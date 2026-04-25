@@ -217,7 +217,7 @@ fun DPadButtons2(
 ) {
     Box(modifier = modifier) {
         SquareTextButton(
-            text = "↑",
+            text = "T",
             fontSize = fontSize,
             modifier = Modifier
                 .fillMaxSize(0.33f)
@@ -230,7 +230,7 @@ fun DPadButtons2(
             }
         )
         SquareTextButton(
-            text = "↓",
+            text = "B",
             fontSize = fontSize,
             modifier = Modifier
                 .fillMaxSize(0.33f)
@@ -243,7 +243,7 @@ fun DPadButtons2(
             }
         )
         SquareTextButton(
-            text = "←",
+            text = "L",
             fontSize = fontSize,
             modifier = Modifier
                 .fillMaxSize(0.33f)
@@ -256,7 +256,7 @@ fun DPadButtons2(
             }
         )
         SquareTextButton(
-            text = "→",
+            text = "F",
             fontSize = fontSize,
             modifier = Modifier
                 .fillMaxSize(0.33f)
