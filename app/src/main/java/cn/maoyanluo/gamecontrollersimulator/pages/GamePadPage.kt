@@ -120,8 +120,13 @@ fun GameControllerPage(modifier: Modifier = Modifier) {
                     hidBluetoothManager.connect(it)
                 }
             }
-            LaunchedEffect(Unit) {
+            DisposableEffect(Unit) {
                 connectTarget()
+                onDispose {
+                    viewModel.selectDevice?.let {
+                        hidBluetoothManager.disconnect()
+                    }
+                }
             }
             if (connected) {
                 GameControllerInnerLayout(modifier)
