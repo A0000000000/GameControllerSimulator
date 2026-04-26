@@ -74,7 +74,6 @@ fun CircleTextButton(
     }
 }
 
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun Joystick(
     modifier: Modifier = Modifier,
