@@ -5,7 +5,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
-import cn.maoyanluo.bluetooth_library.HIDBluetoothManager
+import cn.maoyanluo.bluetooth_library.hid.HIDBluetoothManager
 
 class MainViewModel(): ViewModel() {
     var selectDevice: BluetoothDevice? by mutableStateOf(null)

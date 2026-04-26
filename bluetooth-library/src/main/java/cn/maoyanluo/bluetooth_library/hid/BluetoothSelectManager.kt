@@ -1,4 +1,4 @@
-package cn.maoyanluo.bluetooth_library
+package cn.maoyanluo.bluetooth_library.hid
 
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothDevice

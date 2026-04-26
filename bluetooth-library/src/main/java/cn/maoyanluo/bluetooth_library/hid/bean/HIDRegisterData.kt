@@ -1,4 +1,4 @@
-package cn.maoyanluo.bluetooth_library.bean
+package cn.maoyanluo.bluetooth_library.hid.bean
 
 data class HIDRegisterData(
     val hidReporter: ByteArray,

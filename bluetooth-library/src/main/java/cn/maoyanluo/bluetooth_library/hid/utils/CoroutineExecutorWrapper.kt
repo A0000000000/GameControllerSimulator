@@ -1,4 +1,4 @@
-package cn.maoyanluo.bluetooth_library.utils
+package cn.maoyanluo.bluetooth_library.hid.utils
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch

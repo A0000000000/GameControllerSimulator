@@ -1,4 +1,4 @@
-package cn.maoyanluo.bluetooth_library
+package cn.maoyanluo.bluetooth_library.hid
 
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothDevice
@@ -8,8 +8,8 @@ import android.bluetooth.BluetoothHidDeviceAppSdpSettings
 import android.bluetooth.BluetoothManager
 import android.bluetooth.BluetoothProfile
 import android.content.Context
-import cn.maoyanluo.bluetooth_library.bean.HIDRegisterData
-import cn.maoyanluo.bluetooth_library.utils.CoroutineExecutorWrapper
+import cn.maoyanluo.bluetooth_library.hid.bean.HIDRegisterData
+import cn.maoyanluo.bluetooth_library.hid.utils.CoroutineExecutorWrapper
 import cn.maoyanluo.log_library.LogUtils
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
