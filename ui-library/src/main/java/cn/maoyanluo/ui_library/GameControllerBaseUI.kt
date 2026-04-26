@@ -1,41 +1,36 @@
 package cn.maoyanluo.ui_library
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.foundation.Canvas
-import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.input.pointer.pointerInteropFilter
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.TextUnit
-import androidx.compose.ui.platform.LocalDensity
-import android.view.MotionEvent
-import androidx.compose.foundation.gestures.awaitEachGesture
-import androidx.compose.foundation.gestures.awaitFirstDown
-import androidx.compose.ui.ExperimentalComposeUiApi
-import androidx.compose.ui.unit.dp
 import kotlin.math.sqrt
 
 
@@ -88,15 +83,9 @@ fun Joystick(
     activeKnobColor: Color = Color.DarkGray,
     onStickPress: (() -> Unit)? = null,
     onStickRelease: (() -> Unit)? = null,
-    onAxisChanged: (x: Int, y: Int) -> Unit = { _, _ -> }
+    onAxisChanged: (x: Int, y: Int) -> Unit = { _, _ -> },
+    knobDiameterRatio: Float = 0.24f
 ) {
-    // 小圆直径占整个摇杆容器直径的比例。
-    // 这里统一用一套比例同时驱动：
-    // 1. 视觉上小圆的真实尺寸
-    // 2. 命中检测时的小圆半径
-    // 3. 小圆可移动半径的边界计算
-    val knobDiameterRatio = 0.24f
-
     // Compose 的偏移量、尺寸计算都更适合先用像素处理，最后再转成 dp 给 Modifier.offset。
     val density = LocalDensity.current
 
@@ -137,7 +126,7 @@ fun Joystick(
         return (((normalized + 1f) * 0.5f) * 255f).toInt().coerceIn(0, 255)
     }
 
-    BoxWithConstraints(
+    Box(
         modifier = modifier
             .aspectRatio(1f)
             // 记录这个摇杆容器的实际宽高。
@@ -285,7 +274,7 @@ fun Joystick(
         // 把像素偏移转换成 dp，给 Modifier.offset 使用。
         val knobOffsetXDp = with(density) { knobOffset.x.toDp() }
         val knobOffsetYDp = with(density) { knobOffset.y.toDp() }
-        val knobSize = maxWidth * knobDiameterRatio
+        val knobSize = with(density) { (containerSize.x * knobDiameterRatio).toDp() }
 
         Box(
             modifier = Modifier
@@ -311,7 +300,6 @@ fun Joystick(
     }
 
     LaunchedEffect(Unit) {
-        // 首次进入时主动回调一次中心值，确保外部一开始就拿到稳定的初始 XY。
         onAxisChanged(128, 128)
     }
 }
@@ -325,32 +313,10 @@ fun GameControllerTriggerButton(
     activeColor: Color = Color.DarkGray,
     onValueChanged: (value: Int) -> Unit = {}
 ) {
-    // 记录整个扳机控件的实际像素尺寸。
-    // 后续要根据这个尺寸，把手指按下的位置换算成 0..255 的扳机值。
     var containerSize by remember { mutableStateOf(Size.Zero) }
-
-    // 当前是否处于按压状态。
-    // 用它控制是否显示深灰色填充条。
     var pressed by remember { mutableStateOf(false) }
 
-    // 当前扳机原始值，范围是 0..255。
-    // 在当前项目里，这个值会先从 UI 里算出来，
-    // 然后由上层决定是映射成标准手柄里的 LT / RT 按钮，还是别的输入语义。
-    var currentValue by remember { mutableStateOf(0) }
-
-    // 扳机条统一使用固定的圆角风格。
-    // 这里保留一个像素级圆角值给 Canvas 的填充区域使用，
-    // 让内部深灰色进度条和外层容器保持一致的视觉圆角。
-    val triggerCornerRadiusPx = with(LocalDensity.current) { 30.dp.toPx() }
-
-    // 根据当前触点在长条上的位置，计算出扳机值。
-    // reverseDirection = false 时：
-    // 1. 从左往右递增
-    // 2. 最左边是 0，最右边是 255
-    //
-    // reverseDirection = true 时：
-    // 1. 从右往左递增
-    // 2. 最右边是 0，最左边是 255
+    var currentValue by remember { mutableIntStateOf(0) }
     fun computeValue(x: Float, width: Float): Int {
         if (width <= 0f) return 0
         val clampedX = x.coerceIn(0f, width)
@@ -364,38 +330,28 @@ fun GameControllerTriggerButton(
 
     Box(
         modifier = modifier
-            // 记录当前长条控件的宽高，给触点和比例换算使用。
             .onSizeChanged {
                 containerSize = Size(it.width.toFloat(), it.height.toFloat())
             }
-            // 用 MotionEvent 直接处理按下 / 移动 / 抬起，逻辑简单直观，
-            // 也更适合这种“持续拖动 -> 持续输出值”的控件。
-            .pointerInteropFilter { event ->
-                val width = containerSize.width
-                when (event.actionMasked) {
-                    MotionEvent.ACTION_DOWN, MotionEvent.ACTION_MOVE -> {
-                        pressed = true
-                        currentValue = computeValue(event.x, width)
+            .pointerInput(Unit) {
+                awaitEachGesture {
+                    val down = awaitFirstDown(requireUnconsumed = false)
+                    pressed = true
+                    currentValue = computeValue(down.position.x, containerSize.width)
+                    onValueChanged(currentValue)
+                    while (true) {
+                        val event = awaitPointerEvent().changes.find { it.id == down.id } ?: break
+                        currentValue = computeValue(event.position.x, containerSize.width)
                         onValueChanged(currentValue)
-                        true
+                        event.consume()
                     }
-
-                    MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
-                        pressed = false
-                        currentValue = 0
-                        onValueChanged(0)
-                        true
-                    }
-
-                    else -> false
+                    pressed = false
+                    currentValue = 0
+                    onValueChanged(0)
                 }
             }
-            .clip(RoundedCornerShape(30.dp))
             .background(backgroundColor)
     ) {
-        // 用 Canvas 画激活区域，方便精确控制：
-        // 1. LT/RT 按下后只把当前位置到左/右边填充成深灰色
-        // 2. 松开后立即恢复默认灰色
         Canvas(modifier = Modifier.fillMaxSize()) {
             if (!pressed || currentValue <= 0) return@Canvas
 
@@ -409,17 +365,11 @@ fun GameControllerTriggerButton(
             drawRoundRect(
                 color = activeColor,
                 topLeft = Offset(left, 0f),
-                size = Size(progressWidth, size.height),
-                cornerRadius = CornerRadius(
-                    x = triggerCornerRadiusPx,
-                    y = triggerCornerRadiusPx
-                )
+                size = Size(progressWidth, size.height)
             )
         }
     }
-
     LaunchedEffect(Unit) {
-        // 初始进入时主动回调 0，确保外部一开始拿到的是“未按下”的扳机状态。
         onValueChanged(0)
     }
 }
