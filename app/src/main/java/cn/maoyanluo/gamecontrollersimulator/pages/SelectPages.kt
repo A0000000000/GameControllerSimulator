@@ -20,7 +20,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import cn.maoyanluo.bluetooth_library.hid.BluetoothSelectManager
+import cn.maoyanluo.bluetooth_library.BluetoothSelectManager
 import cn.maoyanluo.gamecontrollersimulator.MainViewModel
 import cn.maoyanluo.gamecontrollersimulator.R
 
