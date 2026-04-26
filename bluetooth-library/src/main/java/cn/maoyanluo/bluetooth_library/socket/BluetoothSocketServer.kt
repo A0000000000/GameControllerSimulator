@@ -61,7 +61,7 @@ class BluetoothSocketServer(
                 if (synchronized(this@BluetoothSocketServer) {
                         return@synchronized isStart && serverSocketSnapshot === serverSocket
                     }) {
-                    scope.launch { serverCallback.onStopForeverException(e) }
+                    scope.launch { serverCallback.onForeverLoopException(e) }
                 }
                 synchronized(this@BluetoothSocketServer) {
                     if (serverSocket === serverSocketSnapshot) {
