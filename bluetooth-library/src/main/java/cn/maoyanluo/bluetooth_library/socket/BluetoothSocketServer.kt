@@ -181,7 +181,6 @@ class BluetoothSocketServer(
         }
 
         fun disconnect() {
-            var needCallback = false
             synchronized(this@Client) {
                 if (!isConnected) {
                     return
@@ -191,11 +190,8 @@ class BluetoothSocketServer(
                     socket.close()
                 } catch (ignore: Exception) { }
                 scope.cancel()
-                needCallback = true
             }
-            if (needCallback) {
-                callback.onDisconnect()
-            }
+            callback.onDisconnect()
         }
 
     }
