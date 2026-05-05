@@ -9,7 +9,7 @@
 
 ## 开发环境
 * Android Studio
-* CodeX
+* Codex
 
 ## 使用方法
 1. 编译安装App
