@@ -42,5 +42,6 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     implementation(project(":socket-common-library"))
+    implementation(project(":coroutine-library"))
     implementation(project(":log-library"))
 }

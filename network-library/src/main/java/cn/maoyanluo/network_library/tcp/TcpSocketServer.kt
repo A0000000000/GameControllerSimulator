@@ -1,39 +1,41 @@
 package cn.maoyanluo.network_library.tcp
 
+import cn.maoyanluo.coroutine_library.CoroutineManager
 import cn.maoyanluo.socket_common_library.SocketServer
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
+import cn.maoyanluo.socket_common_library.SocketServerCallback
+import java.io.InputStream
+import java.io.OutputStream
 import java.net.ServerSocket
+import java.net.Socket
 
-class TcpSocketServer(port: UInt): SocketServer {
+class TcpSocketServer(
+    private val port: Int,
+    private val serverCallback: SocketServerCallback<Socket>,
+    coroutineManager: CoroutineManager
+): SocketServer<ServerSocket, Socket>(serverCallback, coroutineManager) {
 
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
-    private var serverSocket: ServerSocket? = null
-    @Volatile
-    private var isStart = false
+    override fun createServerSocket(): ServerSocket = ServerSocket(port)
 
-    override fun startListener() {
-        TODO("Not yet implemented")
-    }
+    override fun acceptSocket(serverSocketSnapshot: ServerSocket?): Socket? = serverSocketSnapshot?.accept()
 
-    override fun stopListener() {
-        TODO("Not yet implemented")
-    }
+    override fun createAcceptClient(
+        socket: Socket,
+        callback: SocketServerCallback.ClientCallback,
+        coroutineManager: CoroutineManager
+    ): SocketServer.Client<Socket> = Client(
+        socket,
+        callback,
+        coroutineManager
+    )
 
+    class Client(
+        private val socket: Socket,
+        callback: SocketServerCallback.ClientCallback,
+        private val coroutineManager: CoroutineManager
+    ) : SocketServer.Client<Socket>(socket, callback, coroutineManager) {
 
-    class Client: SocketServer.Client {
-        override fun sendData(data: ByteArray, id: Int) {
-            TODO("Not yet implemented")
-        }
-
-        override fun isAvailable(): Boolean {
-            TODO("Not yet implemented")
-        }
-
-        override fun disconnect() {
-            TODO("Not yet implemented")
-        }
+        override fun getOutputStream(): OutputStream? = socket.getOutputStream()
+        override fun getInputStream(): InputStream? = socket.getInputStream()
 
     }
 

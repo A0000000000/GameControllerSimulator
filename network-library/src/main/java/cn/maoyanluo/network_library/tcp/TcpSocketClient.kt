@@ -1,19 +1,23 @@
 package cn.maoyanluo.network_library.tcp
 
+import cn.maoyanluo.coroutine_library.CoroutineManager
 import cn.maoyanluo.socket_common_library.SocketClient
+import cn.maoyanluo.socket_common_library.SocketClientCallback
+import java.io.InputStream
+import java.io.OutputStream
+import java.net.Socket
 
-class TcpSocketClient: SocketClient {
+class TcpSocketClient(
+    private val host: String,
+    private val port: Int,
+    clientCallback: SocketClientCallback,
+    coroutineManager: CoroutineManager
+): SocketClient<Socket>(clientCallback, coroutineManager) {
 
-    override fun connect() {
-        TODO("Not yet implemented")
-    }
+    override fun createSocket(): Socket = Socket(host, port)
 
-    override fun sendData(data: ByteArray, id: Int) {
-        TODO("Not yet implemented")
-    }
+    override fun getOutputStream(): OutputStream? = socket?.getOutputStream()
 
-    override fun disconnect() {
-        TODO("Not yet implemented")
-    }
+    override fun getInputStream(): InputStream? = socket?.getInputStream()
 
 }
