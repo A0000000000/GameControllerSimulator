@@ -1,5 +1,6 @@
 package cn.maoyanluo.gamecontrollersimulator.pages
 
+import android.annotation.SuppressLint
 import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -26,6 +27,7 @@ import cn.maoyanluo.gamecontrollersimulator.R
 
 
 @Composable
+@SuppressLint("MissingPermission")
 fun SelectDevicePages(modifier: Modifier = Modifier) {
     val ctx = LocalContext.current
     val mainViewModel: MainViewModel = viewModel()

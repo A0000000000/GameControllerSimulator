@@ -1,8 +1,5 @@
 package cn.maoyanluo.gamecontrollersimulator.pages
 
-import android.bluetooth.BluetoothDevice
-import android.bluetooth.BluetoothProfile
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -21,20 +18,18 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
-import cn.maoyanluo.bluetooth_library.hid.HIDBluetoothCallback
-import cn.maoyanluo.bluetooth_library.hid.HIDBluetoothManager
 import cn.maoyanluo.bluetooth_library.hid.bean.HIDRegisterData
-import cn.maoyanluo.coroutine_library.CoroutineManager
 import cn.maoyanluo.gamecontrollersimulator.MainViewModel
 import cn.maoyanluo.gamecontrollersimulator.R
 import cn.maoyanluo.hid_library.GameControllerHID
 import cn.maoyanluo.hid_library.GameControllerHIDReportGenerator
-import cn.maoyanluo.log_library.LogUtils
 import cn.maoyanluo.ui_library.ActionButtons
 import cn.maoyanluo.ui_library.ActionButtons2
 import cn.maoyanluo.ui_library.CircleTextButton
@@ -44,98 +39,65 @@ import cn.maoyanluo.ui_library.Joystick
 import cn.maoyanluo.ui_library.LeftButtonGroup
 import cn.maoyanluo.ui_library.RightButtonGroup
 import cn.maoyanluo.ui_library.SquareTextButton
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 
 const val TAG = "GameControllerPage"
 
 @Composable
 fun GameControllerPage(modifier: Modifier = Modifier) {
-    val ctx = LocalContext.current
     val viewModel: MainViewModel = viewModel()
-    var registerResult by remember { mutableStateOf(false) }
-    var connected by remember { mutableStateOf(false) }
-    val hidBluetoothManager = remember {
-        HIDBluetoothManager(ctx, object : HIDBluetoothCallback {
-            override fun initResult(result: Boolean) {
-                LogUtils.i(TAG, "initResult = $result")
-            }
-
-            override fun onAppStatusChanged(
-                pluggedDevice: BluetoothDevice?,
-                registered: Boolean
-            ) {
-                LogUtils.i(TAG, "onAppStatusChanged = $registered")
-                registerResult = registered
-            }
-
-            override fun onConnectionStateChanged(
-                device: BluetoothDevice?,
-                state: Int
-            ) {
-                if (device == viewModel.selectDevice) {
-                    when (state) {
-                        BluetoothProfile.STATE_CONNECTED -> {
-                            connected = true
-                        }
-                        BluetoothProfile.STATE_CONNECTING -> {
-
-                        }
-                        BluetoothProfile.STATE_DISCONNECTING -> {
-
-                        }
-                        BluetoothProfile.STATE_DISCONNECTED -> {
-                            connected = false
-                        }
-                    }
-                }
-            }
-
-            override fun release() {
-                registerResult = false
-            }
-
-        }, viewModel.coroutineManager)
-    }
     val hidName = stringResource(R.string.hid_name)
     val hidDescription = stringResource(R.string.hid_description)
     val hidProvider = stringResource(R.string.hid_provider)
-    DisposableEffect(Unit) {
-        LogUtils.i(TAG, "init hidBluetoothManager")
-        hidBluetoothManager.init(HIDRegisterData(
-            GameControllerHID.HID_REPORT_DESCRIPTOR,
-            hidName,
-            hidDescription,
-            hidProvider
-        ))
-        viewModel.hidBluetoothManager = hidBluetoothManager
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = object: DefaultLifecycleObserver {
+            override fun onResume(owner: LifecycleOwner) {
+                super.onResume(owner)
+                if (!viewModel.registerResult) {
+                    viewModel.initHidBluetoothManager(HIDRegisterData(
+                        GameControllerHID.HID_REPORT_DESCRIPTOR,
+                        hidName,
+                        hidDescription,
+                        hidProvider
+                    ))
+                }
+            }
+
+            override fun onDestroy(owner: LifecycleOwner) {
+                super.onDestroy(owner)
+                viewModel.releaseHidBluetoothManager()
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
         onDispose {
-            LogUtils.i(TAG, "dispose hidBluetoothManager")
-            hidBluetoothManager.release()
-            viewModel.hidBluetoothManager = null
+            lifecycleOwner.lifecycle.removeObserver(observer)
         }
     }
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        if (registerResult) {
-            fun connectTarget() {
-                viewModel.selectDevice?.let {
-                    hidBluetoothManager.connect(it)
-                }
-            }
+        if (viewModel.registerResult) {
             DisposableEffect(Unit) {
-                connectTarget()
-                onDispose {
-                    viewModel.selectDevice?.let {
-                        hidBluetoothManager.disconnect()
+                val observer = object: DefaultLifecycleObserver {
+                    override fun onResume(owner: LifecycleOwner) {
+                        super.onResume(owner)
+                        if (!viewModel.connected) {
+                            viewModel.connectTargetDevice()
+                        }
+                    }
+
+                    override fun onDestroy(owner: LifecycleOwner) {
+                        super.onDestroy(owner)
+                        viewModel.disconnectTargetDevice()
                     }
                 }
+                lifecycleOwner.lifecycle.addObserver(observer)
+                onDispose {
+                    lifecycleOwner.lifecycle.removeObserver(observer)
+                }
             }
-            if (connected) {
+            if (viewModel.connected) {
                 GameControllerInnerLayout(modifier)
             } else {
-                Text(text = stringResource(R.string.not_connected), fontSize = 50.sp, modifier = Modifier.clickable {
-                    connectTarget()
-                })
+                Text(text = stringResource(R.string.not_connected), fontSize = 50.sp)
             }
         } else {
             Text(text = stringResource(R.string.not_register), fontSize = 50.sp)
@@ -146,34 +108,31 @@ fun GameControllerPage(modifier: Modifier = Modifier) {
 @Composable
 fun GameControllerInnerLayout(modifier: Modifier) {
     val viewModel: MainViewModel = viewModel()
-    val generator = remember { GameControllerHIDReportGenerator(viewModel.coroutineManager) }
     DisposableEffect(Unit) {
-        generator.startCollection {
-            viewModel.hidBluetoothManager?.sendReport(it)
-        }
+        viewModel.startCollection()
         onDispose {
-            generator.stopCollection()
+            viewModel.stopCollection()
         }
     }
     Column(modifier.fillMaxSize().padding(0.dp)) {
         Row(modifier = Modifier.fillMaxWidth()) {
             Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.CenterStart) {
-                LeftButtonGroup(modifier = Modifier.height(50.dp), fontSize = 20.sp, generator::setButton)
+                LeftButtonGroup(modifier = Modifier.height(50.dp), fontSize = 20.sp, viewModel.generator::setButton)
             }
             Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.CenterEnd) {
-                RightButtonGroup(modifier = Modifier.height(50.dp), fontSize = 20.sp, generator::setButton)
+                RightButtonGroup(modifier = Modifier.height(50.dp), fontSize = 20.sp, viewModel.generator::setButton)
             }
         }
         Row(modifier = Modifier.weight(1f)) {
             Box(modifier = Modifier.weight(1f).fillMaxHeight()) {
                 Box(modifier = Modifier.padding(50.dp, 0.dp, 0.dp, 0.dp).align(Alignment.TopStart)) {
                     Joystick(modifier = Modifier.size(180.dp), onStickPress = {
-                        generator.setButton(GameControllerHIDReportGenerator.Button.L3, true)
+                        viewModel.generator.setButton(GameControllerHIDReportGenerator.Button.L3, true)
                     }, onStickRelease = {
-                        generator.setButton(GameControllerHIDReportGenerator.Button.L3, false)
+                        viewModel.generator.setButton(GameControllerHIDReportGenerator.Button.L3, false)
                     }, onAxisChanged = { x,y ->
-                        generator.setAxis(GameControllerHIDReportGenerator.Axis.X, x)
-                        generator.setAxis(GameControllerHIDReportGenerator.Axis.Y, y)
+                        viewModel.generator.setAxis(GameControllerHIDReportGenerator.Axis.X, x)
+                        viewModel.generator.setAxis(GameControllerHIDReportGenerator.Axis.Y, y)
                     })
                 }
 
@@ -182,13 +141,13 @@ fun GameControllerInnerLayout(modifier: Modifier) {
                     if (isDpad) {
                         DPadButtons(modifier = Modifier.size(180.dp), fontSize = 30.sp) { btn, on ->
                             if (on) {
-                                generator.setDPad(btn)
+                                viewModel.generator.setDPad(btn)
                             } else {
-                                generator.setDPad(GameControllerHIDReportGenerator.DPad.NEUTRAL)
+                                viewModel.generator.setDPad(GameControllerHIDReportGenerator.DPad.NEUTRAL)
                             }
                         }
                     } else {
-                        DPadButtons2(modifier = Modifier.size(180.dp), fontSize = 30.sp, generator::setButton)
+                        DPadButtons2(modifier = Modifier.size(180.dp), fontSize = 30.sp, viewModel.generator::setButton)
                     }
                     Box(modifier = Modifier.align(Alignment.Center)) {
                         SquareTextButton(text = if (isDpad) "H" else "B", fontSize = 20.sp, modifier = Modifier.size(50.dp), onDown = {
@@ -199,9 +158,9 @@ fun GameControllerInnerLayout(modifier: Modifier) {
 
                 Box(modifier = Modifier.padding(0.dp, 50.dp, 50.dp, 0.dp).align(Alignment.TopEnd)) {
                     SquareTextButton(text = "Back", fontSize = 20.sp, modifier = Modifier.size(50.dp), onDown = {
-                        generator.setButton(GameControllerHIDReportGenerator.Button.BACK, true)
+                        viewModel.generator.setButton(GameControllerHIDReportGenerator.Button.BACK, true)
                     }, onUp = {
-                        generator.setButton(GameControllerHIDReportGenerator.Button.BACK, false)
+                        viewModel.generator.setButton(GameControllerHIDReportGenerator.Button.BACK, false)
                     })
                 }
 
@@ -209,12 +168,12 @@ fun GameControllerInnerLayout(modifier: Modifier) {
             Box(modifier = Modifier.weight(1f).fillMaxHeight()) {
                 Box(modifier = Modifier.padding(50.dp, 0.dp, 0.dp, 0.dp).align(Alignment.BottomStart)) {
                     Joystick(modifier = Modifier.size(180.dp), onStickPress = {
-                        generator.setButton(GameControllerHIDReportGenerator.Button.R3, true)
+                        viewModel.generator.setButton(GameControllerHIDReportGenerator.Button.R3, true)
                     }, onStickRelease = {
-                        generator.setButton(GameControllerHIDReportGenerator.Button.R3, false)
+                        viewModel.generator.setButton(GameControllerHIDReportGenerator.Button.R3, false)
                     }, onAxisChanged = { x, y ->
-                        generator.setAxis(GameControllerHIDReportGenerator.Axis.RX, x)
-                        generator.setAxis(GameControllerHIDReportGenerator.Axis.RY, y)
+                        viewModel.generator.setAxis(GameControllerHIDReportGenerator.Axis.RX, x)
+                        viewModel.generator.setAxis(GameControllerHIDReportGenerator.Axis.RY, y)
                     })
                 }
                 Box(modifier = Modifier.padding(0.dp, 0.dp, 50.dp, 0.dp).align(Alignment.TopEnd)) {
@@ -224,14 +183,14 @@ fun GameControllerInnerLayout(modifier: Modifier) {
                             modifier = Modifier.size(180.dp),
                             fontSize = 30.sp
                         ) { btn, on ->
-                            generator.setButton(btn, on)
+                            viewModel.generator.setButton(btn, on)
                         }
                     } else {
                         ActionButtons2(
                             modifier = Modifier.size(180.dp),
                             fontSize = 30.sp
                         ) { btn, on ->
-                            generator.setButton(btn, on)
+                            viewModel.generator.setButton(btn, on)
                         }
                     }
                     Box(modifier = Modifier.align(Alignment.Center)) {
@@ -242,9 +201,9 @@ fun GameControllerInnerLayout(modifier: Modifier) {
                 }
                 Box(modifier = Modifier.padding(50.dp, 50.dp, 0.dp, 0.dp).align(Alignment.TopStart)) {
                     SquareTextButton(text = "Start", fontSize = 20.sp, modifier = Modifier.size(50.dp), onDown = {
-                        generator.setButton(GameControllerHIDReportGenerator.Button.START, true)
+                        viewModel.generator.setButton(GameControllerHIDReportGenerator.Button.START, true)
                     }, onUp = {
-                        generator.setButton(GameControllerHIDReportGenerator.Button.START, false)
+                        viewModel.generator.setButton(GameControllerHIDReportGenerator.Button.START, false)
                     })
                 }
             }
