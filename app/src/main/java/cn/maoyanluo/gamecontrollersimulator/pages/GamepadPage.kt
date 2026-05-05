@@ -75,7 +75,7 @@ fun GameControllerPage(modifier: Modifier = Modifier) {
     }
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         if (viewModel.registerResult) {
-            DisposableEffect(Unit) {
+            DisposableEffect(lifecycleOwner) {
                 val observer = object: DefaultLifecycleObserver {
                     override fun onResume(owner: LifecycleOwner) {
                         super.onResume(owner)
