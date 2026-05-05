@@ -31,7 +31,7 @@ class TcpSocketServer(
     class Client(
         private val socket: Socket,
         callback: SocketServerCallback.ClientCallback,
-        private val coroutineManager: CoroutineManager
+        coroutineManager: CoroutineManager
     ) : SocketServer.Client<Socket>(socket, callback, coroutineManager) {
 
         override fun getOutputStream(): OutputStream? = socket.getOutputStream()
