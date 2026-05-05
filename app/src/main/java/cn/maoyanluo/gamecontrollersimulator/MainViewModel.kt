@@ -98,6 +98,7 @@ class MainViewModel(application: Application): AndroidViewModel(application) {
 
     fun disconnectTargetDevice() {
         hidBluetoothManager.disconnect()
+        connected = false
     }
 
     fun startCollection() {
