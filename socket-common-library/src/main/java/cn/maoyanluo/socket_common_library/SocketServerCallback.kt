@@ -2,7 +2,7 @@ package cn.maoyanluo.socket_common_library
 
 import java.io.Closeable
 
-interface SocketServerCallback<TSocket : Closeable> {
+interface SocketServerCallback<TSocket: Closeable> {
 
     fun onStartServerSuccess()
     fun onStartServerFailed(e: Exception)
