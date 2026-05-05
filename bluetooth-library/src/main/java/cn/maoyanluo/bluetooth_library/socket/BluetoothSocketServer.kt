@@ -3,11 +3,11 @@ package cn.maoyanluo.bluetooth_library.socket
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothServerSocket
 import android.bluetooth.BluetoothSocket
-import cn.maoyanluo.bluetooth_library.socket.utils.IntConverter
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancel
+import cn.maoyanluo.coroutine_library.CoroutineManager
+import cn.maoyanluo.socket_common_library.MAX_BUFF_SIZE
+import cn.maoyanluo.socket_common_library.SocketServer
+import cn.maoyanluo.socket_common_library.SocketServerCallback
+import cn.maoyanluo.socket_common_library.utils.IntConverter
 import kotlinx.coroutines.launch
 import java.io.IOException
 import java.util.UUID
@@ -18,15 +18,15 @@ class BluetoothSocketServer(
     private val adapter: BluetoothAdapter,
     private val name: String,
     private val uuid: UUID,
-    private val serverCallback: BluetoothServerCallback
-) {
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    private val serverCallback: SocketServerCallback,
+    private val coroutineManager: CoroutineManager
+): SocketServer {
     private var serverSocket: BluetoothServerSocket? = null
     @Volatile
     private var isStart = false
 
-    fun startListener() {
-        scope.launch {
+    override fun startListener() {
+        coroutineManager.getIOScope().launch {
             synchronized(this@BluetoothSocketServer) {
                 if (isStart) {
                     return@launch
@@ -36,20 +36,20 @@ class BluetoothSocketServer(
                     currentServerSocket = adapter.listenUsingRfcommWithServiceRecord(name, uuid)
                     serverSocket = currentServerSocket
                     isStart = true
-                    scope.launch { serverCallback.onStartServerSuccess() }
+                    coroutineManager.getIOScope().launch { serverCallback.onStartServerSuccess() }
                     startForeverLoop()
                 } catch (e: Exception) {
                     try {
                         currentServerSocket?.close()
                     } catch (ignore: Exception) { }
-                    scope.launch { serverCallback.onStartServerFailed(e) }
+                    coroutineManager.getIOScope().launch { serverCallback.onStartServerFailed(e) }
                 }
             }
         }
     }
 
     private fun startForeverLoop() {
-        scope.launch {
+        coroutineManager.getIOScope().launch {
             val serverSocketSnapshot = serverSocket
             try {
                 while (isStart && serverSocketSnapshot === serverSocket) {
@@ -61,7 +61,7 @@ class BluetoothSocketServer(
                 if (synchronized(this@BluetoothSocketServer) {
                         return@synchronized isStart && serverSocketSnapshot === serverSocket
                     }) {
-                    scope.launch { serverCallback.onForeverLoopException(e) }
+                    coroutineManager.getIOScope().launch { serverCallback.onForeverLoopException(e) }
                 }
                 synchronized(this@BluetoothSocketServer) {
                     if (serverSocket === serverSocketSnapshot) {
@@ -73,12 +73,13 @@ class BluetoothSocketServer(
     }
 
     private fun onClientSocketAccept(socket: BluetoothSocket) {
-        scope.launch {
+        coroutineManager.getIOScope().launch {
             try {
                 serverCallback.onNewClientConnect(
                     Client(
                         socket,
-                        serverCallback.createNewClientCallback()
+                        serverCallback.createNewClientCallback(),
+                        coroutineManager
                     )
                 )
             } catch (e: Exception) {
@@ -90,7 +91,7 @@ class BluetoothSocketServer(
         }
     }
 
-    fun stopListener() {
+    override fun stopListener() {
         synchronized(this@BluetoothSocketServer) {
             if (!isStart) {
                 return
@@ -101,47 +102,47 @@ class BluetoothSocketServer(
                 serverSocket = null
             } catch (ignore: Exception) {
             }
-            scope.launch {  serverCallback.onStopServer() }
+            coroutineManager.getIOScope().launch {  serverCallback.onStopServer() }
         }
     }
 
     class Client(
         private val socket: BluetoothSocket,
-        private val callback: BluetoothServerCallback.ClientCallback
-        ) {
+        private val callback: SocketServerCallback.ClientCallback,
+        private val coroutineManager: CoroutineManager
+        ): SocketServer.Client {
 
         init {
             dataRevLoop()
         }
 
         private var isConnected = true
-        private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
-        fun sendData(data: ByteArray, id: Int = -1) {
-            scope.launch {
+        override fun sendData(data: ByteArray, id: Int) {
+            coroutineManager.getIOScope().launch {
                 synchronized(this@Client) {
                     if (!isConnected) {
                         return@launch
                     }
                     try {
                         if (data.size !in 0..MAX_BUFF_SIZE) {
-                            throw IllegalArgumentException("package is too large: ${data.size}, max=$MAX_BUFF_SIZE")
+                            throw IllegalArgumentException("package is too large: ${data.size}, max=${MAX_BUFF_SIZE}")
                         }
                         val outputStream = socket.outputStream ?: throw IOException("outputStream is null")
                         outputStream.write(IntConverter.toBigEndian(data.size), 0, 4)
                         outputStream.write(data, 0, data.size)
                         outputStream.flush()
                     } catch (e: Exception) {
-                        scope.launch { callback.onSendDataException(e, id) }
+                        coroutineManager.getIOScope().launch { callback.onSendDataException(e, id) }
                     }
                 }
             }
         }
 
-        fun isAvailable() = isConnected
+        override fun isAvailable() = isConnected
 
         private fun dataRevLoop() {
-            scope.launch {
+            coroutineManager.getIOScope().launch {
                 try {
                     while (isConnected) {
                         val inputStream = socket.inputStream ?: throw IOException("inputStream is null")
@@ -169,29 +170,31 @@ class BluetoothSocketServer(
                             }
                             totalSize += read
                         }
-                        scope.launch { callback.onDataReady(buff) }
+                        coroutineManager.getIOScope().launch { callback.onDataReady(buff) }
                     }
                 } catch (e: Exception) {
                     if (e !is CancellationException) {
-                        scope.launch { callback.onDataRevException(e) }
+                        coroutineManager.getIOScope().launch { callback.onDataRevException(e) }
                     }
                     disconnect()
                 }
             }
         }
 
-        fun disconnect() {
-            synchronized(this@Client) {
-                if (!isConnected) {
-                    return
+        override fun disconnect() {
+            coroutineManager.getIOScope().launch {
+                synchronized(this@Client) {
+                    if (!isConnected) {
+                        return@launch
+                    }
+                    isConnected = false
+                    try {
+                        socket.close()
+                    } catch (ignore: Exception) {
+                    }
+                    callback.onDisconnect()
                 }
-                isConnected = false
-                try {
-                    socket.close()
-                } catch (ignore: Exception) { }
-                scope.cancel()
             }
-            callback.onDisconnect()
         }
 
     }

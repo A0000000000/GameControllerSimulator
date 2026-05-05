@@ -1,4 +1,4 @@
-package cn.maoyanluo.bluetooth_library.socket.utils
+package cn.maoyanluo.socket_common_library.utils
 
 object IntConverter {
 

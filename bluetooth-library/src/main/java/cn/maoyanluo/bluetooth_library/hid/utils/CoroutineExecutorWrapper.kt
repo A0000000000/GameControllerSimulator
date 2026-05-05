@@ -1,15 +1,15 @@
 package cn.maoyanluo.bluetooth_library.hid.utils
 
-import kotlinx.coroutines.CoroutineScope
+import cn.maoyanluo.coroutine_library.CoroutineManager
 import kotlinx.coroutines.launch
 import java.util.concurrent.Executor
 
 class CoroutineExecutorWrapper(
-    private val scope: CoroutineScope
+    private val coroutineManager: CoroutineManager
 ) : Executor {
 
     override fun execute(command: Runnable) {
-        scope.launch {
+        coroutineManager.getDefaultScope().launch {
             command.run()
         }
     }

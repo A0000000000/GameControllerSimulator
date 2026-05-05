@@ -3,10 +3,11 @@ package cn.maoyanluo.bluetooth_library.socket
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothSocket
-import cn.maoyanluo.bluetooth_library.socket.utils.IntConverter
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
+import cn.maoyanluo.coroutine_library.CoroutineManager
+import cn.maoyanluo.socket_common_library.MAX_BUFF_SIZE
+import cn.maoyanluo.socket_common_library.SocketClient
+import cn.maoyanluo.socket_common_library.SocketClientCallback
+import cn.maoyanluo.socket_common_library.utils.IntConverter
 import kotlinx.coroutines.launch
 import java.io.IOException
 import java.util.UUID
@@ -17,17 +18,17 @@ class BluetoothSocketClient(
     private val adapter: BluetoothAdapter,
     private val targetDevice: BluetoothDevice,
     private val uuid: UUID,
-    private val clientCallback: BluetoothClientCallback
-) {
+    private val clientCallback: SocketClientCallback,
+    private val coroutineManager: CoroutineManager
+): SocketClient {
 
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     @Volatile
     private var isConnected = false
 
     private var socket: BluetoothSocket? = null
 
-    fun connect() {
-        scope.launch {
+    override fun connect() {
+        coroutineManager.getIOScope().launch {
             synchronized(this@BluetoothSocketClient) {
                 if (isConnected) {
                     return@launch
@@ -39,7 +40,7 @@ class BluetoothSocketClient(
                 try {
                     socket?.connect()
                     isConnected = true
-                    scope.launch { clientCallback.onConnectSuccess() }
+                    coroutineManager.getIOScope().launch { clientCallback.onConnectSuccess() }
                     dataRevLoop()
                 } catch (e: Exception) {
                     try {
@@ -47,36 +48,36 @@ class BluetoothSocketClient(
                     } catch (ignore: Exception) { }
                     socket = null
                     isConnected = false
-                    scope.launch { clientCallback.onConnectException(e) }
+                    coroutineManager.getIOScope().launch { clientCallback.onConnectException(e) }
                     return@launch
                 }
             }
         }
     }
 
-    fun sendData(data: ByteArray, id: Int = -1) {
-        scope.launch {
+    override fun sendData(data: ByteArray, id: Int) {
+        coroutineManager.getIOScope().launch {
             synchronized(this@BluetoothSocketClient) {
                 if (!isConnected) {
                     return@launch
                 }
                 try {
                     if (data.size !in 0..MAX_BUFF_SIZE) {
-                        throw IllegalArgumentException("package is too large: ${data.size}, max=$MAX_BUFF_SIZE")
+                        throw IllegalArgumentException("package is too large: ${data.size}, max=${MAX_BUFF_SIZE}")
                     }
                     val outputStream = socket?.outputStream ?: throw IOException("outputStream is null")
                     outputStream.write(IntConverter.toBigEndian(data.size), 0, 4)
                     outputStream.write(data, 0, data.size)
                     outputStream.flush()
                 } catch (e: Exception) {
-                    scope.launch { clientCallback.onSendDataException(e, id) }
+                    coroutineManager.getIOScope().launch { clientCallback.onSendDataException(e, id) }
                 }
             }
         }
     }
 
     private fun dataRevLoop() {
-        scope.launch {
+        coroutineManager.getIOScope().launch {
             val socketSnapshot = socket
             try {
                 while (isConnected && socketSnapshot === socket) {
@@ -105,11 +106,11 @@ class BluetoothSocketClient(
                         }
                         totalSize += read
                     }
-                    scope.launch { clientCallback.onDataReady(buff) }
+                    coroutineManager.getIOScope().launch { clientCallback.onDataReady(buff) }
                 }
             } catch (e: Exception) {
                 if (e !is CancellationException) {
-                    scope.launch { clientCallback.onDataRevException(e) }
+                    coroutineManager.getIOScope().launch { clientCallback.onDataRevException(e) }
                 }
                 synchronized(this@BluetoothSocketClient) {
                     if (socketSnapshot === socket) {
@@ -120,17 +121,20 @@ class BluetoothSocketClient(
         }
     }
 
-    fun disconnect() {
-        synchronized(this@BluetoothSocketClient) {
-            if (!isConnected) {
-                return
+    override fun disconnect() {
+        coroutineManager.getIOScope().launch {
+            synchronized(this@BluetoothSocketClient) {
+                if (!isConnected) {
+                    return@launch
+                }
+                isConnected = false
+                try {
+                    socket?.close()
+                    socket = null
+                } catch (ignore: Exception) {
+                }
+                clientCallback.onDisconnect()
             }
-            isConnected = false
-            try {
-                socket?.close()
-                socket = null
-            } catch (ignore: Exception) { }
-            scope.launch {  clientCallback.onDisconnect() }
         }
     }
 

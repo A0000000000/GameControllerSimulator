@@ -1,13 +1,13 @@
-package cn.maoyanluo.bluetooth_library.socket
+package cn.maoyanluo.socket_common_library
 
-interface BluetoothServerCallback {
+interface SocketServerCallback {
 
     fun onStartServerSuccess()
     fun onStartServerFailed(e: Exception)
     fun onStopServer()
     fun onForeverLoopException(e: Exception)
     fun createNewClientCallback(): ClientCallback
-    fun onNewClientConnect(client: BluetoothSocketServer.Client)
+    fun onNewClientConnect(client: SocketServer.Client)
     fun onNewClientException(e: Exception)
 
     interface ClientCallback {

@@ -1,6 +1,6 @@
-package cn.maoyanluo.bluetooth_library.socket
+package cn.maoyanluo.socket_common_library
 
-interface BluetoothClientCallback {
+interface SocketClientCallback {
 
     fun onConnectSuccess()
     fun onConnectException(e: Exception)

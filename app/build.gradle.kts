@@ -61,5 +61,6 @@ dependencies {
     implementation(project(":bluetooth-library"))
     implementation(project(":hid-library"))
     implementation(project(":ui-library"))
+    implementation(project(":coroutine-library"))
     implementation(project(":log-library"))
 }

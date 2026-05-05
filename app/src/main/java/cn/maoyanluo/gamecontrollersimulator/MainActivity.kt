@@ -60,6 +60,12 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun MainContainer(modifier: Modifier = Modifier) {
     val viewModel: MainViewModel = viewModel()
+    DisposableEffect(Unit) {
+        viewModel.coroutineManager.init()
+        onDispose {
+            viewModel.coroutineManager.destroy()
+        }
+    }
     var hasPermission by remember { mutableStateOf(false) }
     val pageModifier = if (viewModel.selectDevice == null) {
         modifier.safeDrawingPadding()

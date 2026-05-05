@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "cn.maoyanluo.hid_library"
+    namespace = "cn.maoyanluo.network_library"
     compileSdk {
         version = release(36)
     }
@@ -41,6 +41,6 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
-    implementation(project(":coroutine-library"))
+    implementation(project(":socket-common-library"))
     implementation(project(":log-library"))
 }

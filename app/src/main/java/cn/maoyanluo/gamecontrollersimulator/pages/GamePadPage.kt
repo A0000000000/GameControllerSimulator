@@ -29,6 +29,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import cn.maoyanluo.bluetooth_library.hid.HIDBluetoothCallback
 import cn.maoyanluo.bluetooth_library.hid.HIDBluetoothManager
 import cn.maoyanluo.bluetooth_library.hid.bean.HIDRegisterData
+import cn.maoyanluo.coroutine_library.CoroutineManager
 import cn.maoyanluo.gamecontrollersimulator.MainViewModel
 import cn.maoyanluo.gamecontrollersimulator.R
 import cn.maoyanluo.hid_library.GameControllerHID
@@ -43,6 +44,8 @@ import cn.maoyanluo.ui_library.Joystick
 import cn.maoyanluo.ui_library.LeftButtonGroup
 import cn.maoyanluo.ui_library.RightButtonGroup
 import cn.maoyanluo.ui_library.SquareTextButton
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 
 const val TAG = "GameControllerPage"
 
@@ -92,7 +95,7 @@ fun GameControllerPage(modifier: Modifier = Modifier) {
                 registerResult = false
             }
 
-        })
+        }, viewModel.coroutineManager)
     }
     val hidName = stringResource(R.string.hid_name)
     val hidDescription = stringResource(R.string.hid_description)
@@ -143,7 +146,7 @@ fun GameControllerPage(modifier: Modifier = Modifier) {
 @Composable
 fun GameControllerInnerLayout(modifier: Modifier) {
     val viewModel: MainViewModel = viewModel()
-    val generator = remember { GameControllerHIDReportGenerator() }
+    val generator = remember { GameControllerHIDReportGenerator(viewModel.coroutineManager) }
     DisposableEffect(Unit) {
         generator.startCollection {
             viewModel.hidBluetoothManager?.sendReport(it)

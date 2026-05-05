@@ -10,10 +10,9 @@ import android.bluetooth.BluetoothProfile
 import android.content.Context
 import cn.maoyanluo.bluetooth_library.hid.bean.HIDRegisterData
 import cn.maoyanluo.bluetooth_library.hid.utils.CoroutineExecutorWrapper
+import cn.maoyanluo.coroutine_library.CoroutineManager
 import cn.maoyanluo.log_library.LogUtils
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -21,14 +20,17 @@ import kotlinx.coroutines.withContext
  * 这个用于处理向系统注册HID设备相关的逻辑
  */
 @SuppressLint("MissingPermission")
-class HIDBluetoothManager(private val ctx: Context, private val callback: HIDBluetoothCallback) {
+class HIDBluetoothManager(
+    private val ctx: Context,
+    private val callback: HIDBluetoothCallback,
+    private val coroutineManager: CoroutineManager
+) {
 
     companion object {
         val TAG = HIDBluetoothManager::class.simpleName ?: "HIDBluetoothManager"
     }
 
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
-    private val executor = CoroutineExecutorWrapper(scope)
+    private val executor = CoroutineExecutorWrapper(coroutineManager)
 
     private val bluetoothManager = ctx.getSystemService(BluetoothManager::class.java)
     private val adapter = bluetoothManager.adapter
@@ -41,12 +43,12 @@ class HIDBluetoothManager(private val ctx: Context, private val callback: HIDBlu
      */
 
     fun init(registerData: HIDRegisterData) {
-        scope.launch {
+        coroutineManager.getDefaultScope().launch {
             adapter.getProfileProxy(ctx, object : BluetoothProfile.ServiceListener {
                 override fun onServiceConnected(profile: Int, proxy: BluetoothProfile) {
                     LogUtils.i(TAG, "onServiceConnected profile = $profile, proxy = $proxy")
                     if (profile == BluetoothProfile.HID_DEVICE) {
-                        scope.launch {
+                        coroutineManager.getDefaultScope().launch {
                             hidDevice = proxy as BluetoothHidDevice
                             val sdp = BluetoothHidDeviceAppSdpSettings(
                                 registerData.name,
@@ -130,14 +132,14 @@ class HIDBluetoothManager(private val ctx: Context, private val callback: HIDBlu
     }
 
     fun sendReport(report: ByteArray) {
-        scope.launch {
+        coroutineManager.getDefaultScope().launch {
             val res = hidDevice?.sendReport(device, 0, report)
             LogUtils.i(TAG, "sendReport res = $res, report = $report, device = $device, hidDevice = $hidDevice")
         }
     }
 
     fun disconnect() {
-        scope.launch {
+        coroutineManager.getDefaultScope().launch {
             device?.let {
                 hidDevice?.disconnect(it)
             }
@@ -145,7 +147,7 @@ class HIDBluetoothManager(private val ctx: Context, private val callback: HIDBlu
     }
 
     fun release() {
-        scope.launch {
+        coroutineManager.getDefaultScope().launch {
             hidDevice?.unregisterApp()
             adapter.closeProfileProxy(
                 BluetoothProfile.HID_DEVICE,

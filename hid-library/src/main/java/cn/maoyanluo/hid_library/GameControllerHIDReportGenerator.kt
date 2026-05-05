@@ -1,5 +1,6 @@
 package cn.maoyanluo.hid_library
 
+import cn.maoyanluo.coroutine_library.CoroutineManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -7,7 +8,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.concurrent.Volatile
 
-class GameControllerHIDReportGenerator {
+class GameControllerHIDReportGenerator(private val coroutineManager: CoroutineManager) {
 
     companion object {
         private const val MAX_SAME_NOT_SEND_TIME = 60
@@ -27,7 +28,6 @@ class GameControllerHIDReportGenerator {
         TOP(0), RIGHT(2), BOTTOM(4), LEFT(6), NEUTRAL(8)
     }
 
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private val currentReportStatus = GameControllerHID.RESET_REPORT.clone()
 
     @Volatile
@@ -79,7 +79,7 @@ class GameControllerHIDReportGenerator {
     fun startCollection(receiver: (ByteArray) -> Unit) {
         if (isStart) return
         isStart = true
-        scope.launch {
+        coroutineManager.getDefaultScope().launch {
             while (isStart) {
                 val send = currentReportStatus.clone()
                 when (lastSend.contentEquals(send)) {
