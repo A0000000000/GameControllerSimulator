@@ -15,7 +15,7 @@ class BluetoothSocketServer(
     private val adapter: BluetoothAdapter,
     private val name: String,
     private val uuid: UUID,
-    private val serverCallback: SocketServerCallback<BluetoothSocket>,
+    serverCallback: SocketServerCallback<BluetoothSocket>,
     coroutineManager: CoroutineManager
 ): SocketServer<BluetoothServerSocket, BluetoothSocket>(serverCallback, coroutineManager) {
 

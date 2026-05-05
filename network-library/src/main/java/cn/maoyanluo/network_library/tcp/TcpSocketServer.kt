@@ -10,7 +10,7 @@ import java.net.Socket
 
 class TcpSocketServer(
     private val port: Int,
-    private val serverCallback: SocketServerCallback<Socket>,
+    serverCallback: SocketServerCallback<Socket>,
     coroutineManager: CoroutineManager
 ): SocketServer<ServerSocket, Socket>(serverCallback, coroutineManager) {
 
