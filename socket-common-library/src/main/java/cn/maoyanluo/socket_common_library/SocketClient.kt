@@ -18,9 +18,9 @@ abstract class SocketClient<TSocket: Closeable>(
     private var isConnected = false
     protected var socket: TSocket? = null
 
-    abstract fun createSocket(): TSocket
-    abstract fun getOutputStream(): OutputStream?
-    abstract fun getInputStream(): InputStream?
+    protected abstract fun createSocket(): TSocket
+    protected abstract fun getOutputStream(): OutputStream?
+    protected abstract fun getInputStream(): InputStream?
 
     fun connect() {
         coroutineManager.getIOScope().launch {

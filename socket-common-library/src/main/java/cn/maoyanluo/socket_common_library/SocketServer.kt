@@ -21,7 +21,6 @@ abstract class SocketServer<TServerSocket: Closeable, TSocket: Closeable>(
 
     protected abstract fun createServerSocket(): TServerSocket
     protected abstract fun acceptSocket(serverSocketSnapshot: TServerSocket?): TSocket?
-
     protected abstract fun createAcceptClient(socket: TSocket, callback: ClientCallback, coroutineManager: CoroutineManager): Client<TSocket>
 
     fun startListener() {
