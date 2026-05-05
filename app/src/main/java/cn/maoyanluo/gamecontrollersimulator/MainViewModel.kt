@@ -23,7 +23,7 @@ class MainViewModel(application: Application): AndroidViewModel(application) {
     val coroutineManager = CoroutineManager()
     val generator = GameControllerHIDReportGenerator(coroutineManager)
 
-    val hidBluetoothManager = HIDBluetoothManager(application, object : HIDBluetoothCallback {
+    val hidBluetoothManager = HIDBluetoothManager(application, object: HIDBluetoothCallback {
         override fun initResult(result: Boolean) {
             LogUtils.i(TAG, "initResult = $result")
         }

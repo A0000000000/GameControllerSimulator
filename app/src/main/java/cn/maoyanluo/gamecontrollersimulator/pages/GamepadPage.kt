@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -63,7 +62,6 @@ fun GameControllerPage(modifier: Modifier = Modifier) {
                     ))
                 }
             }
-
         }
         lifecycleOwner.lifecycle.addObserver(observer)
         onDispose {
@@ -80,7 +78,6 @@ fun GameControllerPage(modifier: Modifier = Modifier) {
                             viewModel.connectTargetDevice()
                         }
                     }
-
                 }
                 lifecycleOwner.lifecycle.addObserver(observer)
                 onDispose {
@@ -201,7 +198,5 @@ fun GameControllerInnerLayout(modifier: Modifier) {
                 }
             }
         }
-
     }
-
 }
