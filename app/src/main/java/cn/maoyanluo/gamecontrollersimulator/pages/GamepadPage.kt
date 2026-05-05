@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -63,10 +64,6 @@ fun GameControllerPage(modifier: Modifier = Modifier) {
                 }
             }
 
-            override fun onDestroy(owner: LifecycleOwner) {
-                super.onDestroy(owner)
-                viewModel.releaseHidBluetoothManager()
-            }
         }
         lifecycleOwner.lifecycle.addObserver(observer)
         onDispose {
@@ -84,10 +81,6 @@ fun GameControllerPage(modifier: Modifier = Modifier) {
                         }
                     }
 
-                    override fun onDestroy(owner: LifecycleOwner) {
-                        super.onDestroy(owner)
-                        viewModel.disconnectTargetDevice()
-                    }
                 }
                 lifecycleOwner.lifecycle.addObserver(observer)
                 onDispose {

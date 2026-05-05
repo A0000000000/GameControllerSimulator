@@ -14,6 +14,7 @@ import cn.maoyanluo.coroutine_library.CoroutineManager
 import cn.maoyanluo.gamecontrollersimulator.pages.TAG
 import cn.maoyanluo.hid_library.GameControllerHIDReportGenerator
 import cn.maoyanluo.log_library.LogUtils
+import kotlinx.coroutines.launch
 
 class MainViewModel(application: Application): AndroidViewModel(application) {
     var selectDevice: BluetoothDevice? by mutableStateOf(null)
@@ -32,33 +33,42 @@ class MainViewModel(application: Application): AndroidViewModel(application) {
             registered: Boolean
         ) {
             LogUtils.i(TAG, "onAppStatusChanged = $registered")
-            registerResult = registered
+            coroutineManager.getMainScope().launch {
+                registerResult = registered
+            }
         }
 
         override fun onConnectionStateChanged(
             device: BluetoothDevice?,
             state: Int
         ) {
-            if (device == selectDevice) {
-                when (state) {
-                    BluetoothProfile.STATE_CONNECTED -> {
-                        connected = true
-                    }
-                    BluetoothProfile.STATE_CONNECTING -> {
+            coroutineManager.getMainScope().launch {
+                if (device == selectDevice) {
+                    when (state) {
+                        BluetoothProfile.STATE_CONNECTED -> {
+                            connected = true
+                        }
 
-                    }
-                    BluetoothProfile.STATE_DISCONNECTING -> {
+                        BluetoothProfile.STATE_CONNECTING -> {
 
-                    }
-                    BluetoothProfile.STATE_DISCONNECTED -> {
-                        connected = false
+                        }
+
+                        BluetoothProfile.STATE_DISCONNECTING -> {
+
+                        }
+
+                        BluetoothProfile.STATE_DISCONNECTED -> {
+                            connected = false
+                        }
                     }
                 }
             }
         }
 
         override fun release() {
-            registerResult = false
+            coroutineManager.getMainScope().launch {
+                registerResult = false
+            }
         }
 
     }, coroutineManager)
@@ -96,6 +106,13 @@ class MainViewModel(application: Application): AndroidViewModel(application) {
 
     fun stopCollection() {
         generator.stopCollection()
+    }
+
+    fun exitGamepad() {
+        stopCollection()
+        disconnectTargetDevice()
+        releaseHidBluetoothManager()
+        selectDevice = null
     }
 
 }

@@ -85,7 +85,7 @@ fun MainContainer(modifier: Modifier = Modifier) {
     }
     if (hasPermission) {
         BackHandler(enabled = viewModel.selectDevice != null) {
-            viewModel.selectDevice = null
+            viewModel.exitGamepad()
         }
         LockScreenOrientation(
             orientation = if (viewModel.selectDevice == null) ActivityInfo.SCREEN_ORIENTATION_PORTRAIT else ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
