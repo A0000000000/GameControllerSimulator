@@ -8,7 +8,6 @@ import java.io.Closeable
 import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
-import kotlin.coroutines.cancellation.CancellationException
 
 abstract class SocketServer<TServerSocket: Closeable, TSocket: Closeable>(
     private val serverCallback: SocketServerCallback<TSocket>,
@@ -39,9 +38,8 @@ abstract class SocketServer<TServerSocket: Closeable, TSocket: Closeable>(
                 } catch (e: Exception) {
                     try {
                         currentServerSocket?.close()
-                    } catch (ignore: Exception) { }
+                    } catch (_: Exception) { }
                     coroutineManager.getIOScope().launch { serverCallback.onStartServerFailed(e) }
-
                 }
             }
         }
@@ -56,11 +54,7 @@ abstract class SocketServer<TServerSocket: Closeable, TSocket: Closeable>(
                     onClientSocketAccept(socket)
                 }
             } catch (e: Exception) {
-                if (synchronized(this@SocketServer) {
-                        return@synchronized isStart && serverSocketSnapshot === serverSocket
-                    }) {
-                    coroutineManager.getIOScope().launch { serverCallback.onForeverLoopException(e) }
-                }
+                coroutineManager.getIOScope().launch { serverCallback.onForeverLoopException(e) }
                 synchronized(this@SocketServer) {
                     if (serverSocket === serverSocketSnapshot) {
                         stopListener()
@@ -99,7 +93,7 @@ abstract class SocketServer<TServerSocket: Closeable, TSocket: Closeable>(
                 try {
                     serverSocket?.close()
                     serverSocket = null
-                } catch (ignore: Exception) {
+                } catch (_: Exception) {
                 }
                 coroutineManager.getIOScope().launch { serverCallback.onStopServer() }
             }
@@ -108,7 +102,7 @@ abstract class SocketServer<TServerSocket: Closeable, TSocket: Closeable>(
 
     abstract class Client<TSocket: Closeable>(
         private val socket: TSocket,
-        private val callback: SocketServerCallback.ClientCallback,
+        private val callback: ClientCallback,
         private val coroutineManager: CoroutineManager
     ) {
         private var isConnected = true
@@ -175,9 +169,7 @@ abstract class SocketServer<TServerSocket: Closeable, TSocket: Closeable>(
                         coroutineManager.getIOScope().launch { callback.onDataReady(buff) }
                     }
                 } catch (e: Exception) {
-                    if (e !is CancellationException) {
-                        coroutineManager.getIOScope().launch { callback.onDataRevException(e) }
-                    }
+                    coroutineManager.getIOScope().launch { callback.onDataRevException(e) }
                     disconnect()
                 }
             }
@@ -192,7 +184,7 @@ abstract class SocketServer<TServerSocket: Closeable, TSocket: Closeable>(
                     isConnected = false
                     try {
                         socket.close()
-                    } catch (ignore: Exception) {
+                    } catch (_: Exception) {
                     }
                     callback.onDisconnect()
                 }

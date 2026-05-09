@@ -7,7 +7,6 @@ import java.io.Closeable
 import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
-import kotlin.coroutines.cancellation.CancellationException
 
 abstract class SocketClient<TSocket: Closeable>(
     private val clientCallback: SocketClientCallback,
@@ -79,9 +78,7 @@ abstract class SocketClient<TSocket: Closeable>(
                     coroutineManager.getIOScope().launch { clientCallback.onDataReady(buff) }
                 }
             } catch (e: Exception) {
-                if (e !is CancellationException) {
-                    coroutineManager.getIOScope().launch { clientCallback.onDataRevException(e) }
-                }
+                coroutineManager.getIOScope().launch { clientCallback.onDataRevException(e) }
                 synchronized(this@SocketClient) {
                     if (socketSnapshot === socket) {
                         disconnect()
@@ -122,7 +119,7 @@ abstract class SocketClient<TSocket: Closeable>(
                 try {
                     socket?.close()
                     socket = null
-                } catch (ignore: Exception) {
+                } catch (_: Exception) {
                 }
                 clientCallback.onDisconnect()
             }
