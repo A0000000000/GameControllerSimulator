@@ -21,6 +21,7 @@ dependencyResolutionManagement {
 
 rootProject.name = "GameControllerSimulator"
 include(":app")
+include(":app2")
 include(":bluetooth-library")
 include(":ui-library")
 include(":hid-library")
