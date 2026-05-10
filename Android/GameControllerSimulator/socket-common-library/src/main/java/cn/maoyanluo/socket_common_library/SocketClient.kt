@@ -62,9 +62,6 @@ abstract class SocketClient<TSocket: Closeable>(
                         totalSize += read
                     }
                     val size = IntConverter.fromBigEndian(sizeBuff)
-                    if (size !in 0..MAX_BUFF_SIZE) {
-                        throw IOException("data size is exception. size = $size")
-                    }
                     val buff = ByteArray(size)
                     totalSize = 0
                     while (totalSize < size) {
@@ -95,9 +92,6 @@ abstract class SocketClient<TSocket: Closeable>(
                     return@launch
                 }
                 try {
-                    if (data.size !in 0..MAX_BUFF_SIZE) {
-                        throw IllegalArgumentException("package is too large: ${data.size}, max=${MAX_BUFF_SIZE}")
-                    }
                     val outputStream = getOutputStream() ?: throw IOException("outputStream is null")
                     outputStream.write(IntConverter.toBigEndian(data.size), 0, 4)
                     outputStream.write(data, 0, data.size)
