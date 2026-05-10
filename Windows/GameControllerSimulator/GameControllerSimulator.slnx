@@ -4,6 +4,7 @@
     <Platform Name="x64" />
     <Platform Name="x86" />
   </Configurations>
+  <Project Path="BluetoothLibrary/BluetoothLibrary.csproj" Id="35c61e5a-7005-4fbc-8153-42e3bba1f355" />
   <Project Path="GameControllerSimulator/GameControllerSimulator.csproj">
     <Platform Solution="*|ARM64" Project="ARM64" />
     <Platform Solution="*|x64" Project="x64" />
