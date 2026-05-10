@@ -3,8 +3,8 @@
   "WorkspaceRootPath": "C:\\Users\\mengx\\Documents\\GameControllerSimulator\\Windows\\GameControllerSimulator\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{A36BB2A8-5A9C-4959-9A48-1FCA1CCC2900}|GameControllerSimulator\\GameControllerSimulator.csproj|c:\\users\\mengx\\documents\\gamecontrollersimulator\\windows\\gamecontrollersimulator\\gamecontrollersimulator\\mainwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
-      "RelativeMoniker": "D:0:0:{A36BB2A8-5A9C-4959-9A48-1FCA1CCC2900}|GameControllerSimulator\\GameControllerSimulator.csproj|solutionrelative:gamecontrollersimulator\\mainwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+      "AbsoluteMoniker": "D:0:0:{08CA83EF-6EE4-979A-0F08-14D48000EBDD}|GameControllerSimulator\\GameControllerSimulator.csproj|c:\\users\\mengx\\documents\\gamecontrollersimulator\\windows\\gamecontrollersimulator\\gamecontrollersimulator\\mainwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{08CA83EF-6EE4-979A-0F08-14D48000EBDD}|GameControllerSimulator\\GameControllerSimulator.csproj|solutionrelative:gamecontrollersimulator\\mainwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
     }
   ],
   "DocumentGroupContainers": [
@@ -24,7 +24,7 @@
               "RelativeDocumentMoniker": "GameControllerSimulator\\MainWindow.xaml",
               "ToolTip": "C:\\Users\\mengx\\Documents\\GameControllerSimulator\\Windows\\GameControllerSimulator\\GameControllerSimulator\\MainWindow.xaml",
               "RelativeToolTip": "GameControllerSimulator\\MainWindow.xaml",
-              "ViewState": "AgIAAAYAAAAAAAAAAAAAABQAAAAmAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAUAAAAvAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
               "WhenOpened": "2026-05-10T06:16:01.493Z",
               "EditorCaption": ""

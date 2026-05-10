@@ -44,7 +44,7 @@ Windows/**/*.suo
 Windows/**/*.VC.db
 Windows/**/*.VC.opendb
 Windows/**/*.pdb
-
+Windows/**/.vs/
 # ==========================
 # 通用
 # ==========================
