@@ -12,8 +12,13 @@ Android/**/bin/
 Android/**/obj/
 
 # Gradle/IDE缓存
-Android/.gradle/
-Android/local.properties
+Android/**/.idea/workspace.xml
+Android/**/.idea/tasks.xml
+Android/**/.idea/usage.statistics.xml
+Android/**/.idea/shelf/
+Android/**/.idea/dictionaries/
+Android/**/.gradle/
+Android/**/local.properties
 
 # ==========================
 # iOS
