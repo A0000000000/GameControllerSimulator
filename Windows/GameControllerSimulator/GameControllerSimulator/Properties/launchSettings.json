@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "GameControllerSimulator (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "GameControllerSimulator (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}

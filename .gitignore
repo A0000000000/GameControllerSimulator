@@ -1,50 +1,58 @@
-*.iml
-.gradle
-/local.properties
-/.idea/caches
-/.idea/libraries
-/.idea/modules.xml
-/.idea/workspace.xml
-/.idea/navEditor.xml
-/.idea/assetWizardSettings.xml
-.DS_Store
-/build
-/captures
-.externalNativeBuild
-.cxx
-local.properties
+# =====================================
+# Gitignore for GameControllerSimulator
+# Android / iOS / Windows modules
+# =====================================
 
-# Gradle files
-.gradle/
-build/
+# ==========================
+# Android
+# ==========================
+# 忽略所有模块下的 build/ 和 bin/ 目录
+Android/**/build/
+Android/**/bin/
+Android/**/obj/
 
-# Local configuration file (sdk path, etc)
-local.properties
+# Gradle/IDE缓存
+Android/.gradle/
+Android/local.properties
 
-# Log/OS Files
-*.log
+# ==========================
+# iOS
+# ==========================
+# 忽略所有模块下的 build/ 和 DerivedData
+iOS/**/build/
+iOS/**/DerivedData/
 
-# Android Studio generated files and folders
-captures/
-.externalNativeBuild/
-.cxx/
-*.aab
-*.apk
-output-metadata.json
+# Xcode 文件缓存
+iOS/**/*.xcuserdata
+iOS/**/*.xcuserstate
+iOS/**/*.xcscmblueprint
 
-# IntelliJ
-*.iml
-.idea/
-misc.xml
-deploymentTargetDropDown.xml
-render.experimental.xml
+# CocoaPods
+iOS/Pods/
 
-# Keystore files
-*.jks
-*.keystore
+# ==========================
+# Windows
+# ==========================
+# 忽略所有模块下的 bin/ 和 obj/
+Windows/**/bin/
+Windows/**/obj/
 
-# Google Services (e.g. APIs or Firebase)
-google-services.json
+# VS / WinUI3 / .NET 临时文件
+Windows/**/.vs/
+Windows/**/*.user
+Windows/**/*.suo
+Windows/**/*.VC.db
+Windows/**/*.VC.opendb
+Windows/**/*.pdb
 
-# Android Profiling
-*.hprof
+# ==========================
+# 通用
+# ==========================
+# 忽略系统文件
+*.DS_Store
+Thumbs.db
+
+# 临时编辑器文件
+*.swp
+*.sublime-workspace
+*.sublime-project

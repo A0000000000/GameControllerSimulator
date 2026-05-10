@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Window
+    x:Class="GameControllerSimulator.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:GameControllerSimulator"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Title="GameControllerSimulator">
+
+    <Window.SystemBackdrop>
+        <MicaBackdrop />
+    </Window.SystemBackdrop>
+
+
+    <Grid RowDefinitions="Auto,Auto,*">
+
+        <!-- ===================== -->
+        <!-- 1. 标题区域 -->
+        <!-- ===================== -->
+        <TextBlock
+            Grid.Row="0"
+            Text="ViGEm Controller Monitor"
+            FontSize="28"
+            FontWeight="Bold"
+            HorizontalAlignment="Center"
+            Margin="0,20,0,10"/>
+
+        <!-- ===================== -->
+        <!-- 2. 基本信息区域 -->
+        <!-- ===================== -->
+        <Border Grid.Row="1"
+                Margin="20"
+                Padding="16"
+                CornerRadius="10"
+                BorderThickness="1"
+                BorderBrush="#333">
+
+            <StackPanel HorizontalAlignment="Center" Spacing="8">
+
+                <TextBlock x:Name="DriverStatus" Text="Driver Status: Running" HorizontalAlignment="Center"/>
+                <TextBlock x:Name="BluetoothUUID" Text="Bluetooth UUID: 00001124-0000-1000-8000-00805f9b34fb" HorizontalAlignment="Center"/>
+                <TextBlock x:Name="TcpInfo" Text="UDP: 0.0.0.0:9000" HorizontalAlignment="Center"/>
+                <TextBlock x:Name="UdpInfo" Text="TCP: 0.0.0.0:9100" HorizontalAlignment="Center"/>
+
+            </StackPanel>
+        </Border>
+
+        <!-- ===================== -->
+        <!-- 3. 手柄状态区域（4个卡片） -->
+        <!-- ===================== -->
+        <Grid Grid.Row="2"
+              Margin="20"
+              RowDefinitions="*,*"
+              ColumnDefinitions="*,*"
+              RowSpacing="12"
+              ColumnSpacing="12">
+
+            <!-- Controller 1 -->
+            <Border Grid.Row="0" Grid.Column="0"
+                    CornerRadius="10"
+                    BorderThickness="1"
+                    BorderBrush="#444"
+                    Padding="10">
+
+                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="6">
+                    <TextBlock Text="Controller 1" FontWeight="Bold" HorizontalAlignment="Center"/>
+                    <TextBlock Text="Disconnected" HorizontalAlignment="Center"/>
+                </StackPanel>
+
+            </Border>
+
+            <!-- Controller 2 -->
+            <Border Grid.Row="0" Grid.Column="1"
+                    CornerRadius="10"
+                    BorderThickness="1"
+                    BorderBrush="#444"
+                    Padding="10">
+
+                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="6">
+                    <TextBlock Text="Controller 2" FontWeight="Bold" HorizontalAlignment="Center"/>
+                    <TextBlock Text="Connected" HorizontalAlignment="Center"/>
+                </StackPanel>
+
+            </Border>
+
+            <!-- Controller 3 -->
+            <Border Grid.Row="1" Grid.Column="0"
+                    CornerRadius="10"
+                    BorderThickness="1"
+                    BorderBrush="#444"
+                    Padding="10">
+
+                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="6">
+                    <TextBlock Text="Controller 3" FontWeight="Bold" HorizontalAlignment="Center"/>
+                    <TextBlock Text="Idle" HorizontalAlignment="Center"/>
+                </StackPanel>
+
+            </Border>
+
+            <!-- Controller 4 -->
+            <Border Grid.Row="1" Grid.Column="1"
+                    CornerRadius="10"
+                    BorderThickness="1"
+                    BorderBrush="#444"
+                    Padding="10">
+
+                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="6">
+                    <TextBlock Text="Controller 4" FontWeight="Bold" HorizontalAlignment="Center"/>
+                    <TextBlock Text="Disconnected" HorizontalAlignment="Center"/>
+                </StackPanel>
+
+            </Border>
+
+        </Grid>
+
+    </Grid>
+
+</Window>
