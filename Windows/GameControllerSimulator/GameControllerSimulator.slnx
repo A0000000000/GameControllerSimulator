@@ -11,4 +11,5 @@
     <Platform Solution="*|x86" Project="x86" />
     <Deploy />
   </Project>
+  <Project Path="ViGEmBusLibrary/ViGEmBusLibrary.csproj" Id="6cd5dc52-d488-43be-a30b-666824a4d5db" />
 </Solution>

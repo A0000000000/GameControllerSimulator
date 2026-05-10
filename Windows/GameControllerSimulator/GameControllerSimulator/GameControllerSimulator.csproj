@@ -44,6 +44,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\BluetoothLibrary\BluetoothLibrary.csproj" />
+    <ProjectReference Include="..\ViGEmBusLibrary\ViGEmBusLibrary.csproj" />
   </ItemGroup>
 
   <!--

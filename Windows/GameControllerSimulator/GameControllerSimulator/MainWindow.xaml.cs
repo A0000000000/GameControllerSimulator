@@ -12,6 +12,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Text;
+using ViGEmBusLibrary;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.Storage.Streams;
@@ -34,9 +35,21 @@ namespace GameControllerSimulator
         }
         private void StatusText_PointerPressed(object sender, PointerRoutedEventArgs e)
         {
-            bluetoothSocketServer = new BluetoothLibrary.BluetoothSocketServer(Guid.Parse("0000180D-0000-1000-8000-00805f9b34fb"), "BLE", new Callback());
-            System.Diagnostics.Debug.WriteLine("start listener");
-            bluetoothSocketServer.StartListener();
+            //bluetoothSocketServer = new BluetoothLibrary.BluetoothSocketServer(Guid.Parse("0000180D-0000-1000-8000-00805f9b34fb"), "BLE", new Callback());
+            //System.Diagnostics.Debug.WriteLine("start listener");
+            //bluetoothSocketServer.StartListener();
+            if (ViGEmBusUtils.IsDriverInstalled())
+            {
+                System.Diagnostics.Debug.WriteLine("installed");
+                ViGEmBusUtils.test();
+            }
+            else
+            {
+                System.Diagnostics.Debug.WriteLine("not installed");
+                ViGEmBusUtils.InstallDriver();
+            }
+
+
         }
 
         class ClientCallback : BluetoothLibrary.BluetoothSocketCallback.ClientCallback
