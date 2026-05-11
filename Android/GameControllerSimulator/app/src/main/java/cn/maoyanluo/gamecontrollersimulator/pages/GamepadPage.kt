@@ -29,10 +29,12 @@ import cn.maoyanluo.bluetooth_library.hid.bean.HIDRegisterData
 import cn.maoyanluo.gamecontrollersimulator.MainViewModel
 import cn.maoyanluo.gamecontrollersimulator.R
 import cn.maoyanluo.hid_library.GameControllerHID
-import cn.maoyanluo.hid_library.GameControllerHIDReportGenerator
 import cn.maoyanluo.ui_library.ActionButtons
 import cn.maoyanluo.ui_library.ActionButtons2
+import cn.maoyanluo.ui_library.Axis
+import cn.maoyanluo.ui_library.Button
 import cn.maoyanluo.ui_library.CircleTextButton
+import cn.maoyanluo.ui_library.DPad
 import cn.maoyanluo.ui_library.DPadButtons
 import cn.maoyanluo.ui_library.DPadButtons2
 import cn.maoyanluo.ui_library.Joystick
@@ -117,12 +119,12 @@ fun GameControllerInnerLayout(modifier: Modifier) {
             Box(modifier = Modifier.weight(1f).fillMaxHeight()) {
                 Box(modifier = Modifier.padding(50.dp, 0.dp, 0.dp, 0.dp).align(Alignment.TopStart)) {
                     Joystick(modifier = Modifier.size(180.dp), onStickPress = {
-                        viewModel.generator.setButton(GameControllerHIDReportGenerator.Button.L3, true)
+                        viewModel.generator.setButton(Button.L3, true)
                     }, onStickRelease = {
-                        viewModel.generator.setButton(GameControllerHIDReportGenerator.Button.L3, false)
+                        viewModel.generator.setButton(Button.L3, false)
                     }, onAxisChanged = { x,y ->
-                        viewModel.generator.setAxis(GameControllerHIDReportGenerator.Axis.X, x)
-                        viewModel.generator.setAxis(GameControllerHIDReportGenerator.Axis.Y, y)
+                        viewModel.generator.setAxis(Axis.X, x)
+                        viewModel.generator.setAxis(Axis.Y, y)
                     })
                 }
 
@@ -133,7 +135,7 @@ fun GameControllerInnerLayout(modifier: Modifier) {
                             if (on) {
                                 viewModel.generator.setDPad(btn)
                             } else {
-                                viewModel.generator.setDPad(GameControllerHIDReportGenerator.DPad.NEUTRAL)
+                                viewModel.generator.setDPad(DPad.NEUTRAL)
                             }
                         }
                     } else {
@@ -148,9 +150,9 @@ fun GameControllerInnerLayout(modifier: Modifier) {
 
                 Box(modifier = Modifier.padding(0.dp, 50.dp, 50.dp, 0.dp).align(Alignment.TopEnd)) {
                     SquareTextButton(text = "Back", fontSize = 20.sp, modifier = Modifier.size(50.dp), onDown = {
-                        viewModel.generator.setButton(GameControllerHIDReportGenerator.Button.BACK, true)
+                        viewModel.generator.setButton(Button.BACK, true)
                     }, onUp = {
-                        viewModel.generator.setButton(GameControllerHIDReportGenerator.Button.BACK, false)
+                        viewModel.generator.setButton(Button.BACK, false)
                     })
                 }
 
@@ -158,12 +160,12 @@ fun GameControllerInnerLayout(modifier: Modifier) {
             Box(modifier = Modifier.weight(1f).fillMaxHeight()) {
                 Box(modifier = Modifier.padding(50.dp, 0.dp, 0.dp, 0.dp).align(Alignment.BottomStart)) {
                     Joystick(modifier = Modifier.size(180.dp), onStickPress = {
-                        viewModel.generator.setButton(GameControllerHIDReportGenerator.Button.R3, true)
+                        viewModel.generator.setButton(Button.R3, true)
                     }, onStickRelease = {
-                        viewModel.generator.setButton(GameControllerHIDReportGenerator.Button.R3, false)
+                        viewModel.generator.setButton(Button.R3, false)
                     }, onAxisChanged = { x, y ->
-                        viewModel.generator.setAxis(GameControllerHIDReportGenerator.Axis.RX, x)
-                        viewModel.generator.setAxis(GameControllerHIDReportGenerator.Axis.RY, y)
+                        viewModel.generator.setAxis(Axis.RX, x)
+                        viewModel.generator.setAxis(Axis.RY, y)
                     })
                 }
                 Box(modifier = Modifier.padding(0.dp, 0.dp, 50.dp, 0.dp).align(Alignment.TopEnd)) {
@@ -191,9 +193,9 @@ fun GameControllerInnerLayout(modifier: Modifier) {
                 }
                 Box(modifier = Modifier.padding(50.dp, 50.dp, 0.dp, 0.dp).align(Alignment.TopStart)) {
                     SquareTextButton(text = "Start", fontSize = 20.sp, modifier = Modifier.size(50.dp), onDown = {
-                        viewModel.generator.setButton(GameControllerHIDReportGenerator.Button.START, true)
+                        viewModel.generator.setButton(Button.START, true)
                     }, onUp = {
-                        viewModel.generator.setButton(GameControllerHIDReportGenerator.Button.START, false)
+                        viewModel.generator.setButton(Button.START, false)
                     })
                 }
             }

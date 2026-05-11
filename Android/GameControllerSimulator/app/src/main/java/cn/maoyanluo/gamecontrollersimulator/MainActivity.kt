@@ -1,9 +1,6 @@
 package cn.maoyanluo.gamecontrollersimulator
 
 import android.Manifest
-import android.app.Activity
-import android.content.Context
-import android.content.ContextWrapper
 import android.content.pm.ActivityInfo
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -21,7 +18,6 @@ import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -29,16 +25,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
-import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import cn.maoyanluo.gamecontrollersimulator.pages.GameControllerPage
-import cn.maoyanluo.gamecontrollersimulator.pages.SelectDevicePages
 import cn.maoyanluo.gamecontrollersimulator.ui.theme.GameControllerSimulatorTheme
+import cn.maoyanluo.ui_library.LockScreenOrientation
+import cn.maoyanluo.ui_library.pages.SelectDevicePages
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -91,7 +85,9 @@ fun MainContainer(modifier: Modifier = Modifier) {
             orientation = if (viewModel.selectDevice == null) ActivityInfo.SCREEN_ORIENTATION_PORTRAIT else ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
         )
         if (viewModel.selectDevice == null) {
-            SelectDevicePages(pageModifier)
+            SelectDevicePages(pageModifier) {
+                viewModel.selectDevice = it
+            }
         } else {
             GameControllerPage(pageModifier)
         }
@@ -102,45 +98,6 @@ fun MainContainer(modifier: Modifier = Modifier) {
             })
         }
     }
-}
-
-@Composable
-fun LockScreenOrientation(orientation: Int) {
-    val context = LocalContext.current
-    DisposableEffect(orientation) {
-        val activity = context.findActivity()
-        val original = activity?.requestedOrientation
-        val window = activity?.window
-        val decorView = window?.decorView
-        val insetsController = if (window != null && decorView != null) {
-            WindowInsetsControllerCompat(window, decorView)
-        } else {
-            null
-        }
-        val immersiveLandscape = orientation != ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-
-        activity?.requestedOrientation = orientation
-        if (immersiveLandscape) {
-            insetsController?.systemBarsBehavior =
-                WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-            insetsController?.hide(WindowInsetsCompat.Type.systemBars())
-        } else {
-            insetsController?.show(WindowInsetsCompat.Type.systemBars())
-        }
-        onDispose {
-            activity?.requestedOrientation = original ?: ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
-            insetsController?.show(WindowInsetsCompat.Type.systemBars())
-        }
-    }
-}
-
-fun Context.findActivity(): Activity? {
-    var ctx = this
-    while (ctx is ContextWrapper) {
-        if (ctx is Activity) return ctx
-        ctx = ctx.baseContext
-    }
-    return null
 }
 
 @Preview(showBackground = true)

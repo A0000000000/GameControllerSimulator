@@ -1,6 +1,9 @@
 package cn.maoyanluo.hid_library
 
 import cn.maoyanluo.coroutine_library.CoroutineManager
+import cn.maoyanluo.ui_library.Axis
+import cn.maoyanluo.ui_library.Button
+import cn.maoyanluo.ui_library.DPad
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.concurrent.Volatile
@@ -11,19 +14,6 @@ class GameControllerHIDReportGenerator(private val coroutineManager: CoroutineMa
         private const val MAX_SAME_NOT_SEND_TIME = 60
     }
 
-
-    enum class Axis {
-        X, Y, RX, RY
-    }
-
-    enum class Button(val bitIndex: Int) {
-        A(0), B(1), X(2), Y(3), LB(4), RB(5), L2(6), R2(7),
-        BACK(8), START(9), L3(10), R3(11), TOP(12), BOTTOM(13), LEFT(14), RIGHT(15)
-    }
-
-    enum class DPad(val hatValue: Int) {
-        TOP(0), RIGHT(2), BOTTOM(4), LEFT(6), NEUTRAL(8)
-    }
 
     private val currentReportStatus = GameControllerHID.RESET_REPORT.clone()
 

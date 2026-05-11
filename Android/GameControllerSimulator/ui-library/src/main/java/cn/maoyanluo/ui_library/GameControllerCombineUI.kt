@@ -10,14 +10,25 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.TextUnit
-import cn.maoyanluo.hid_library.GameControllerHIDReportGenerator
 
+enum class Axis {
+    X, Y, RX, RY
+}
+
+enum class Button(val bitIndex: Int) {
+    A(0), B(1), X(2), Y(3), LB(4), RB(5), L2(6), R2(7),
+    BACK(8), START(9), L3(10), R3(11), TOP(12), BOTTOM(13), LEFT(14), RIGHT(15)
+}
+
+enum class DPad(val hatValue: Int) {
+    TOP(0), RIGHT(2), BOTTOM(4), LEFT(6), NEUTRAL(8)
+}
 
 @Composable
 fun ActionButtons(
     modifier: Modifier,
     fontSize: TextUnit,
-    onKeyEvent: (btn: GameControllerHIDReportGenerator.Button, on: Boolean) -> Unit
+    onKeyEvent: (btn: Button, on: Boolean) -> Unit
     ) {
     Box(modifier = modifier) {
         CircleTextButton(
@@ -28,10 +39,10 @@ fun ActionButtons(
                 .align(Alignment.TopCenter),
             textColor = Color(0xFFFFC107),
             onDown = {
-                onKeyEvent(GameControllerHIDReportGenerator.Button.Y, true)
+                onKeyEvent(Button.Y, true)
             },
             onUp = {
-                onKeyEvent(GameControllerHIDReportGenerator.Button.Y, false)
+                onKeyEvent(Button.Y, false)
             }
         )
 
@@ -43,10 +54,10 @@ fun ActionButtons(
                 .align(Alignment.CenterStart),
             textColor = Color(0xFF2196F3),
             onDown = {
-                onKeyEvent(GameControllerHIDReportGenerator.Button.X, true)
+                onKeyEvent(Button.X, true)
             },
             onUp = {
-                onKeyEvent(GameControllerHIDReportGenerator.Button.X, false)
+                onKeyEvent(Button.X, false)
             }
         )
 
@@ -58,10 +69,10 @@ fun ActionButtons(
                 .align(Alignment.CenterEnd),
             textColor = Color(0xFFF44336),
             onDown = {
-                onKeyEvent(GameControllerHIDReportGenerator.Button.B, true)
+                onKeyEvent(Button.B, true)
             },
             onUp = {
-                onKeyEvent(GameControllerHIDReportGenerator.Button.B, false)
+                onKeyEvent(Button.B, false)
             }
         )
 
@@ -73,10 +84,10 @@ fun ActionButtons(
                 .align(Alignment.BottomCenter),
             textColor = Color(0xFF4CAF50),
             onDown = {
-                onKeyEvent(GameControllerHIDReportGenerator.Button.A, true)
+                onKeyEvent(Button.A, true)
             },
             onUp = {
-                onKeyEvent(GameControllerHIDReportGenerator.Button.A, false)
+                onKeyEvent(Button.A, false)
             }
         )
     }
@@ -86,7 +97,7 @@ fun ActionButtons(
 fun ActionButtons2(
     modifier: Modifier,
     fontSize: TextUnit,
-    onKeyEvent: (btn: GameControllerHIDReportGenerator.Button, on: Boolean) -> Unit
+    onKeyEvent: (btn: Button, on: Boolean) -> Unit
 ) {
     Box(modifier = modifier) {
         CircleTextButton(
@@ -96,10 +107,10 @@ fun ActionButtons2(
                 .fillMaxSize(0.33f)
                 .align(Alignment.TopCenter),
             onDown = {
-                onKeyEvent(GameControllerHIDReportGenerator.Button.Y, true)
+                onKeyEvent(Button.Y, true)
             },
             onUp = {
-                onKeyEvent(GameControllerHIDReportGenerator.Button.Y, false)
+                onKeyEvent(Button.Y, false)
             }
         )
 
@@ -110,10 +121,10 @@ fun ActionButtons2(
                 .fillMaxSize(0.33f)
                 .align(Alignment.CenterEnd),
             onDown = {
-                onKeyEvent(GameControllerHIDReportGenerator.Button.X, true)
+                onKeyEvent(Button.X, true)
             },
             onUp = {
-                onKeyEvent(GameControllerHIDReportGenerator.Button.X, false)
+                onKeyEvent(Button.X, false)
             }
         )
 
@@ -124,10 +135,10 @@ fun ActionButtons2(
                 .fillMaxSize(0.33f)
                 .align(Alignment.BottomCenter),
             onDown = {
-                onKeyEvent(GameControllerHIDReportGenerator.Button.B, true)
+                onKeyEvent(Button.B, true)
             },
             onUp = {
-                onKeyEvent(GameControllerHIDReportGenerator.Button.B, false)
+                onKeyEvent(Button.B, false)
             }
         )
 
@@ -138,10 +149,10 @@ fun ActionButtons2(
                 .fillMaxSize(0.33f)
                 .align(Alignment.CenterStart),
             onDown = {
-                onKeyEvent(GameControllerHIDReportGenerator.Button.A, true)
+                onKeyEvent(Button.A, true)
             },
             onUp = {
-                onKeyEvent(GameControllerHIDReportGenerator.Button.A, false)
+                onKeyEvent(Button.A, false)
             }
         )
     }
@@ -151,7 +162,7 @@ fun ActionButtons2(
 fun DPadButtons(
     modifier: Modifier,
     fontSize: TextUnit,
-    onKeyEvent: (btn: GameControllerHIDReportGenerator.DPad, on: Boolean) -> Unit
+    onKeyEvent: (btn: DPad, on: Boolean) -> Unit
 ) {
     Box(modifier = modifier) {
         SquareTextButton(
@@ -161,10 +172,10 @@ fun DPadButtons(
                 .fillMaxSize(0.33f)
                 .align(Alignment.TopCenter),
             onDown = {
-                onKeyEvent(GameControllerHIDReportGenerator.DPad.TOP, true)
+                onKeyEvent(DPad.TOP, true)
             },
             onUp = {
-                onKeyEvent(GameControllerHIDReportGenerator.DPad.TOP, false)
+                onKeyEvent(DPad.TOP, false)
             }
         )
         SquareTextButton(
@@ -174,10 +185,10 @@ fun DPadButtons(
                 .fillMaxSize(0.33f)
                 .align(Alignment.BottomCenter),
             onDown = {
-                onKeyEvent(GameControllerHIDReportGenerator.DPad.BOTTOM, true)
+                onKeyEvent(DPad.BOTTOM, true)
             },
             onUp = {
-                onKeyEvent(GameControllerHIDReportGenerator.DPad.BOTTOM, false)
+                onKeyEvent(DPad.BOTTOM, false)
             }
         )
         SquareTextButton(
@@ -187,10 +198,10 @@ fun DPadButtons(
                 .fillMaxSize(0.33f)
                 .align(Alignment.CenterStart),
             onDown = {
-                onKeyEvent(GameControllerHIDReportGenerator.DPad.LEFT, true)
+                onKeyEvent(DPad.LEFT, true)
             },
             onUp = {
-                onKeyEvent(GameControllerHIDReportGenerator.DPad.LEFT, false)
+                onKeyEvent(DPad.LEFT, false)
             }
         )
         SquareTextButton(
@@ -200,10 +211,10 @@ fun DPadButtons(
                 .fillMaxSize(0.33f)
                 .align(Alignment.CenterEnd),
             onDown = {
-                onKeyEvent(GameControllerHIDReportGenerator.DPad.RIGHT, true)
+                onKeyEvent(DPad.RIGHT, true)
             },
             onUp = {
-                onKeyEvent(GameControllerHIDReportGenerator.DPad.RIGHT, false)
+                onKeyEvent(DPad.RIGHT, false)
             }
         )
     }
@@ -213,7 +224,7 @@ fun DPadButtons(
 fun DPadButtons2(
     modifier: Modifier,
     fontSize: TextUnit,
-    onKeyEvent: (btn: GameControllerHIDReportGenerator.Button, on: Boolean) -> Unit
+    onKeyEvent: (btn: Button, on: Boolean) -> Unit
 ) {
     Box(modifier = modifier) {
         SquareTextButton(
@@ -223,10 +234,10 @@ fun DPadButtons2(
                 .fillMaxSize(0.33f)
                 .align(Alignment.TopCenter),
             onDown = {
-                onKeyEvent(GameControllerHIDReportGenerator.Button.TOP, true)
+                onKeyEvent(Button.TOP, true)
             },
             onUp = {
-                onKeyEvent(GameControllerHIDReportGenerator.Button.TOP, false)
+                onKeyEvent(Button.TOP, false)
             }
         )
         SquareTextButton(
@@ -236,10 +247,10 @@ fun DPadButtons2(
                 .fillMaxSize(0.33f)
                 .align(Alignment.BottomCenter),
             onDown = {
-                onKeyEvent(GameControllerHIDReportGenerator.Button.BOTTOM, true)
+                onKeyEvent(Button.BOTTOM, true)
             },
             onUp = {
-                onKeyEvent(GameControllerHIDReportGenerator.Button.BOTTOM, false)
+                onKeyEvent(Button.BOTTOM, false)
             }
         )
         SquareTextButton(
@@ -249,10 +260,10 @@ fun DPadButtons2(
                 .fillMaxSize(0.33f)
                 .align(Alignment.CenterStart),
             onDown = {
-                onKeyEvent(GameControllerHIDReportGenerator.Button.LEFT, true)
+                onKeyEvent(Button.LEFT, true)
             },
             onUp = {
-                onKeyEvent(GameControllerHIDReportGenerator.Button.LEFT, false)
+                onKeyEvent(Button.LEFT, false)
             }
         )
         SquareTextButton(
@@ -262,10 +273,10 @@ fun DPadButtons2(
                 .fillMaxSize(0.33f)
                 .align(Alignment.CenterEnd),
             onDown = {
-                onKeyEvent(GameControllerHIDReportGenerator.Button.RIGHT, true)
+                onKeyEvent(Button.RIGHT, true)
             },
             onUp = {
-                onKeyEvent(GameControllerHIDReportGenerator.Button.RIGHT, false)
+                onKeyEvent(Button.RIGHT, false)
             }
         )
     }
@@ -276,7 +287,7 @@ fun LTLBButtons(
     modifier: Modifier,
     fontSize: TextUnit,
     onTriggerChanged: (value: Int) -> Unit,
-    onKeyEvent: (btn: GameControllerHIDReportGenerator.Button, on: Boolean) -> Unit
+    onKeyEvent: (btn: Button, on: Boolean) -> Unit
 ) {
     Row(modifier = modifier) {
         GameControllerTriggerButton(
@@ -294,10 +305,10 @@ fun LTLBButtons(
                 .fillMaxHeight()
                 .aspectRatio(1f),
             onDown = {
-                onKeyEvent(GameControllerHIDReportGenerator.Button.LB, true)
+                onKeyEvent(Button.LB, true)
             },
             onUp = {
-                onKeyEvent(GameControllerHIDReportGenerator.Button.LB, false)
+                onKeyEvent(Button.LB, false)
             }
         )
     }
@@ -308,7 +319,7 @@ fun RBRTButtons(
     modifier: Modifier,
     fontSize: TextUnit,
     onTriggerChanged: (value: Int) -> Unit,
-    onKeyEvent: (btn: GameControllerHIDReportGenerator.Button, on: Boolean) -> Unit
+    onKeyEvent: (btn: Button, on: Boolean) -> Unit
 ) {
     Row(modifier = modifier) {
         SquareTextButton(
@@ -318,10 +329,10 @@ fun RBRTButtons(
                 .fillMaxHeight()
                 .aspectRatio(1f),
             onDown = {
-                onKeyEvent(GameControllerHIDReportGenerator.Button.RB, true)
+                onKeyEvent(Button.RB, true)
             },
             onUp = {
-                onKeyEvent(GameControllerHIDReportGenerator.Button.RB, false)
+                onKeyEvent(Button.RB, false)
             }
         )
 
@@ -339,7 +350,7 @@ fun RBRTButtons(
 fun LeftButtonGroup(
     modifier: Modifier,
     fontSize: TextUnit,
-    onKeyEvent: (btn: GameControllerHIDReportGenerator.Button, on: Boolean) -> Unit) {
+    onKeyEvent: (btn: Button, on: Boolean) -> Unit) {
     Row(modifier = modifier) {
         RectangleTextButton(
             text = "L2",
@@ -347,10 +358,10 @@ fun LeftButtonGroup(
             modifier = Modifier
                 .weight(1f),
             onDown = {
-                onKeyEvent(GameControllerHIDReportGenerator.Button.L2, true)
+                onKeyEvent(Button.L2, true)
             },
             onUp = {
-                onKeyEvent(GameControllerHIDReportGenerator.Button.L2, false)
+                onKeyEvent(Button.L2, false)
             }
         )
         RectangleTextButton(
@@ -359,10 +370,10 @@ fun LeftButtonGroup(
             modifier = Modifier
                 .weight(1f),
             onDown = {
-                onKeyEvent(GameControllerHIDReportGenerator.Button.LB, true)
+                onKeyEvent(Button.LB, true)
             },
             onUp = {
-                onKeyEvent(GameControllerHIDReportGenerator.Button.LB, false)
+                onKeyEvent(Button.LB, false)
             }
         )
     }
@@ -372,7 +383,7 @@ fun LeftButtonGroup(
 fun RightButtonGroup(
     modifier: Modifier,
     fontSize: TextUnit,
-    onKeyEvent: (btn: GameControllerHIDReportGenerator.Button, on: Boolean) -> Unit) {
+    onKeyEvent: (btn: Button, on: Boolean) -> Unit) {
     Row(modifier = modifier) {
         RectangleTextButton(
             text = "RB",
@@ -380,10 +391,10 @@ fun RightButtonGroup(
             modifier = Modifier
                 .weight(1f),
             onDown = {
-                onKeyEvent(GameControllerHIDReportGenerator.Button.RB, true)
+                onKeyEvent(Button.RB, true)
             },
             onUp = {
-                onKeyEvent(GameControllerHIDReportGenerator.Button.RB, false)
+                onKeyEvent(Button.RB, false)
             }
         )
         RectangleTextButton(
@@ -392,10 +403,10 @@ fun RightButtonGroup(
             modifier = Modifier
                 .weight(1f),
             onDown = {
-                onKeyEvent(GameControllerHIDReportGenerator.Button.R2, true)
+                onKeyEvent(Button.R2, true)
             },
             onUp = {
-                onKeyEvent(GameControllerHIDReportGenerator.Button.R2, false)
+                onKeyEvent(Button.R2, false)
             }
         )
     }

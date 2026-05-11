@@ -1,6 +1,7 @@
-package cn.maoyanluo.gamecontrollersimulator.pages
+package cn.maoyanluo.ui_library.pages
 
 import android.annotation.SuppressLint
+import android.bluetooth.BluetoothDevice
 import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -20,17 +21,14 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import cn.maoyanluo.bluetooth_library.BluetoothSelectManager
-import cn.maoyanluo.gamecontrollersimulator.MainViewModel
-import cn.maoyanluo.gamecontrollersimulator.R
+import cn.maoyanluo.ui_library.R
 
 
 @Composable
 @SuppressLint("MissingPermission")
-fun SelectDevicePages(modifier: Modifier = Modifier) {
+fun SelectDevicePages(modifier: Modifier = Modifier, onBluetoothDeviceSelected: ((BluetoothDevice) -> Unit)) {
     val ctx = LocalContext.current
-    val mainViewModel: MainViewModel = viewModel()
     val bluetoothSelectManager = remember { BluetoothSelectManager(ctx) }
     var devicesList by remember {
         mutableStateOf(bluetoothSelectManager.getBondedDevice())
@@ -49,7 +47,7 @@ fun SelectDevicePages(modifier: Modifier = Modifier) {
             for (device in devicesList) {
                 item {
                     Text(text = device.name, fontSize = 20.sp, modifier = Modifier.padding(0.dp, 3.dp).clickable {
-                        mainViewModel.selectDevice = device
+                        onBluetoothDeviceSelected(device)
                     })
                 }
             }
