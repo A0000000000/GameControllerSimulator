@@ -48,5 +48,5 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     implementation(project(":log-library"))
-    implementation(project(":bluetooth-library"))
+    implementation(project(":game-event-common-library"))
 }

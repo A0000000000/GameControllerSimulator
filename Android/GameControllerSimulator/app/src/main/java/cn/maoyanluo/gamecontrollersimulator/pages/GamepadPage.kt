@@ -31,10 +31,10 @@ import cn.maoyanluo.gamecontrollersimulator.R
 import cn.maoyanluo.hid_library.GameControllerHID
 import cn.maoyanluo.ui_library.ActionButtons
 import cn.maoyanluo.ui_library.ActionButtons2
-import cn.maoyanluo.ui_library.Axis
-import cn.maoyanluo.ui_library.Button
+import cn.maoyanluo.game_event_common_library.Axis
+import cn.maoyanluo.game_event_common_library.Button
 import cn.maoyanluo.ui_library.CircleTextButton
-import cn.maoyanluo.ui_library.DPad
+import cn.maoyanluo.game_event_common_library.DPad
 import cn.maoyanluo.ui_library.DPadButtons
 import cn.maoyanluo.ui_library.DPadButtons2
 import cn.maoyanluo.ui_library.Joystick

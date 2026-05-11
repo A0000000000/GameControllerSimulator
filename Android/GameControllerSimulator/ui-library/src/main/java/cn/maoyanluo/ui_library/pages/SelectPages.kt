@@ -21,17 +21,15 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import cn.maoyanluo.bluetooth_library.BluetoothSelectManager
 import cn.maoyanluo.ui_library.R
 
 
 @Composable
 @SuppressLint("MissingPermission")
-fun SelectDevicePages(modifier: Modifier = Modifier, onBluetoothDeviceSelected: ((BluetoothDevice) -> Unit)) {
+fun SelectDevicePages(modifier: Modifier = Modifier, getBoundsDevices: (() -> List<BluetoothDevice>), onBluetoothDeviceSelected: ((BluetoothDevice) -> Unit)) {
     val ctx = LocalContext.current
-    val bluetoothSelectManager = remember { BluetoothSelectManager(ctx) }
     var devicesList by remember {
-        mutableStateOf(bluetoothSelectManager.getBondedDevice())
+        mutableStateOf(getBoundsDevices())
     }
     Column(modifier = modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
         Text(
@@ -39,7 +37,7 @@ fun SelectDevicePages(modifier: Modifier = Modifier, onBluetoothDeviceSelected: 
             fontSize = 30.sp,
             modifier = Modifier.padding(0.dp, 10.dp).clickable {
                 Toast.makeText(ctx, R.string.start_update, Toast.LENGTH_SHORT).show()
-                devicesList = bluetoothSelectManager.getBondedDevice()
+                devicesList = getBoundsDevices()
                 Toast.makeText(ctx, R.string.update_finish, Toast.LENGTH_SHORT).show()
             }
         )

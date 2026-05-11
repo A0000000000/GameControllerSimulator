@@ -25,10 +25,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import cn.maoyanluo.bluetooth_library.BluetoothSelectManager
 import cn.maoyanluo.gamecontrollersimulator.pages.GameControllerPage
 import cn.maoyanluo.gamecontrollersimulator.ui.theme.GameControllerSimulatorTheme
 import cn.maoyanluo.ui_library.LockScreenOrientation
@@ -53,8 +55,12 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun MainContainer(modifier: Modifier = Modifier) {
+    val ctx = LocalContext.current
     val viewModel: MainViewModel = viewModel()
     var hasPermission by remember { mutableStateOf(false) }
+    val bluetoothSelectManager = remember {
+        BluetoothSelectManager(ctx)
+    }
     val pageModifier = if (viewModel.selectDevice == null) {
         modifier.safeDrawingPadding()
     } else {
@@ -85,7 +91,7 @@ fun MainContainer(modifier: Modifier = Modifier) {
             orientation = if (viewModel.selectDevice == null) ActivityInfo.SCREEN_ORIENTATION_PORTRAIT else ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
         )
         if (viewModel.selectDevice == null) {
-            SelectDevicePages(pageModifier) {
+            SelectDevicePages(pageModifier, bluetoothSelectManager::getBondedDevice) {
                 viewModel.selectDevice = it
             }
         } else {

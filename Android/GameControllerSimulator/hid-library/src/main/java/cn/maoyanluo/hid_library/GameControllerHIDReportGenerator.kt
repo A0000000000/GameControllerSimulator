@@ -1,9 +1,9 @@
 package cn.maoyanluo.hid_library
 
 import cn.maoyanluo.coroutine_library.CoroutineManager
-import cn.maoyanluo.ui_library.Axis
-import cn.maoyanluo.ui_library.Button
-import cn.maoyanluo.ui_library.DPad
+import cn.maoyanluo.game_event_common_library.Axis
+import cn.maoyanluo.game_event_common_library.Button
+import cn.maoyanluo.game_event_common_library.DPad
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.concurrent.Volatile

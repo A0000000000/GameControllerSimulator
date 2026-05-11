@@ -19,12 +19,15 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import cn.maoyanluo.bluetooth_library.BluetoothSelectManager
 import cn.maoyanluo.gamecontrollersimulator2.ui.theme.GameControllerSimulatorTheme
 import cn.maoyanluo.ui_library.LockScreenOrientation
 import cn.maoyanluo.ui_library.pages.SelectDevicePages
@@ -68,7 +71,7 @@ fun MainContainer(modifier: Modifier = Modifier) {
             fun requestPermission() {
                 launcher.launch(
                     arrayOf(
-                        Manifest.permission.BLUETOOTH_SCAN
+                        Manifest.permission.BLUETOOTH_CONNECT
                     )
                 )
             }
@@ -82,7 +85,9 @@ fun MainContainer(modifier: Modifier = Modifier) {
             }
         }
         MainUiState.SelectPage -> {
-            SelectDevicePages(pageModifier) {
+            val ctx = LocalContext.current
+            val bluetoothSelectManager = remember { BluetoothSelectManager(ctx) }
+            SelectDevicePages(pageModifier, bluetoothSelectManager::getBondedDevice) {
                 viewModel.setCurrentDevice(it)
             }
         }

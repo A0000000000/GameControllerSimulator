@@ -11,6 +11,7 @@ activityCompose = "1.8.0"
 composeBom = "2024.09.00"
 appcompat = "1.6.1"
 material = "1.10.0"
+androidBuiltInKotlin = "9.2.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -37,3 +38,4 @@ android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 android-library = { id = "com.android.library", version.ref = "agp" }
+android-built-in1-kotlin = { id = "com.android.built-in-kotlin", version.ref = "androidBuiltInKotlin" }

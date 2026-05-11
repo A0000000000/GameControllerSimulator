@@ -1,10 +1,10 @@
 plugins {
     alias(libs.plugins.android.library)
-    alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.android.built.in1.kotlin)
 }
 
 android {
-    namespace = "cn.maoyanluo.hid_library"
+    namespace = "cn.maoyanluo.game_event_common_library"
     compileSdk {
         version = release(36)
     }
@@ -15,33 +15,18 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
     }
-
-    buildTypes {
-        release {
-            isMinifyEnabled = false
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
-        }
-    }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
-    kotlinOptions {
-        jvmTarget = "11"
-    }
+
 }
 
 dependencies {
-    implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
+    implementation(libs.androidx.core.ktx)
     implementation(libs.material)
     testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
-    implementation(project(":coroutine-library"))
-    implementation(project(":game-event-common-library"))
-    implementation(project(":log-library"))
+    androidTestImplementation(libs.androidx.junit)
 }
