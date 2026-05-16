@@ -60,7 +60,7 @@ abstract class UdpBase(
                                             targetAddress,
                                             targetPort
                                         )
-                                    socketSnapshot.send(targetPacket)
+                                    sendPacket(targetPacket)
                                 } catch (e: Exception) {
                                     callback.onDataSendException(e, id)
                                 }
@@ -86,6 +86,10 @@ abstract class UdpBase(
                 callback.onStop()
             }
         }
+    }
+
+    protected fun sendPacket(packet: DatagramPacket) {
+        socket?.send(packet)
     }
 
 }

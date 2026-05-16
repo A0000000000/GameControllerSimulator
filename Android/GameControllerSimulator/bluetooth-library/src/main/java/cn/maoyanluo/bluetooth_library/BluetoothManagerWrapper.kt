@@ -7,7 +7,7 @@ import android.bluetooth.BluetoothManager
 import android.content.Context
 
 @SuppressLint("MissingPermission")
-class BluetoothSelectManager(private val ctx: Context) {
+class BluetoothManagerWrapper(ctx: Context) {
 
     private val bluetoothManager = ctx.getSystemService(BluetoothManager::class.java)
     private val adapter = bluetoothManager.adapter

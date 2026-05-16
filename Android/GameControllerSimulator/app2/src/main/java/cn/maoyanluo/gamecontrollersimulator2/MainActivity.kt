@@ -19,15 +19,14 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import cn.maoyanluo.bluetooth_library.BluetoothSelectManager
+import cn.maoyanluo.gamecontrollersimulator2.pages.ConnectingPage
+import cn.maoyanluo.gamecontrollersimulator2.pages.GamepadPage
 import cn.maoyanluo.gamecontrollersimulator2.ui.theme.GameControllerSimulatorTheme
 import cn.maoyanluo.ui_library.LockScreenOrientation
 import cn.maoyanluo.ui_library.pages.SelectDevicePages
@@ -85,9 +84,7 @@ fun MainContainer(modifier: Modifier = Modifier) {
             }
         }
         MainUiState.SelectPage -> {
-            val ctx = LocalContext.current
-            val bluetoothSelectManager = remember { BluetoothSelectManager(ctx) }
-            SelectDevicePages(pageModifier, bluetoothSelectManager::getBondedDevice) {
+            SelectDevicePages(pageModifier, viewModel::getBoundDevices) {
                 viewModel.setCurrentDevice(it)
             }
         }
@@ -95,11 +92,13 @@ fun MainContainer(modifier: Modifier = Modifier) {
             BackHandler() {
                 viewModel.disconnect()
             }
+            ConnectingPage(modifier)
         }
         is MainUiState.GamepadPage -> {
             BackHandler() {
                 viewModel.exitGamepadPage()
             }
+            GamepadPage(modifier)
         }
     }
 }

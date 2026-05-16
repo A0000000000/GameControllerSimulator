@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">GameControllerSimulator 2</string>
     <string name="no_permission">无权限</string>
+    <string name="error_page">页面错误，请重启App重试</string>
 </resources>
