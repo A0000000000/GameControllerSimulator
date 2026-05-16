@@ -85,20 +85,28 @@ fun MainContainer(modifier: Modifier = Modifier) {
         }
         MainUiState.SelectPage -> {
             SelectDevicePages(pageModifier, viewModel::getBoundDevices) {
-                viewModel.setCurrentDevice(it)
+                viewModel.onDeviceSelected(it)
             }
         }
         is MainUiState.ConnectingPage -> {
             BackHandler() {
                 viewModel.disconnect()
             }
-            ConnectingPage(modifier)
+            ConnectingPage(
+                modifier = pageModifier,
+                device = uiState.device,
+                isAvailable = uiState.isAvailable,
+                onOpenGamepad = viewModel::onEnterGamepad
+            )
         }
         is MainUiState.GamepadPage -> {
             BackHandler() {
-                viewModel.exitGamepadPage()
+                viewModel.onBackFromGamepad()
             }
-            GamepadPage(modifier)
+            GamepadPage(
+                modifier = pageModifier,
+                device = uiState.device
+            )
         }
     }
 }

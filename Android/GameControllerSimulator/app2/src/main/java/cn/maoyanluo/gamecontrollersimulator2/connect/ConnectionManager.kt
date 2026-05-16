@@ -30,7 +30,7 @@ class ConnectionManager(
 ): Closeable {
 
     enum class ConnectionType {
-        UDP, TCP, BLE
+        BLE, TCP, UDP
     }
 
     companion object {
@@ -118,21 +118,19 @@ class ConnectionManager(
     }
 
     fun init() {
-        bluetoothSocketClient = BluetoothSocketClient(
-            adapter,
-            device,
-            HOST_UUID,
-            bluetoothClientCallback,
-            coroutineManager
-        )
-        bluetoothSocketClient?.connect()
-    }
-
-    fun setConnectionType(type: ConnectionType) {
-        if (type != ConnectionType.BLE) {
-            throw IllegalStateException("Not support type: $type.")
+        coroutineManager.getIOScope().launch {
+            if (isAvailable) {
+                return@launch
+            }
+            bluetoothSocketClient = BluetoothSocketClient(
+                adapter,
+                device,
+                HOST_UUID,
+                bluetoothClientCallback,
+                coroutineManager
+            )
+            bluetoothSocketClient?.connect()
         }
-        connectionType = type
     }
 
     fun <T> sendData(data: BaseEntity<T>, id: Int = -1) {
@@ -147,7 +145,9 @@ class ConnectionManager(
 
     fun destroy() {
         coroutineManager.getIOScope().launch {
-            unregisterClientId()
+            if (isAvailable) {
+                unregisterClientId()
+            }
         }
     }
 
