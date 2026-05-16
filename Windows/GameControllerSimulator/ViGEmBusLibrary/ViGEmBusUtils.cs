@@ -41,6 +41,7 @@ namespace ViGEmBusLibrary
             var client = new ViGEmClient();
             var controller = client.CreateXbox360Controller();
             controller.Connect();
+            await Task.Delay(20000);
             controller.SetButtonState(Xbox360Button.A, true);
             await Task.Delay(20000);
             controller.SetButtonState(Xbox360Button.A, false);

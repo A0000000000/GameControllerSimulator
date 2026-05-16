@@ -224,7 +224,7 @@ namespace BluetoothLibrary
                 }
                 catch (Exception ex)
                 {
-                    Post(() => callback?.OnSendDataException(ex, id));
+                    Post(() => callback?.OnSendDataException(this, ex, id));
                 }
             }
 
@@ -241,12 +241,12 @@ namespace BluetoothLibrary
                         byte[] data = new byte[size];
                         read = await ReadExact(data, size);
                         if (read == 0) break;
-                        Post(() => callback?.OnDataReady(data));
+                        Post(() => callback?.OnDataReady(this, data));
                     }
                 }
                 catch (Exception ex)
                 {
-                    Post(() => callback?.OnDataRevException(ex));
+                    Post(() => callback?.OnDataRevException(this, ex));
                 }
                 finally
                 {
@@ -286,7 +286,7 @@ namespace BluetoothLibrary
                     client.Dispose();
                 }
                 catch { }
-                Post(() => callback?.OnDisconnect());
+                Post(() => callback?.OnDisconnect(this));
                 return;
             }
         }

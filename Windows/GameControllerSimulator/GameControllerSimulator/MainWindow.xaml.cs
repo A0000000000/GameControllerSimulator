@@ -54,25 +54,23 @@ namespace GameControllerSimulator
 
         class ClientCallback : BluetoothLibrary.BluetoothSocketCallback.ClientCallback
         {
-            public void OnDataReady(byte[] data)
+            public void OnDataReady(BluetoothSocketServer.Client client, byte[] data)
             {
                 string received = Encoding.UTF8.GetString(data, 0, data.Length);
                 System.Diagnostics.Debug.WriteLine(received);
             }
 
-            public void OnDataRevException(Exception ex)
+            public void OnDataRevException(BluetoothSocketServer.Client client, Exception ex)
             {
                 
             }
 
-            public void OnDisconnect()
+            public void OnDisconnect(BluetoothSocketServer.Client client)
             {
-               
             }
 
-            public void OnSendDataException(Exception ex, int id = -1)
+            public void OnSendDataException(BluetoothSocketServer.Client client, Exception ex, int id = -1)
             {
-               
             }
         }
 

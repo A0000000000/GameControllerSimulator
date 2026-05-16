@@ -23,10 +23,10 @@ namespace BluetoothLibrary
         public interface ClientCallback
         {
 
-            void OnSendDataException(Exception ex, int id = -1);
-            void OnDisconnect();
-            void OnDataReady(byte[] data);
-            void OnDataRevException(Exception ex);
+            void OnSendDataException(BluetoothSocketServer.Client client, Exception ex, int id = -1);
+            void OnDisconnect(BluetoothSocketServer.Client client);
+            void OnDataReady(BluetoothSocketServer.Client client, byte[] data);
+            void OnDataRevException(BluetoothSocketServer.Client client, Exception ex);
 
         }
     }
