@@ -96,17 +96,20 @@ fun MainContainer(modifier: Modifier = Modifier) {
                 modifier = pageModifier,
                 device = uiState.device,
                 isAvailable = uiState.isAvailable,
+                onReInitConnection = viewModel::reInitConnectionManager,
                 onOpenGamepad = viewModel::onEnterGamepad
             )
         }
-        is MainUiState.GamepadPage -> {
+        MainUiState.GamepadPage -> {
             BackHandler() {
                 viewModel.onBackFromGamepad()
             }
             GamepadPage(
                 modifier = pageModifier,
-                device = uiState.device
-            )
+                coroutineManager = viewModel.coroutineManager
+            ) {
+                viewModel.onGamepadEvent(it)
+            }
         }
     }
 }

@@ -2,6 +2,7 @@ package cn.maoyanluo.gamecontrollersimulator2
 
 import android.app.Application
 import android.bluetooth.BluetoothDevice
+import android.os.Build
 import android.widget.Toast
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -10,18 +11,37 @@ import androidx.lifecycle.AndroidViewModel
 import cn.maoyanluo.bluetooth_library.BluetoothManagerWrapper
 import cn.maoyanluo.coroutine_library.CoroutineManager
 import cn.maoyanluo.gamecontrollersimulator2.bean.BaseEntity
+import cn.maoyanluo.gamecontrollersimulator2.bean.DeviceInfo
 import cn.maoyanluo.gamecontrollersimulator2.connect.ConnectionCallback
 import cn.maoyanluo.gamecontrollersimulator2.connect.ConnectionManager
+import cn.maoyanluo.gamecontrollersimulator2.constant.EntityId
+import cn.maoyanluo.gamecontrollersimulator2.constant.EntityType
 import com.google.gson.JsonElement
 import kotlinx.coroutines.launch
 
 class MainViewModel(application: Application) : AndroidViewModel(application) {
 
+    val deviceInfo = DeviceInfo(
+        osVersion = "Android ${Build.VERSION.RELEASE}",
+        sdk = "${Build.VERSION.SDK_INT}",
+        brand = "${Build.BRAND}",
+        manufacturer = "${Build.MANUFACTURER}",
+        model = "${Build.MODEL}",
+        device = "${Build.DEVICE}",
+        product = "${Build.PRODUCT}",
+        board = "${Build.BOARD}",
+        hardware = "${Build.HARDWARE}",
+        codename = "${Build.VERSION.CODENAME}",
+        buildId = "${Build.ID}",
+        fingerprint = "${Build.FINGERPRINT}",
+        supportedAbis = Build.SUPPORTED_ABIS.joinToString(),
+    )
+
     var mainUiState by mutableStateOf<MainUiState>(MainUiState.NoPermissionPage)
         private set
 
     private val bluetoothManagerWrapper = BluetoothManagerWrapper(application)
-    private val coroutineManager = CoroutineManager()
+    val coroutineManager = CoroutineManager()
     private var connectionManager: ConnectionManager? = null
 
     private val connectionCallback = object : ConnectionCallback {
@@ -34,10 +54,28 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
 
         override fun getTypeClass(type: Int): Class<*> {
-            return JsonElement::class.java
+            return EntityType.TYPE_MAPPING[type] ?: JsonElement::class.java
         }
 
         override fun onDataReady(data: BaseEntity<*>?) {
+            if (data != null) {
+                when (data.type) {
+                    EntityType.TYPE_QUERY_CLIENT_INFO -> {
+                        connectionManager?.sendData(BaseEntity(
+                            type = EntityType.TYPE_QUERY_CLIENT_INFO_RESULT,
+                            id = EntityId.GAMEPAD_PAGE_EVENT,
+                            timestamp = System.currentTimeMillis(),
+                            data = deviceInfo
+                        ))
+                    }
+
+                    EntityType.TYPE_FEEDBACK_RECEIVED -> {
+
+                    }
+
+
+                }
+            }
         }
 
         override fun onSendDataException(
@@ -102,21 +140,44 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         ).also { it.init() }
     }
 
+    fun reInitConnectionManager() {
+        connectionManager?.init()
+    }
+
     fun onEnterGamepad() {
         val currentState = mainUiState
-        if (currentState is MainUiState.ConnectingPage && currentState.isAvailable) {
-            mainUiState = MainUiState.GamepadPage(currentState.device)
+        val cm = connectionManager
+        if (currentState is MainUiState.ConnectingPage && currentState.isAvailable && cm != null) {
+            mainUiState = MainUiState.GamepadPage
+        }
+        if (cm == null) {
+            mainUiState = MainUiState.SelectPage
         }
     }
 
     fun onBackFromGamepad() {
         val currentState = mainUiState
-        if (currentState is MainUiState.GamepadPage) {
+        val cm = connectionManager
+        if (currentState is MainUiState.GamepadPage && cm != null) {
             mainUiState = MainUiState.ConnectingPage(
-                device = currentState.device,
+                device = cm.device,
                 isAvailable = connectionManager?.isAvailable == true
             )
         }
+        if (cm == null) {
+            mainUiState = MainUiState.SelectPage
+        }
+    }
+
+    fun onGamepadEvent(data: ByteArray) {
+        connectionManager?.sendData(
+            BaseEntity(
+                type = EntityType.TYPE_SEND_GAME_EVENT,
+                id = EntityId.GAMEPAD_PAGE_EVENT,
+                timestamp = System.currentTimeMillis(),
+                data = data
+            )
+        )
     }
 
     fun disconnect() {
@@ -132,11 +193,15 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 mainUiState = currentState.copy(isAvailable = isAvailable)
             }
             is MainUiState.GamepadPage -> {
-                if (!isAvailable) {
+                val cm = connectionManager
+                if (!isAvailable && cm != null) {
                     mainUiState = MainUiState.ConnectingPage(
-                        device = currentState.device,
+                        device = cm.device,
                         isAvailable = false
                     )
+                }
+                if (cm == null) {
+                    mainUiState = MainUiState.SelectPage
                 }
             }
             else -> Unit

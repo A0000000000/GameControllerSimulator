@@ -289,7 +289,10 @@ fun LTLBButtons(
                 .fillMaxHeight()
                 .weight(1f),
             reverseDirection = true,
-            onValueChanged = onTriggerChanged
+            onValueChanged = onTriggerChanged,
+            minValue = 0,
+            maxValue = 255,
+            initialValue = 0
         )
 
         SquareTextButton(
@@ -335,7 +338,10 @@ fun RBRTButtons(
                 .fillMaxHeight()
                 .weight(1f),
             reverseDirection = false,
-            onValueChanged = onTriggerChanged
+            onValueChanged = onTriggerChanged,
+            minValue = 0,
+            maxValue = 255,
+            initialValue = 0
         )
     }
 }
