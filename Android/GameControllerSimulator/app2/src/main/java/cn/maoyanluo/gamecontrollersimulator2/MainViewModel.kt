@@ -3,6 +3,7 @@ package cn.maoyanluo.gamecontrollersimulator2
 import android.app.Application
 import android.bluetooth.BluetoothDevice
 import android.os.Build
+import android.util.Base64
 import android.widget.Toast
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -175,7 +176,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 type = EntityType.TYPE_SEND_GAME_EVENT,
                 id = EntityId.GAMEPAD_PAGE_EVENT,
                 timestamp = System.currentTimeMillis(),
-                data = data
+                data = Base64.encodeToString(data, Base64.NO_WRAP)
             )
         )
     }

@@ -21,7 +21,7 @@ object EntityType {
         Pair(TYPE_REQUEST_CLIENT_ID_RESULT, String::class.java),
         Pair(TYPE_UNREGISTER_CLIENT_ID, String::class.java),
         Pair(TYPE_UNREGISTER_CLIENT_ID_RESULT, JsonElement::class.java),
-        Pair(TYPE_SEND_GAME_EVENT, ByteArray::class.java),
+        Pair(TYPE_SEND_GAME_EVENT, String::class.java),
         Pair(TYPE_SEND_GAME_EVENT_RESULT, JsonElement::class.java),
         Pair(TYPE_FEEDBACK_RECEIVED, FeedbackReceived::class.java),
         Pair(TYPE_FEEDBACK_RECEIVED_RESULT, JsonElement::class.java),
