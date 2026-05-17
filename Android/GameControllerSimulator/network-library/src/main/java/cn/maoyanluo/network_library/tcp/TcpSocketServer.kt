@@ -20,7 +20,7 @@ class TcpSocketServer(
 
     override fun createAcceptClient(
         socket: Socket,
-        callback: SocketServerCallback.ClientCallback,
+        callback: SocketServerCallback.ClientCallback<Socket>,
         coroutineManager: CoroutineManager
     ): SocketServer.Client<Socket> = Client(
         socket,
@@ -30,7 +30,7 @@ class TcpSocketServer(
 
     class Client(
         private val socket: Socket,
-        callback: SocketServerCallback.ClientCallback,
+        callback: SocketServerCallback.ClientCallback<Socket>,
         coroutineManager: CoroutineManager
     ) : SocketServer.Client<Socket>(socket, callback, coroutineManager) {
 

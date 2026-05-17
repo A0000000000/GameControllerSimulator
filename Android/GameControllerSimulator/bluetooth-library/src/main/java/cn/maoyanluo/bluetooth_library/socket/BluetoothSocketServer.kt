@@ -25,7 +25,7 @@ class BluetoothSocketServer(
 
     override fun createAcceptClient(
         socket: BluetoothSocket,
-        callback: SocketServerCallback.ClientCallback,
+        callback: SocketServerCallback.ClientCallback<BluetoothSocket>,
         coroutineManager: CoroutineManager
     ): SocketServer.Client<BluetoothSocket> = Client(
         socket,
@@ -35,7 +35,7 @@ class BluetoothSocketServer(
 
     class Client(
         private val socket: BluetoothSocket,
-        callback: SocketServerCallback.ClientCallback,
+        callback: SocketServerCallback.ClientCallback<BluetoothSocket>,
         coroutineManager: CoroutineManager
         ): SocketServer.Client<BluetoothSocket>(socket, callback, coroutineManager) {
 

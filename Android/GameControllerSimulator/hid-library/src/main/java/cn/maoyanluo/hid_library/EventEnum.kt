@@ -1,4 +1,4 @@
-package cn.maoyanluo.game_event_common_library
+package cn.maoyanluo.hid_library
 
 
 enum class Axis {

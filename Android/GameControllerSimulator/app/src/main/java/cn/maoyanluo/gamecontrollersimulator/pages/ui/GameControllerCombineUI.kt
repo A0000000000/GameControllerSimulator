@@ -1,4 +1,4 @@
-package cn.maoyanluo.ui_library
+package cn.maoyanluo.gamecontrollersimulator.pages.ui
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -10,8 +10,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.TextUnit
-import cn.maoyanluo.game_event_common_library.Button
-import cn.maoyanluo.game_event_common_library.DPad
+import cn.maoyanluo.hid_library.Button
+import cn.maoyanluo.hid_library.DPad
+import cn.maoyanluo.ui_library.CircleTextButton
+import cn.maoyanluo.ui_library.GameControllerTriggerButton
+import cn.maoyanluo.ui_library.RectangleTextButton
+import cn.maoyanluo.ui_library.SquareTextButton
 
 
 @Composable

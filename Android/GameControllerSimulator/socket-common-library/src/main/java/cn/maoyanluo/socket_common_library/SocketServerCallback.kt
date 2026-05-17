@@ -8,15 +8,15 @@ interface SocketServerCallback<TSocket: Closeable> {
     fun onStartServerFailed(e: Exception)
     fun onStopServer()
     fun onForeverLoopException(e: Exception)
-    fun createNewClientCallback(): ClientCallback
+    fun createNewClientCallback(): ClientCallback<TSocket>
     fun onNewClientConnect(client: SocketServer.Client<TSocket>)
     fun onNewClientException(e: Exception)
 
-    interface ClientCallback {
-        fun onSendDataException(e: Exception, id: Int = -1)
-        fun onDisconnect()
-        fun onDataReady(data: ByteArray)
-        fun onDataRevException(e: Exception)
+    interface ClientCallback<TSocket: Closeable> {
+        fun onSendDataException(client: SocketServer.Client<TSocket>, e: Exception, id: Int = -1)
+        fun onDisconnect(client: SocketServer.Client<TSocket>)
+        fun onDataReady(client: SocketServer.Client<TSocket>, data: ByteArray)
+        fun onDataRevException(client: SocketServer.Client<TSocket>, e: Exception)
     }
 
 }

@@ -29,17 +29,17 @@ import cn.maoyanluo.bluetooth_library.hid.bean.HIDRegisterData
 import cn.maoyanluo.gamecontrollersimulator.MainViewModel
 import cn.maoyanluo.gamecontrollersimulator.R
 import cn.maoyanluo.hid_library.GameControllerHID
-import cn.maoyanluo.ui_library.ActionButtons
-import cn.maoyanluo.ui_library.ActionButtons2
-import cn.maoyanluo.game_event_common_library.Axis
-import cn.maoyanluo.game_event_common_library.Button
+import cn.maoyanluo.gamecontrollersimulator.pages.ui.ActionButtons
+import cn.maoyanluo.gamecontrollersimulator.pages.ui.ActionButtons2
+import cn.maoyanluo.hid_library.Axis
+import cn.maoyanluo.hid_library.Button
 import cn.maoyanluo.ui_library.CircleTextButton
-import cn.maoyanluo.game_event_common_library.DPad
-import cn.maoyanluo.ui_library.DPadButtons
-import cn.maoyanluo.ui_library.DPadButtons2
+import cn.maoyanluo.hid_library.DPad
+import cn.maoyanluo.gamecontrollersimulator.pages.ui.DPadButtons
+import cn.maoyanluo.gamecontrollersimulator.pages.ui.DPadButtons2
 import cn.maoyanluo.ui_library.Joystick
-import cn.maoyanluo.ui_library.LeftButtonGroup
-import cn.maoyanluo.ui_library.RightButtonGroup
+import cn.maoyanluo.gamecontrollersimulator.pages.ui.LeftButtonGroup
+import cn.maoyanluo.gamecontrollersimulator.pages.ui.RightButtonGroup
 import cn.maoyanluo.ui_library.SquareTextButton
 
 const val TAG = "GameControllerPage"

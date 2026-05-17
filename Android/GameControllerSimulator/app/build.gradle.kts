@@ -62,6 +62,5 @@ dependencies {
     implementation(project(":hid-library"))
     implementation(project(":ui-library"))
     implementation(project(":coroutine-library"))
-    implementation(project(":game-event-common-library"))
     implementation(project(":log-library"))
 }

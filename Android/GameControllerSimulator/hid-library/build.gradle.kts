@@ -42,6 +42,5 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     implementation(project(":coroutine-library"))
-    implementation(project(":game-event-common-library"))
     implementation(project(":log-library"))
 }

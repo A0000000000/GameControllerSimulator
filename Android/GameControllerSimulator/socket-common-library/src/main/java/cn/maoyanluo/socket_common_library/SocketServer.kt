@@ -20,7 +20,7 @@ abstract class SocketServer<TServerSocket: Closeable, TSocket: Closeable>(
 
     protected abstract fun createServerSocket(): TServerSocket
     protected abstract fun acceptSocket(serverSocketSnapshot: TServerSocket?): TSocket?
-    protected abstract fun createAcceptClient(socket: TSocket, callback: ClientCallback, coroutineManager: CoroutineManager): Client<TSocket>
+    protected abstract fun createAcceptClient(socket: TSocket, callback: ClientCallback<TSocket>, coroutineManager: CoroutineManager): Client<TSocket>
 
     fun startListener() {
         coroutineManager.getIOScope().launch {
@@ -102,7 +102,7 @@ abstract class SocketServer<TServerSocket: Closeable, TSocket: Closeable>(
 
     abstract class Client<TSocket: Closeable>(
         private val socket: TSocket,
-        private val callback: ClientCallback,
+        private val callback: ClientCallback<TSocket>,
         private val coroutineManager: CoroutineManager
     ) {
         private var isConnected = true
@@ -126,7 +126,7 @@ abstract class SocketServer<TServerSocket: Closeable, TSocket: Closeable>(
                         outputStream.write(data, 0, data.size)
                         outputStream.flush()
                     } catch (e: Exception) {
-                        coroutineManager.getIOScope().launch { callback.onSendDataException(e, id) }
+                        coroutineManager.getIOScope().launch { callback.onSendDataException(this@Client, e, id) }
                     }
                 }
             }
@@ -160,10 +160,10 @@ abstract class SocketServer<TServerSocket: Closeable, TSocket: Closeable>(
                             }
                             totalSize += read
                         }
-                        coroutineManager.getIOScope().launch { callback.onDataReady(buff) }
+                        coroutineManager.getIOScope().launch { callback.onDataReady(this@Client, buff) }
                     }
                 } catch (e: Exception) {
-                    coroutineManager.getIOScope().launch { callback.onDataRevException(e) }
+                    coroutineManager.getIOScope().launch { callback.onDataRevException(this@Client, e) }
                     disconnect()
                 }
             }
@@ -180,7 +180,7 @@ abstract class SocketServer<TServerSocket: Closeable, TSocket: Closeable>(
                         socket.close()
                     } catch (_: Exception) {
                     }
-                    callback.onDisconnect()
+                    callback.onDisconnect(this@Client)
                 }
             }
         }
