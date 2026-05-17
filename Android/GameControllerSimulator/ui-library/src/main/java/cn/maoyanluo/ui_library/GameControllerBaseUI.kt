@@ -348,6 +348,8 @@ fun Joystick(
 @Composable
 fun GameControllerTriggerButton(
     modifier: Modifier = Modifier,
+    text: String,
+    fontSize: TextUnit,
     reverseDirection: Boolean = false,
     backgroundColor: Color = Color.Gray,
     activeColor: Color = Color.DarkGray,
@@ -384,6 +386,10 @@ fun GameControllerTriggerButton(
                     onValueChanged(currentValue)
                     while (true) {
                         val event = awaitPointerEvent().changes.find { it.id == down.id } ?: break
+                        if (!event.pressed) {
+                            event.consume()
+                            break
+                        }
                         currentValue = computeValue(event.position.x, containerSize.width)
                         onValueChanged(currentValue)
                         event.consume()
@@ -393,7 +399,8 @@ fun GameControllerTriggerButton(
                     onValueChanged(initialValue)
                 }
             }
-            .background(backgroundColor)
+            .background(backgroundColor),
+        contentAlignment = Alignment.Center
     ) {
         Canvas(modifier = Modifier.fillMaxSize()) {
             if (!pressed || currentValue <= minValue) return@Canvas
@@ -412,6 +419,10 @@ fun GameControllerTriggerButton(
                 size = Size(progressWidth, size.height)
             )
         }
+        Text(
+            text = text,
+            fontSize = fontSize,
+        )
     }
     LaunchedEffect(Unit) {
         onValueChanged(initialValue)

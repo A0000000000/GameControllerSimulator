@@ -24,7 +24,7 @@ class GamepadStatePacket {
         initializeState(last)
     }
 
-    fun isChange() = current.contentEquals(last)
+    fun isChange() = !current.contentEquals(last)
     fun copyCurrentToLast() = current.copyInto(last)
 
     fun setButton(button: GamepadButton, pressed: Boolean) {

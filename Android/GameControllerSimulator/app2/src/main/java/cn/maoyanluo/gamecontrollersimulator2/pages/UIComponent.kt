@@ -1,6 +1,9 @@
 package cn.maoyanluo.gamecontrollersimulator2.pages
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -9,6 +12,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.TextUnit
 import cn.maoyanluo.gamecontrollersimulator2.generator.GamepadButton
 import cn.maoyanluo.ui_library.CircleTextButton
+import cn.maoyanluo.ui_library.GameControllerTriggerButton
 import cn.maoyanluo.ui_library.SquareTextButton
 
 
@@ -140,6 +144,80 @@ fun DPadButtons(
             onUp = {
                 onKeyEvent(GamepadButton.Right, false)
             }
+        )
+    }
+}
+
+@Composable
+fun LTLBButtons(
+    modifier: Modifier,
+    fontSize: TextUnit,
+    onTriggerChanged: (value: Int) -> Unit,
+    onKeyEvent: (btn: GamepadButton, on: Boolean) -> Unit
+) {
+    Row(modifier = modifier) {
+        GameControllerTriggerButton(
+            text = "LT",
+            fontSize = fontSize,
+            modifier = Modifier
+                .fillMaxHeight()
+                .weight(1f),
+            reverseDirection = true,
+            onValueChanged = onTriggerChanged,
+            minValue = 0,
+            maxValue = 255,
+            initialValue = 0
+        )
+
+        SquareTextButton(
+            text = "LB",
+            fontSize = fontSize,
+            modifier = Modifier
+                .fillMaxHeight()
+                .aspectRatio(1f),
+            onDown = {
+                onKeyEvent(GamepadButton.LB, true)
+            },
+            onUp = {
+                onKeyEvent(GamepadButton.LB, false)
+            }
+        )
+    }
+}
+
+@Composable
+fun RBRTButtons(
+    modifier: Modifier,
+    fontSize: TextUnit,
+    onTriggerChanged: (value: Int) -> Unit,
+    onKeyEvent: (btn: GamepadButton, on: Boolean) -> Unit
+) {
+    Row(modifier = modifier) {
+        SquareTextButton(
+            text = "RB",
+            fontSize = fontSize,
+            modifier = Modifier
+                .fillMaxHeight()
+                .aspectRatio(1f),
+            onDown = {
+                onKeyEvent(GamepadButton.RB, true)
+            },
+            onUp = {
+                onKeyEvent(GamepadButton.RB, false)
+            }
+        )
+
+        GameControllerTriggerButton(
+            text = "RT",
+            fontSize = fontSize,
+            modifier = Modifier
+                .fillMaxHeight()
+                .weight(1f),
+            reverseDirection = false,
+            onValueChanged = onTriggerChanged,
+            minValue = 0,
+            maxValue = 255,
+            initialValue = 0
         )
     }
 }

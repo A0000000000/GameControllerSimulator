@@ -8,10 +8,12 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -29,7 +31,20 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import cn.maoyanluo.coroutine_library.CoroutineManager
 import cn.maoyanluo.gamecontrollersimulator2.R
+import cn.maoyanluo.gamecontrollersimulator2.generator.GamepadAxis
+import cn.maoyanluo.gamecontrollersimulator2.generator.GamepadButton
 import cn.maoyanluo.gamecontrollersimulator2.generator.GamepadEventGenerator
+import cn.maoyanluo.gamecontrollersimulator2.generator.GamepadTrigger
+import cn.maoyanluo.ui_library.Joystick
+import cn.maoyanluo.ui_library.SquareTextButton
+
+private fun invertShortAxisValue(value: Int): Short {
+    return if (value == Short.MIN_VALUE.toInt()) {
+        Short.MAX_VALUE
+    } else {
+        (-value).toShort()
+    }
+}
 
 @SuppressLint("MissingPermission")
 @Composable
@@ -153,8 +168,121 @@ fun GamepadPage(modifier: Modifier, coroutineManager: CoroutineManager, receiver
             generator.stopCollection()
         }
     }
-    Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+    Column(modifier.fillMaxSize().padding(0.dp)) {
+        Row(modifier = Modifier.fillMaxWidth()) {
+            Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.CenterStart) {
+                LTLBButtons(
+                    modifier = Modifier.height(50.dp),
+                    fontSize = 20.sp,
+                    onTriggerChanged = { value ->
+                        generator.setTrigger(GamepadTrigger.LeftTrigger, value.toUByte())
+                    },
+                    onKeyEvent = { btn, on ->
+                        generator.setButton(btn, on)
+                    }
+                )
+            }
+            Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.CenterEnd) {
+                RBRTButtons(
+                    modifier = Modifier.height(50.dp),
+                    fontSize = 20.sp,
+                    onTriggerChanged = { value ->
+                        generator.setTrigger(GamepadTrigger.RightTrigger, value.toUByte())
+                    },
+                    onKeyEvent = { btn, on ->
+                        generator.setButton(btn, on)
+                    }
+                )
+            }
+        }
+        Row(modifier = Modifier.weight(1f)) {
+            Box(modifier = Modifier.weight(1f).fillMaxHeight()) {
+                Box(modifier = Modifier.padding(50.dp, 0.dp, 0.dp, 0.dp).align(Alignment.TopStart)) {
+                    Joystick(
+                        modifier = Modifier.size(180.dp),
+                        onStickPress = {
+                            generator.setButton(GamepadButton.LS, true)
+                        },
+                        onStickRelease = {
+                            generator.setButton(GamepadButton.LS, false)
+                        },
+                        onAxisChanged = { x,y ->
+                            generator.setAxis(GamepadAxis.LeftX, x.toShort())
+                            generator.setAxis(GamepadAxis.LeftY, invertShortAxisValue(y))
+                        },
+                        xMinValue = -32768, xMaxValue = 32767, xInitialValue = 0,
+                        yMinValue = -32768, yMaxValue = 32767, yInitialValue = 0
+                    )
+                }
 
+                Box(modifier = Modifier.padding(0.dp, 0.dp, 50.dp, 0.dp).align(Alignment.BottomEnd)) {
+                    DPadButtons(modifier = Modifier.size(180.dp), fontSize = 30.sp) { btn, on ->
+                        generator.setButton(btn, on)
+                    }
+                }
 
+                Box(modifier = Modifier.padding(0.dp, 50.dp, 50.dp, 0.dp).align(Alignment.TopEnd)) {
+                    SquareTextButton(
+                        text = "Back",
+                        fontSize = 20.sp,
+                        modifier = Modifier.size(50.dp),
+                        onDown = {
+                            generator.setButton(GamepadButton.Back, true)
+                        },
+                        onUp = {
+                            generator.setButton(GamepadButton.Back, false)
+                        }
+                    )
+                }
+            }
+
+            Box(modifier = Modifier.weight(1f).fillMaxHeight()) {
+                Box(
+                    modifier = Modifier.padding(50.dp, 0.dp, 0.dp, 0.dp)
+                        .align(Alignment.BottomStart)
+                ) {
+                    Joystick(
+                        modifier = Modifier.size(180.dp),
+                        onStickPress = {
+                            generator.setButton(GamepadButton.RS, true)
+                        },
+                        onStickRelease = {
+                            generator.setButton(GamepadButton.RS, false)
+                        },
+                        onAxisChanged = { x, y ->
+                            generator.setAxis(GamepadAxis.RightX, x.toShort())
+                            generator.setAxis(GamepadAxis.RightY, invertShortAxisValue(y))
+                        },
+                        xMinValue = -32768, xMaxValue = 32767, xInitialValue = 0,
+                        yMinValue = -32768, yMaxValue = 32767, yInitialValue = 0
+                    )
+                }
+
+                Box(modifier = Modifier.padding(0.dp, 0.dp, 50.dp, 0.dp).align(Alignment.TopEnd)) {
+                    ActionButtons(
+                        modifier = Modifier.size(180.dp),
+                        fontSize = 30.sp
+                    ) { btn, on ->
+                        generator.setButton(btn, on)
+                    }
+                }
+
+                Box(
+                    modifier = Modifier.padding(50.dp, 50.dp, 0.dp, 0.dp).align(Alignment.TopStart)
+                ) {
+                    SquareTextButton(
+                        text = "Start",
+                        fontSize = 20.sp,
+                        modifier = Modifier.size(50.dp),
+                        onDown = {
+                            generator.setButton(GamepadButton.Start, true)
+                        },
+                        onUp = {
+                            generator.setButton(GamepadButton.Start, false)
+                        })
+                }
+
+            }
+        }
     }
 }
