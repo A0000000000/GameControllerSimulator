@@ -169,8 +169,14 @@ namespace BluetoothLibrary
             if (action == null) return;
             _ = Task.Run(() =>
             {
-                try { action(); }
-                catch { }
+                try 
+                {
+                    action();
+                }
+                catch (Exception ex)
+                {
+                    Post(() => callback?.OnTaskException(ex));
+                }
             });
         }
 
@@ -206,8 +212,14 @@ namespace BluetoothLibrary
                 if (action == null) return;
                 _ = Task.Run(() =>
                 {
-                    try { action(); }
-                    catch { }
+                    try 
+                    {
+                        action(); 
+                    }
+                    catch (Exception ex)
+                    {
+                        Post(() => callback?.OnTaskException(ex));
+                    }
                 });
             }
 

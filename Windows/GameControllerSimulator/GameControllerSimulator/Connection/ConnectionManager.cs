@@ -358,6 +358,11 @@ namespace GameControllerSimulator.Connection
             {
                 connectionManager?.OnManagerError("ServerCallback.OnStopServerException", ex);
             }
+
+            public void OnTaskException(Exception ex)
+            {
+                connectionManager?.OnManagerError("ServerCallback.OnTaskException", ex);
+            }
         }
 
 
@@ -390,6 +395,10 @@ namespace GameControllerSimulator.Connection
                 connectionManager?.OnManagerError($"ClientCallback.OnSendDataException, clientId: {connectionManager.GetClientId(client)}, id: {id}", ex);
             }
 
+            public void OnTaskException(Exception ex)
+            {
+                connectionManager?.OnManagerError("ClientCallback.OnTaskException", ex);
+            }
         }
         #endregion
     

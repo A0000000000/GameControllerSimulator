@@ -1,7 +1,10 @@
 using BluetoothLibrary;
+using CommonLibrary.Generator;
 using GameControllerSimulator.Bean;
 using GameControllerSimulator.Connection;
 using GameControllerSimulator.Constant;
+using GameControllerSimulator.Generator;
+using GameControllerSimulator.Generator.GamepadProtocol;
 using GameControllerSimulator.UIManager;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
@@ -13,6 +16,7 @@ using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Navigation;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
@@ -37,6 +41,13 @@ namespace GameControllerSimulator
         private DispatcherQueue _dispatcher = DispatcherQueue.GetForCurrentThread();
         private bool _isInitialized = false;
         private DeviceUIManager[] deviceUIManagers = new DeviceUIManager[4];
+        private GamepadStatePacket[] gamepadStatePackets = new GamepadStatePacket[4]
+        {
+            new GamepadStatePacket(),
+            new GamepadStatePacket(),
+            new GamepadStatePacket(),
+            new GamepadStatePacket()
+        };
 
         public MainWindow()
         {
@@ -72,6 +83,7 @@ namespace GameControllerSimulator
         {
             await CheckBaseComponent();
             await InitControllerUI();
+            await InitGameControllerManager();
             await InitConnectionManager();
         }
 
@@ -79,6 +91,7 @@ namespace GameControllerSimulator
         {
             if (!ViGEmBusUtils.IsDriverInstalled())
             {
+                DriverStatus.Text = "Driver Status: Uninstalled";
                 ViGEmBusUtils.InstallDriver();
             }
             if (!ViGEmBusUtils.IsDriverInstalled())
@@ -114,6 +127,10 @@ namespace GameControllerSimulator
             if (await BluetoothUtils.IsBluetoothAvailableAsync())
             {
                 await DestroyConnectionManager();
+            }
+            if (ViGEmBusUtils.IsDriverInstalled())
+            {
+                await DestroyGameControllerManager(); 
             }
         }
 
@@ -203,6 +220,36 @@ namespace GameControllerSimulator
 
         #endregion
 
+        #region 手柄管理器
+        private ViGEmBusManager? viGEmBusManager;
+        private ViGEmBusGameController?[] gameControllers = new ViGEmBusGameController[4];
+
+        private async Task InitGameControllerManager()
+        {
+            DriverStatus.Text = "Driver Status: Installed";
+            viGEmBusManager = new ViGEmBusManager();
+        }
+
+        private void CreateGameController(int index)
+        {
+            if (viGEmBusManager == null || index < 0 || index >= gameControllers.Length)
+            {
+                return;
+            }
+            gameControllers[index] = viGEmBusManager.CreateXboxController(index);
+        }
+
+        private async Task DestroyGameControllerManager()
+        {
+            viGEmBusManager?.Dispose();
+            viGEmBusManager = null;
+            for (int i = 0; i < gameControllers.Length; i++)
+            {
+                gameControllers[i]?.Dispose();
+                gameControllers[i] = null;
+            }
+        }
+        #endregion
 
         #region 数据处理
 
@@ -219,10 +266,19 @@ namespace GameControllerSimulator
                     DeviceInfo? deviceInfo = data.Data as DeviceInfo;
                     deviceUIManagers[index].SetDeviceName(deviceInfo?.Model ?? "N/A");
                     deviceUIManagers[index].SetOsName(deviceInfo?.OsVersion ?? "N/A");
+                    gameControllers[index]?.Connect();
                     break;
                 case EntityType.TYPE_SEND_GAME_EVENT:
-                    byte[] events = data.Data as byte[] ?? Array.Empty<byte>();
-                    deviceUIManagers[index].SetCurrentEvent(Convert.ToHexString(events));
+                    string? eventsBase64 = data.Data as string;
+                    if (eventsBase64 != null)
+                    {
+                        byte[] events = Convert.FromBase64String(eventsBase64);
+                        deviceUIManagers[index].SetCurrentEvent(Convert.ToHexString(events));
+                        gamepadStatePackets[index].CopyEventToCurrent(events);
+                        List<GamepadStateChange> changes = gamepadStatePackets[index].GetChanges();
+                        gameControllers[index]?.UpdateState(changes);
+                        gamepadStatePackets[index].CopyCurrentToLast();
+                    }
                     break;
                 default:
                     deviceUIManagers[index].SetCurrentEvent($"Unknown Event Type: {data.Type}");
@@ -233,7 +289,7 @@ namespace GameControllerSimulator
 
         private void OnFaulted(string msg, Exception ex)
         {
-
+            Debug.WriteLine($"OnFaulted msg: {msg}, ex: {ex.Message}");
         }
 
         private void OnNewClientConnection(string clientId, int index)
@@ -243,6 +299,7 @@ namespace GameControllerSimulator
                 return;
             }
             deviceUIManagers[index].SetStatus("Connected");
+            CreateGameController(index);
             connectionManager?.SendData(clientId, new BaseEntity<object>
             {
                 Type = EntityType.TYPE_QUERY_CLIENT_INFO,
@@ -259,6 +316,8 @@ namespace GameControllerSimulator
                 return;
             }
             deviceUIManagers[index].Reset();
+            gameControllers[index]?.Dispose();
+            gameControllers[index] = null;
         }
 
         #endregion

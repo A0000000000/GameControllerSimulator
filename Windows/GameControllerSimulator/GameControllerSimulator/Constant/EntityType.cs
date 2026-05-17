@@ -1,4 +1,5 @@
-﻿using GameControllerSimulator.Bean;
+﻿using CommonLibrary.Bean;
+using GameControllerSimulator.Bean;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -27,7 +28,7 @@ namespace GameControllerSimulator.Constant
         { TYPE_REQUEST_CLIENT_ID_RESULT, typeof(string) },
         { TYPE_UNREGISTER_CLIENT_ID, typeof(string) },
         { TYPE_UNREGISTER_CLIENT_ID_RESULT, typeof(object) },
-        { TYPE_SEND_GAME_EVENT, typeof(byte[]) },
+        { TYPE_SEND_GAME_EVENT, typeof(string) },
         { TYPE_SEND_GAME_EVENT_RESULT, typeof(object) },
         { TYPE_FEEDBACK_RECEIVED, typeof(FeedbackReceived) },
         { TYPE_FEEDBACK_RECEIVED_RESULT, typeof(object) },

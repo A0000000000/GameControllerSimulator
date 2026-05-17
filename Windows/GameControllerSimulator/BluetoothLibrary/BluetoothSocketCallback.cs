@@ -19,6 +19,8 @@ namespace BluetoothLibrary
         void OnNewClientConnect(BluetoothSocketServer.Client client);
         void OnNewClientException(Exception ex);
 
+        void OnTaskException(Exception ex);
+
 
         public interface ClientCallback
         {
@@ -27,6 +29,7 @@ namespace BluetoothLibrary
             void OnDisconnect(BluetoothSocketServer.Client client);
             void OnDataReady(BluetoothSocketServer.Client client, byte[] data);
             void OnDataRevException(BluetoothSocketServer.Client client, Exception ex);
+            void OnTaskException(Exception ex);
 
         }
     }
