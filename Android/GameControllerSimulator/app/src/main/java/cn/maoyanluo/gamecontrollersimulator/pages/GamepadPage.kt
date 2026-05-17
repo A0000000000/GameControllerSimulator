@@ -125,7 +125,10 @@ fun GameControllerInnerLayout(modifier: Modifier) {
                     }, onAxisChanged = { x,y ->
                         viewModel.generator.setAxis(Axis.X, x)
                         viewModel.generator.setAxis(Axis.Y, y)
-                    })
+                    },
+                        xMinValue = 0, xMaxValue = 255, xInitialValue = 128,
+                        yMinValue = 0, yMaxValue = 255, yInitialValue = 128
+                    )
                 }
 
                 Box(modifier = Modifier.padding(0.dp, 0.dp, 50.dp, 0.dp).align(Alignment.BottomEnd)) {
@@ -166,7 +169,10 @@ fun GameControllerInnerLayout(modifier: Modifier) {
                     }, onAxisChanged = { x, y ->
                         viewModel.generator.setAxis(Axis.RX, x)
                         viewModel.generator.setAxis(Axis.RY, y)
-                    })
+                    },
+                        xMinValue = 0, xMaxValue = 255, xInitialValue = 128,
+                        yMinValue = 0, yMaxValue = 255, yInitialValue = 128
+                    )
                 }
                 Box(modifier = Modifier.padding(0.dp, 0.dp, 50.dp, 0.dp).align(Alignment.TopEnd)) {
                     var isXbox by remember { mutableStateOf(true) }

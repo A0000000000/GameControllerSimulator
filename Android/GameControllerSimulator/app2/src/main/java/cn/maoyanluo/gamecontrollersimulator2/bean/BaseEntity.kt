@@ -11,5 +11,5 @@ data class BaseEntity<T>(
     @SerializedName("timestamp")
     val timestamp: Long,
     @SerializedName("data")
-    val data: T
+    val data: T?
 )

@@ -23,7 +23,7 @@ import java.util.UUID
  * 由上层自主选择传输数据使用的方式
  */
 class ConnectionManager(
-    private val device: BluetoothDevice,
+    val device: BluetoothDevice,
     private val adapter: BluetoothAdapter,
     private val callback: ConnectionCallback,
     private val coroutineManager: CoroutineManager
@@ -152,7 +152,7 @@ class ConnectionManager(
     }
 
     private fun requestClientId() = sendData(
-        BaseEntity<Any?>(
+        BaseEntity<JsonElement>(
             type = EntityType.TYPE_REQUEST_CLIENT_ID,
             id = EntityId.CONNECTION_MANAGER_INTERNAL_ID,
             timestamp = System.currentTimeMillis(),
@@ -177,20 +177,16 @@ class ConnectionManager(
         if (typeClass != JsonElement::class.java) {
             return typeClass
         }
-        return when (type) {
-            EntityType.TYPE_REQUEST_CLIENT_ID -> String::class.java
-            EntityType.TYPE_UNREGISTER_CLIENT_ID -> String::class.java
-            else -> JsonElement::class.java
-        }
+        return EntityType.TYPE_MAPPING[type] ?: JsonElement::class.java
     }
 
     private fun onDataReady(entity: BaseEntity<*>) {
         when (entity.type) {
-            EntityType.TYPE_REQUEST_CLIENT_ID -> {
+            EntityType.TYPE_REQUEST_CLIENT_ID_RESULT -> {
                 clientId = entity.data?.toString() ?: ""
             }
 
-            EntityType.TYPE_UNREGISTER_CLIENT_ID -> {
+            EntityType.TYPE_UNREGISTER_CLIENT_ID_RESULT -> {
                 bluetoothSocketClient?.disconnect()
                 bluetoothSocketClient = null
                 clientId = ""

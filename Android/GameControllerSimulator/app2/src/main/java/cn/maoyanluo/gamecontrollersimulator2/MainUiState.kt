@@ -9,5 +9,5 @@ sealed interface MainUiState {
         val device: BluetoothDevice,
         val isAvailable: Boolean = false
     ) : MainUiState
-    data class GamepadPage(val device: BluetoothDevice) : MainUiState
+    data object GamepadPage : MainUiState
 }

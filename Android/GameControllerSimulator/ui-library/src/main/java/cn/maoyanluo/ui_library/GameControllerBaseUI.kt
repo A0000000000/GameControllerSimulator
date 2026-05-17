@@ -83,7 +83,13 @@ fun Joystick(
     onStickPress: (() -> Unit)? = null,
     onStickRelease: (() -> Unit)? = null,
     onAxisChanged: (x: Int, y: Int) -> Unit = { _, _ -> },
-    knobDiameterRatio: Float = 0.24f
+    knobDiameterRatio: Float = 0.24f,
+    xMinValue: Int,
+    xMaxValue: Int,
+    xInitialValue: Int,
+    yMinValue: Int,
+    yMaxValue: Int,
+    yInitialValue: Int
 ) {
     // Compose 的偏移量、尺寸计算都更适合先用像素处理，最后再转成 dp 给 Modifier.offset。
     val density = LocalDensity.current
@@ -119,10 +125,21 @@ fun Joystick(
     // 2. 最左 / 最上 -> 0
     // 3. 最右 / 最下 -> 255
     // 这样可以直接对接你当前 HID descriptor 里 0..255 的轴定义。
-    fun axisValue(value: Float, radius: Float): Int {
-        if (radius <= 0f) return 128
+    fun axisValue(
+        value: Float,
+        radius: Float,
+        minValue: Int,
+        maxValue: Int,
+        initialValue: Int
+    ): Int {
+        if (radius <= 0f) return initialValue.coerceIn(minValue, maxValue)
         val normalized = (value / radius).coerceIn(-1f, 1f)
-        return (((normalized + 1f) * 0.5f) * 255f).toInt().coerceIn(0, 255)
+        val mappedValue = if (normalized >= 0f) {
+            initialValue + ((maxValue - initialValue) * normalized)
+        } else {
+            initialValue + ((initialValue - minValue) * normalized)
+        }
+        return mappedValue.toInt().coerceIn(minValue, maxValue)
     }
 
     Box(
@@ -207,8 +224,20 @@ fun Joystick(
                         val updatedOffset = clampToRadius(touchOffset, movableRadius)
                         knobOffset = updatedOffset
                         onAxisChanged(
-                            axisValue(updatedOffset.x, movableRadius),
-                            axisValue(updatedOffset.y, movableRadius)
+                            axisValue(
+                                value = updatedOffset.x,
+                                radius = movableRadius,
+                                minValue = xMinValue,
+                                maxValue = xMaxValue,
+                                initialValue = xInitialValue
+                            ),
+                            axisValue(
+                                value = updatedOffset.y,
+                                radius = movableRadius,
+                                minValue = yMinValue,
+                                maxValue = yMaxValue,
+                                initialValue = yInitialValue
+                            )
                         )
                     }
 
@@ -245,7 +274,7 @@ fun Joystick(
                                 // 拖动结束：小圆回中，并回调 HID 的中心值。
                                 draggingOuterArea = false
                                 knobOffset = Offset.Zero
-                                onAxisChanged(128, 128)
+                                onAxisChanged(xInitialValue, yInitialValue)
                                 activeChange.consume()
                                 break
                             }
@@ -254,8 +283,20 @@ fun Joystick(
                             val updatedOffset = clampToRadius(updatedTouchOffset, movableRadius)
                             knobOffset = updatedOffset
                             onAxisChanged(
-                                axisValue(updatedOffset.x, movableRadius),
-                                axisValue(updatedOffset.y, movableRadius)
+                                axisValue(
+                                    value = updatedOffset.x,
+                                    radius = movableRadius,
+                                    minValue = xMinValue,
+                                    maxValue = xMaxValue,
+                                    initialValue = xInitialValue
+                                ),
+                                axisValue(
+                                    value = updatedOffset.y,
+                                    radius = movableRadius,
+                                    minValue = yMinValue,
+                                    maxValue = yMaxValue,
+                                    initialValue = yInitialValue
+                                )
                             )
                             activeChange.consume()
                             continue
@@ -299,7 +340,7 @@ fun Joystick(
     }
 
     LaunchedEffect(Unit) {
-        onAxisChanged(128, 128)
+        onAxisChanged(xInitialValue, yInitialValue)
     }
 }
 
@@ -310,21 +351,24 @@ fun GameControllerTriggerButton(
     reverseDirection: Boolean = false,
     backgroundColor: Color = Color.Gray,
     activeColor: Color = Color.DarkGray,
-    onValueChanged: (value: Int) -> Unit = {}
+    onValueChanged: (value: Int) -> Unit = {},
+    minValue: Int,
+    maxValue: Int,
+    initialValue: Int
 ) {
     var containerSize by remember { mutableStateOf(Size.Zero) }
     var pressed by remember { mutableStateOf(false) }
 
-    var currentValue by remember { mutableIntStateOf(0) }
+    var currentValue by remember { mutableIntStateOf(initialValue) }
     fun computeValue(x: Float, width: Float): Int {
-        if (width <= 0f) return 0
+        if (width <= 0f) return initialValue.coerceIn(minValue, maxValue)
         val clampedX = x.coerceIn(0f, width)
         val ratio = if (reverseDirection) {
             1f - (clampedX / width)
         } else {
             clampedX / width
         }
-        return (ratio * 255f).toInt().coerceIn(0, 255)
+        return (minValue + ((maxValue - minValue) * ratio)).toInt().coerceIn(minValue, maxValue)
     }
 
     Box(
@@ -345,16 +389,17 @@ fun GameControllerTriggerButton(
                         event.consume()
                     }
                     pressed = false
-                    currentValue = 0
-                    onValueChanged(0)
+                    currentValue = initialValue
+                    onValueChanged(initialValue)
                 }
             }
             .background(backgroundColor)
     ) {
         Canvas(modifier = Modifier.fillMaxSize()) {
-            if (!pressed || currentValue <= 0) return@Canvas
+            if (!pressed || currentValue <= minValue) return@Canvas
 
-            val progressWidth = size.width * (currentValue / 255f)
+            val denominator = (maxValue - minValue).takeIf { it > 0 } ?: return@Canvas
+            val progressWidth = size.width * ((currentValue - minValue).toFloat() / denominator)
             val left = if (reverseDirection) {
                 size.width - progressWidth
             } else {
@@ -369,7 +414,7 @@ fun GameControllerTriggerButton(
         }
     }
     LaunchedEffect(Unit) {
-        onValueChanged(0)
+        onValueChanged(initialValue)
     }
 }
 
