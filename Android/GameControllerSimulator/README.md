@@ -1,21 +1,15 @@
 # GameControllerSimulator
-* 将Android手机模拟成一个蓝牙手柄使用
-* 使用Jetpack Compose编写布局，使用HID协议模拟手柄协议
-* 支持Windows、macOS连接，在[手柄测试](https://www.gamepadtester.cn/)这个网站测试成功可以检测使用
-* 基本上没啥实用的价值，因为手柄的HID协议就是一坨shit山
-* 非要用，Windows下建议使用Steam Input转成Xbox协议使用
-* 绝大部分市面上的手柄都是模拟的Xbox协议，Android无法模拟vid、pid等信息，所以只能使用通用协议
-* 微软真是面子大，macOS、iOS、Android都给Xbox开发专用驱动
+* 用于将Android手机模拟成游戏手柄的Demo
 
 ## 开发环境
 * Android Studio
 * Codex
 
-## 使用方法
-1. 编译安装App
-2. 系统里和对端设备（Windows、macOS）进行配对
-3. 打开App，选择要连接的设备，等待一会即可
+## app
+* 此项目不依赖任何其它软件，只需要设备有蓝牙即可，将设备模拟成HID手柄，支持Windows、macOS
+* 由于是通用手柄协议，用处有限，主要是各个操作系统对HID手柄支持有限
 
-## 截图
-* ![首页](snapshot/Screenshot_20260425_194553.png)
-* ![手柄页](snapshot/Screenshot_20260425_194624.png)
+## app2
+* 纯手柄UI的模拟，将产生的事件通过蓝牙(Todo: 后续支持TCP/UDP)发送给Windows端，由Windows端自己创建虚拟手柄，解析事件，发送到系统
+* 仅支持Windows系统，并且Windows需要安装对应的软件
+* 兼容性高，基本上支持所有支持Xbox手柄的游戏输入
