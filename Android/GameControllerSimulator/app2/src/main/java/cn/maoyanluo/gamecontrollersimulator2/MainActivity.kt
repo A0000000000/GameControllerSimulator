@@ -1,6 +1,7 @@
 package cn.maoyanluo.gamecontrollersimulator2
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.pm.ActivityInfo
 import android.view.KeyEvent
 import android.os.Bundle
@@ -50,6 +51,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    @SuppressLint("RestrictedApi")
     override fun dispatchKeyEvent(event: KeyEvent): Boolean {
         val handler = hardwareKeyEventHandler
         if (handler != null && handler.invoke(event)) {
