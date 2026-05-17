@@ -9,10 +9,7 @@
 * 选择对端设备，然后等待就绪，大概手柄页即可
 
 ## 截图
-![首页](snapshot/Screenshot_20260517_230726.png)
-
-![连接-未就绪](snapshot/Screenshot_20260517_231042.png)
-
-![连接-已就绪](snapshot/Screenshot_20260517_231056.png)
-
-![手柄页](snapshot/Screenshot_20260517_231116.png)
+* ![首页](snapshot/Screenshot_20260517_230726.png)
+* ![连接-未就绪](snapshot/Screenshot_20260517_231042.png)
+* ![连接-已就绪](snapshot/Screenshot_20260517_231056.png)
+* ![手柄页](snapshot/Screenshot_20260517_231116.png)
