@@ -2,8 +2,6 @@ package cn.maoyanluo.gamecontrollersimulator.pages.ui
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -13,7 +11,6 @@ import androidx.compose.ui.unit.TextUnit
 import cn.maoyanluo.hid_library.Button
 import cn.maoyanluo.hid_library.DPad
 import cn.maoyanluo.ui_library.CircleTextButton
-import cn.maoyanluo.ui_library.GameControllerTriggerButton
 import cn.maoyanluo.ui_library.RectangleTextButton
 import cn.maoyanluo.ui_library.SquareTextButton
 
@@ -272,76 +269,6 @@ fun DPadButtons2(
             onUp = {
                 onKeyEvent(Button.RIGHT, false)
             }
-        )
-    }
-}
-
-@Composable
-fun LTLBButtons(
-    modifier: Modifier,
-    fontSize: TextUnit,
-    onTriggerChanged: (value: Int) -> Unit,
-    onKeyEvent: (btn: Button, on: Boolean) -> Unit
-) {
-    Row(modifier = modifier) {
-        GameControllerTriggerButton(
-            modifier = Modifier
-                .fillMaxHeight()
-                .weight(1f),
-            reverseDirection = true,
-            onValueChanged = onTriggerChanged,
-            minValue = 0,
-            maxValue = 255,
-            initialValue = 0
-        )
-
-        SquareTextButton(
-            text = "LB",
-            fontSize = fontSize,
-            modifier = Modifier
-                .fillMaxHeight()
-                .aspectRatio(1f),
-            onDown = {
-                onKeyEvent(Button.LB, true)
-            },
-            onUp = {
-                onKeyEvent(Button.LB, false)
-            }
-        )
-    }
-}
-
-@Composable
-fun RBRTButtons(
-    modifier: Modifier,
-    fontSize: TextUnit,
-    onTriggerChanged: (value: Int) -> Unit,
-    onKeyEvent: (btn: Button, on: Boolean) -> Unit
-) {
-    Row(modifier = modifier) {
-        SquareTextButton(
-            text = "RB",
-            fontSize = fontSize,
-            modifier = Modifier
-                .fillMaxHeight()
-                .aspectRatio(1f),
-            onDown = {
-                onKeyEvent(Button.RB, true)
-            },
-            onUp = {
-                onKeyEvent(Button.RB, false)
-            }
-        )
-
-        GameControllerTriggerButton(
-            modifier = Modifier
-                .fillMaxHeight()
-                .weight(1f),
-            reverseDirection = false,
-            onValueChanged = onTriggerChanged,
-            minValue = 0,
-            maxValue = 255,
-            initialValue = 0
         )
     }
 }
