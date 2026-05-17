@@ -65,8 +65,11 @@
                     Padding="10">
 
                 <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="6">
-                    <TextBlock Text="Controller 1" FontWeight="Bold" HorizontalAlignment="Center"/>
-                    <TextBlock Text="Disconnected" HorizontalAlignment="Center"/>
+                    <TextBlock x:Name="ControllerName1" Text="Controller 1" FontWeight="Bold" HorizontalAlignment="Center"/>
+                    <TextBlock x:Name="ControllerStatus1" Text="状态: Disconnected" HorizontalAlignment="Center"/>
+                    <TextBlock x:Name="ControllerDeviceName1" Text="设备名称: N/A" HorizontalAlignment="Center"/>
+                    <TextBlock x:Name="ControllerOsName1" Text="系统版本: N/A" HorizontalAlignment="Center"/>
+                    <TextBlock x:Name="ControllerCurrentEvent1" Text="当前事件: N/A" HorizontalAlignment="Center"/>
                 </StackPanel>
 
             </Border>
@@ -79,8 +82,11 @@
                     Padding="10">
 
                 <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="6">
-                    <TextBlock Text="Controller 2" FontWeight="Bold" HorizontalAlignment="Center"/>
-                    <TextBlock Text="Connected" HorizontalAlignment="Center"/>
+                    <TextBlock x:Name="ControllerName2" Text="Controller 2" FontWeight="Bold" HorizontalAlignment="Center"/>
+                    <TextBlock x:Name="ControllerStatus2" Text="状态: Disconnected" HorizontalAlignment="Center"/>
+                    <TextBlock x:Name="ControllerDeviceName2" Text="设备名称: N/A" HorizontalAlignment="Center"/>
+                    <TextBlock x:Name="ControllerOsName2" Text="系统版本: N/A" HorizontalAlignment="Center"/>
+                    <TextBlock x:Name="ControllerCurrentEvent2" Text="当前事件: N/A" HorizontalAlignment="Center"/>
                 </StackPanel>
 
             </Border>
@@ -93,8 +99,11 @@
                     Padding="10">
 
                 <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="6">
-                    <TextBlock Text="Controller 3" FontWeight="Bold" HorizontalAlignment="Center"/>
-                    <TextBlock Text="Idle" HorizontalAlignment="Center"/>
+                    <TextBlock x:Name="ControllerName3" Text="Controller 3" FontWeight="Bold" HorizontalAlignment="Center"/>
+                    <TextBlock x:Name="ControllerStatus3" Text="状态: Disconnected" HorizontalAlignment="Center"/>
+                    <TextBlock x:Name="ControllerDeviceName3" Text="设备名称: N/A" HorizontalAlignment="Center"/>
+                    <TextBlock x:Name="ControllerOsName3" Text="系统版本: N/A" HorizontalAlignment="Center"/>
+                    <TextBlock x:Name="ControllerCurrentEvent3" Text="当前事件: N/A" HorizontalAlignment="Center"/>
                 </StackPanel>
 
             </Border>
@@ -107,8 +116,11 @@
                     Padding="10">
 
                 <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="6">
-                    <TextBlock Text="Controller 4" FontWeight="Bold" HorizontalAlignment="Center"/>
-                    <TextBlock Text="Disconnected" HorizontalAlignment="Center"/>
+                    <TextBlock x:Name="ControllerName4" Text="Controller 4" FontWeight="Bold" HorizontalAlignment="Center"/>
+                    <TextBlock x:Name="ControllerStatus4" Text="状态: Disconnected" HorizontalAlignment="Center"/>
+                    <TextBlock x:Name="ControllerDeviceName4" Text="设备名称: N/A" HorizontalAlignment="Center"/>
+                    <TextBlock x:Name="ControllerOsName4" Text="系统版本: N/A" HorizontalAlignment="Center"/>
+                    <TextBlock x:Name="ControllerCurrentEvent4" Text="当前事件: N/A" HorizontalAlignment="Center"/>
                 </StackPanel>
 
             </Border>

@@ -9,6 +9,6 @@ namespace GameControllerSimulator.Constant
     public class EntityId
     {
         public static readonly int CONNECTION_MANAGER_INTERNAL_ID = 1;
-
+        public static readonly int GAMEPAD_PAGE_EVENT = 2;
     }
 }

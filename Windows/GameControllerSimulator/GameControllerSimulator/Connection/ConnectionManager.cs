@@ -12,6 +12,7 @@ namespace GameControllerSimulator.Connection
 {
     public class ConnectionManager: IDisposable
     {
+
         #region 内部使用的常量
         private static readonly Guid HOST_GUID = Guid.Parse("0000180D-0000-1000-8000-00805f9b34fb");
 
@@ -46,13 +47,36 @@ namespace GameControllerSimulator.Connection
             }
         }
 
+        public int GetClientIndex(string clientId)
+        {
+            for (int i = 0; i < clientIds.Length; i++)
+            {
+                if (clientIds[i] == clientId)
+                {
+                    return i;
+                }
+            }
+            return -1;
+        }
+
+        public void SendData(string clientId, IBaseEntity data)
+        {
+            for (int i = 0; i < clientIds.Length; i++)
+            {
+                if (clientIds[i] == clientId)
+                {
+                    clients[i]?.SendData(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(data)));
+                    break;
+                }
+            }
+        }
 
         public void Dispose()
         {
             Destroy();
         }
-        #endregion
 
+        #endregion
 
         #region 对外暴露的属性
         public bool IsAvailable
@@ -117,16 +141,6 @@ namespace GameControllerSimulator.Connection
 
         #region 内部方法
 
-        private void Post(Action action)
-        {
-            if (action == null) return;
-            _ = Task.Run(() =>
-            {
-                try { action(); }
-                catch { }
-            });
-        }
-
         private string GetClientId(BluetoothSocketServer.Client client)
         {
             for (int i = 0; i < clients.Length; i++)
@@ -150,6 +164,7 @@ namespace GameControllerSimulator.Connection
             }
             return -1;
         }
+
         private bool SetClient(BluetoothSocketServer.Client client)
         {
             for (int i = 0; i < clientIds.Length; i++)
@@ -172,6 +187,7 @@ namespace GameControllerSimulator.Connection
                 {
                     clients[i] = null;
                     clientIds[i] = "";
+                    callback?.OnClientDisconnected(i);
                     return true;
                 }
             }
@@ -248,16 +264,7 @@ namespace GameControllerSimulator.Connection
             {
                 return typeClass;
             }
-            switch (type)
-            {
-                case EntityType.TYPE_REQUEST_CLIENT_ID:
-                    return typeof(string);
-                case EntityType.TYPE_UNREGISTER_CLIENT_ID:
-                    return typeof(string);
-
-                default:
-                    return typeof(JsonElement);
-            }
+            return EntityType.TYPE_MAPPING.ContainsKey(type) ? EntityType.TYPE_MAPPING[type] : typeof(JsonElement);
         }
 
 
@@ -268,7 +275,7 @@ namespace GameControllerSimulator.Connection
                 case EntityType.TYPE_REQUEST_CLIENT_ID:
                     client.SendData(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new BaseEntity<string>()
                     {
-                        Type = EntityType.TYPE_REQUEST_CLIENT_ID,
+                        Type = EntityType.TYPE_REQUEST_CLIENT_ID_RESULT,
                         Id = EntityId.CONNECTION_MANAGER_INTERNAL_ID,
                         Timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
                         Data = GetClientId(client)
@@ -385,6 +392,7 @@ namespace GameControllerSimulator.Connection
 
         }
         #endregion
+    
     }
 
 
@@ -401,6 +409,7 @@ namespace GameControllerSimulator.Connection
         Type GetTypeClass(int type);
 
         void OnNewClientConnection(string clientId, int index);
+        void OnClientDisconnected(int index);
 
     }
 

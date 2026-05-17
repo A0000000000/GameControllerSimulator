@@ -220,9 +220,12 @@ namespace BluetoothLibrary
             {
                 try
                 {
-                    stream.Write(IntConverter.ToBigEndian(data.Length), 0, 4);
-                    stream.Write(data, 0, data.Length);
-                    stream.Flush();
+                    lock (_lock)
+                    {
+                        stream.Write(IntConverter.ToBigEndian(data.Length), 0, 4);
+                        stream.Write(data, 0, data.Length);
+                        stream.Flush();
+                    }
                 }
                 catch (Exception ex)
                 {

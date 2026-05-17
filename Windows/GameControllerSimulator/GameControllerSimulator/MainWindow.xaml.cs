@@ -1,6 +1,8 @@
 using BluetoothLibrary;
 using GameControllerSimulator.Bean;
 using GameControllerSimulator.Connection;
+using GameControllerSimulator.Constant;
+using GameControllerSimulator.UIManager;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -34,6 +36,7 @@ namespace GameControllerSimulator
     {
         private DispatcherQueue _dispatcher = DispatcherQueue.GetForCurrentThread();
         private bool _isInitialized = false;
+        private DeviceUIManager[] deviceUIManagers = new DeviceUIManager[4];
 
         public MainWindow()
         {
@@ -68,6 +71,7 @@ namespace GameControllerSimulator
         private async Task Init()
         {
             await CheckBaseComponent();
+            await InitControllerUI();
             await InitConnectionManager();
         }
 
@@ -113,6 +117,18 @@ namespace GameControllerSimulator
             }
         }
 
+        #region 控制器UI管理
+
+        private async Task InitControllerUI()
+        {
+            deviceUIManagers[0] = new DeviceUIManager(_dispatcher, ControllerStatus1, ControllerDeviceName1, ControllerOsName1, ControllerCurrentEvent1);
+            deviceUIManagers[1] = new DeviceUIManager(_dispatcher, ControllerStatus2, ControllerDeviceName2, ControllerOsName2, ControllerCurrentEvent2);
+            deviceUIManagers[2] = new DeviceUIManager(_dispatcher, ControllerStatus3, ControllerDeviceName3, ControllerOsName3, ControllerCurrentEvent3);
+            deviceUIManagers[3] = new DeviceUIManager(_dispatcher, ControllerStatus4, ControllerDeviceName4, ControllerOsName4, ControllerCurrentEvent4);
+        }
+
+        #endregion
+
         #region 连接管理处理
         private ConnectionManager? connectionManager;
         private async Task InitConnectionManager()
@@ -151,17 +167,22 @@ namespace GameControllerSimulator
 
             public Type GetTypeClass(int type)
             {
-                return typeof(JsonElement);
+                return EntityType.TYPE_MAPPING.ContainsKey(type) ? EntityType.TYPE_MAPPING[type] : typeof(JsonElement);
+            }
+
+            public void OnClientDisconnected(int index)
+            {
+                window.OnClientDisconnected(index);
             }
 
             public void OnDataReady(string clientId, IBaseEntity data)
             {
-
+                window.OnDataReady(clientId, data);
             }
 
             public void OnFaulted(string msg, Exception ex)
             {
-
+                window.OnFaulted(msg, ex);
             }
 
             public void OnManagerAvaiable()
@@ -176,10 +197,72 @@ namespace GameControllerSimulator
 
             public void OnNewClientConnection(string clientId, int index)
             {
-                
+                window.OnNewClientConnection(clientId, index);
             }
         }
 
         #endregion
+
+
+        #region 数据处理
+
+        private void OnDataReady(string clientId, IBaseEntity data)
+        {
+            int index = connectionManager?.GetClientIndex(clientId) ?? -1;
+            if (index < 0 || index >= deviceUIManagers.Length)
+            {
+                return;
+            }
+            switch (data.Type)
+            {
+                case EntityType.TYPE_QUERY_CLIENT_INFO_RESULT:
+                    DeviceInfo? deviceInfo = data.Data as DeviceInfo;
+                    deviceUIManagers[index].SetDeviceName(deviceInfo?.Model ?? "N/A");
+                    deviceUIManagers[index].SetOsName(deviceInfo?.OsVersion ?? "N/A");
+                    break;
+                case EntityType.TYPE_SEND_GAME_EVENT:
+                    byte[] events = data.Data as byte[] ?? Array.Empty<byte>();
+                    deviceUIManagers[index].SetCurrentEvent(Convert.ToHexString(events));
+                    break;
+                default:
+                    deviceUIManagers[index].SetCurrentEvent($"Unknown Event Type: {data.Type}");
+                    break;
+            }
+
+        }
+
+        private void OnFaulted(string msg, Exception ex)
+        {
+
+        }
+
+        private void OnNewClientConnection(string clientId, int index)
+        {
+            if (index < 0 || index > deviceUIManagers.Length)
+            {
+                return;
+            }
+            deviceUIManagers[index].SetStatus("Connected");
+            connectionManager?.SendData(clientId, new BaseEntity<object>
+            {
+                Type = EntityType.TYPE_QUERY_CLIENT_INFO,
+                Id = EntityId.GAMEPAD_PAGE_EVENT,
+                Timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
+                Data = null
+            });
+        }
+
+        private void OnClientDisconnected(int index)
+        {
+            if (index < 0 || index > deviceUIManagers.Length)
+            {
+                return;
+            }
+            deviceUIManagers[index].Reset();
+        }
+
+        #endregion
+
+
     }
 }

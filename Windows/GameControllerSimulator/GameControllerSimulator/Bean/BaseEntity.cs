@@ -9,9 +9,14 @@ namespace GameControllerSimulator.Bean
 {
     public interface IBaseEntity
     {
+        [JsonPropertyName("type")]
         int Type { get; }
+        [JsonPropertyName("id")]
         int Id { get; }
+        [JsonPropertyName("timestamp")]
         long Timestamp { get; }
+
+        [JsonPropertyName("data")]
 
         object? Data { get; }
     }
