@@ -156,6 +156,7 @@ fun DPadButtons(
 fun LTLBButtons(
     modifier: Modifier,
     fontSize: TextUnit,
+    lbPressed: Boolean = false,
     onTriggerChanged: (value: Int) -> Unit,
     onKeyEvent: (btn: GamepadButton, on: Boolean) -> Unit
 ) {
@@ -170,6 +171,8 @@ fun LTLBButtons(
             modifier = Modifier
                 .fillMaxHeight()
                 .aspectRatio(1f),
+            enabled = !lbPressed,
+            externalPressed = lbPressed,
             onDown = {
                 onKeyEvent(GamepadButton.LB, true)
             },
@@ -201,6 +204,7 @@ fun LTLBButtons(
 fun RBRTButtons(
     modifier: Modifier,
     fontSize: TextUnit,
+    rbPressed: Boolean = false,
     onTriggerChanged: (value: Int) -> Unit,
     onKeyEvent: (btn: GamepadButton, on: Boolean) -> Unit
 ) {
@@ -231,6 +235,8 @@ fun RBRTButtons(
             modifier = Modifier
                 .fillMaxHeight()
                 .aspectRatio(1f),
+            enabled = !rbPressed,
+            externalPressed = rbPressed,
             onDown = {
                 onKeyEvent(GamepadButton.RB, true)
             },

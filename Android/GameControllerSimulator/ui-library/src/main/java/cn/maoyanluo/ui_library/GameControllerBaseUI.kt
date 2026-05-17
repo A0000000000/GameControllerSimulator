@@ -41,10 +41,13 @@ fun CircleTextButton(
     modifier: Modifier = Modifier,
     textColor: Color = Color.White,
     bgColor: Color = Color.Gray,
+    enabled: Boolean = true,
+    externalPressed: Boolean = false,
     onDown: (() -> Unit)? = null,
     onUp: (() -> Unit)? = null,
 ) {
-    var pressed by remember { mutableStateOf(false) }
+    var internalPressed by remember { mutableStateOf(false) }
+    val pressed = externalPressed || internalPressed
     val bc = if (pressed) textColor else bgColor
     val tc = if (pressed) bgColor else textColor
     Box(
@@ -52,13 +55,14 @@ fun CircleTextButton(
             .aspectRatio(1f)
             .clip(CircleShape)
             .background(bc)
-            .pointerInput(Unit) {
+            .pointerInput(enabled) {
+                if (!enabled) return@pointerInput
                 detectTapGestures(
                     onPress = {
-                        pressed = true
+                        internalPressed = true
                         onDown?.invoke()
                         tryAwaitRelease()
-                        pressed = false
+                        internalPressed = false
                         onUp?.invoke()
                     }
                 )

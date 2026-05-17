@@ -13,14 +13,20 @@ import cn.maoyanluo.bluetooth_library.BluetoothManagerWrapper
 import cn.maoyanluo.coroutine_library.CoroutineManager
 import cn.maoyanluo.gamecontrollersimulator2.bean.BaseEntity
 import cn.maoyanluo.gamecontrollersimulator2.bean.DeviceInfo
+import cn.maoyanluo.gamecontrollersimulator2.bean.FeedbackReceived
 import cn.maoyanluo.gamecontrollersimulator2.connect.ConnectionCallback
 import cn.maoyanluo.gamecontrollersimulator2.connect.ConnectionManager
 import cn.maoyanluo.gamecontrollersimulator2.constant.EntityId
 import cn.maoyanluo.gamecontrollersimulator2.constant.EntityType
+import cn.maoyanluo.log_library.LogUtils
 import com.google.gson.JsonElement
 import kotlinx.coroutines.launch
 
 class MainViewModel(application: Application) : AndroidViewModel(application) {
+
+    companion object {
+        const val TAG = "MainViewModel"
+    }
 
     val deviceInfo = DeviceInfo(
         osVersion = "Android ${Build.VERSION.RELEASE}",
@@ -71,7 +77,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     }
 
                     EntityType.TYPE_FEEDBACK_RECEIVED -> {
-
+                        val received = data.data as? FeedbackReceived
+                        if (received != null) {
+                            LogUtils.d(TAG, "Feedback received. received is $received")
+                        }
                     }
 
 

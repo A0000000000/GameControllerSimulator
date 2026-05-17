@@ -2,6 +2,7 @@ package cn.maoyanluo.gamecontrollersimulator2.pages
 
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothDevice
+import android.view.KeyEvent
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,14 +25,19 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import cn.maoyanluo.coroutine_library.CoroutineManager
 import cn.maoyanluo.gamecontrollersimulator2.R
+import cn.maoyanluo.gamecontrollersimulator2.MainActivity
 import cn.maoyanluo.gamecontrollersimulator2.generator.GamepadAxis
 import cn.maoyanluo.gamecontrollersimulator2.generator.GamepadButton
 import cn.maoyanluo.gamecontrollersimulator2.generator.GamepadEventGenerator
@@ -39,6 +45,7 @@ import cn.maoyanluo.gamecontrollersimulator2.generator.GamepadTrigger
 import cn.maoyanluo.ui_library.CircleTextButton
 import cn.maoyanluo.ui_library.Joystick
 import cn.maoyanluo.ui_library.SquareTextButton
+import cn.maoyanluo.ui_library.findActivity
 
 private fun invertShortAxisValue(value: Int): Short {
     return if (value == Short.MIN_VALUE.toInt()) {
@@ -164,9 +171,59 @@ private fun ConnectionStatusCard(
 @Composable
 fun GamepadPage(modifier: Modifier, coroutineManager: CoroutineManager, receiver: (ByteArray) -> Unit) {
     val generator = remember { GamepadEventGenerator(coroutineManager) }
+    val activity = LocalContext.current.findActivity() as? MainActivity
+    var lbPressed by remember { mutableStateOf(false) }
+    var rbPressed by remember { mutableStateOf(false) }
     DisposableEffect(Unit) {
         generator.startCollection(receiver)
+        val keyEventHandler: (KeyEvent) -> Boolean = { event ->
+            when (event.keyCode) {
+                KeyEvent.KEYCODE_VOLUME_UP -> {
+                    when (event.action) {
+                        KeyEvent.ACTION_DOWN -> {
+                            if (event.repeatCount == 0) {
+                                lbPressed = true
+                                generator.setButton(GamepadButton.LB, true)
+                            }
+                            true
+                        }
+                        KeyEvent.ACTION_UP -> {
+                            lbPressed = false
+                            generator.setButton(GamepadButton.LB, false)
+                            true
+                        }
+                        else -> false
+                    }
+                }
+                KeyEvent.KEYCODE_VOLUME_DOWN -> {
+                    when (event.action) {
+                        KeyEvent.ACTION_DOWN -> {
+                            if (event.repeatCount == 0) {
+                                rbPressed = true
+                                generator.setButton(GamepadButton.RB, true)
+                            }
+                            true
+                        }
+                        KeyEvent.ACTION_UP -> {
+                            rbPressed = false
+                            generator.setButton(GamepadButton.RB, false)
+                            true
+                        }
+                        else -> false
+                    }
+                }
+                else -> false
+            }
+        }
+        activity?.hardwareKeyEventHandler = keyEventHandler
         onDispose {
+            if (activity?.hardwareKeyEventHandler === keyEventHandler) {
+                activity.hardwareKeyEventHandler = null
+            }
+            lbPressed = false
+            rbPressed = false
+            generator.setButton(GamepadButton.LB, false)
+            generator.setButton(GamepadButton.RB, false)
             generator.stopCollection()
         }
     }
@@ -179,6 +236,7 @@ fun GamepadPage(modifier: Modifier, coroutineManager: CoroutineManager, receiver
                 LTLBButtons(
                     modifier = Modifier.height(50.dp),
                     fontSize = 20.sp,
+                    lbPressed = lbPressed,
                     onTriggerChanged = { value ->
                         generator.setTrigger(GamepadTrigger.LeftTrigger, value.toUByte())
                     },
@@ -194,6 +252,7 @@ fun GamepadPage(modifier: Modifier, coroutineManager: CoroutineManager, receiver
                 RBRTButtons(
                     modifier = Modifier.height(50.dp),
                     fontSize = 20.sp,
+                    rbPressed = rbPressed,
                     onTriggerChanged = { value ->
                         generator.setTrigger(GamepadTrigger.RightTrigger, value.toUByte())
                     },

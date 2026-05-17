@@ -2,6 +2,7 @@ package cn.maoyanluo.gamecontrollersimulator2
 
 import android.Manifest
 import android.content.pm.ActivityInfo
+import android.view.KeyEvent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
@@ -32,6 +33,8 @@ import cn.maoyanluo.ui_library.LockScreenOrientation
 import cn.maoyanluo.ui_library.pages.SelectDevicePages
 
 class MainActivity : ComponentActivity() {
+    var hardwareKeyEventHandler: ((KeyEvent) -> Boolean)? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -45,6 +48,14 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    override fun dispatchKeyEvent(event: KeyEvent): Boolean {
+        val handler = hardwareKeyEventHandler
+        if (handler != null && handler.invoke(event)) {
+            return true
+        }
+        return super.dispatchKeyEvent(event)
     }
 }
 
