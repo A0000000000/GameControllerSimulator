@@ -1,4 +1,6 @@
 ﻿using BluetoothLibrary;
+using GameControllerSimulator.Bean;
+using GameControllerSimulator.Constant;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,13 +10,49 @@ using System.Threading.Tasks;
 
 namespace GameControllerSimulator.Connection
 {
-    public class ConnectionManager
+    public class ConnectionManager: IDisposable
     {
         #region 内部使用的常量
         private static readonly Guid HOST_GUID = Guid.Parse("0000180D-0000-1000-8000-00805f9b34fb");
 
-        private static readonly string BLUETOOTH_SERVICE_NAME = "GameControllerSimulator2";
+        private const string BLUETOOTH_SERVICE_NAME = "GameControllerSimulator2";
+
+        private static readonly int[] INTERNAL_ID_ARRAY = new int[] { EntityId.CONNECTION_MANAGER_INTERNAL_ID };
         #endregion
+
+        #region 对外暴露接口
+        public ConnectionManager(IConnectionManagerCallback callback)
+        {
+            this.callback = callback;
+            bluetoothSocketServer = new BluetoothSocketServer(HOST_GUID, BLUETOOTH_SERVICE_NAME, new ServerCallback(this));
+            IsBluetoothAvailable = false;
+            IsTcpAvailable = false;
+            IsUdpAvailable = false;
+            CurrentConnectionType = ConnectionType.BLE;
+        }
+
+        public void Init()
+        {
+            bluetoothSocketServer?.StartListener();
+        }
+
+        public void Destroy()
+        {
+            bluetoothSocketServer?.StopListener();
+            bluetoothSocketServer = null;
+            for (int i = 0; i < clients.Length; i++)
+            {
+                clients[i]?.Disconnect();
+            }
+        }
+
+
+        public void Dispose()
+        {
+            Destroy();
+        }
+        #endregion
+
 
         #region 对外暴露的属性
         public bool IsAvailable
@@ -77,9 +115,18 @@ namespace GameControllerSimulator.Connection
         }
         #endregion
 
-
-
         #region 内部方法
+
+        private void Post(Action action)
+        {
+            if (action == null) return;
+            _ = Task.Run(() =>
+            {
+                try { action(); }
+                catch { }
+            });
+        }
+
         private string GetClientId(BluetoothSocketServer.Client client)
         {
             for (int i = 0; i < clients.Length; i++)
@@ -92,6 +139,17 @@ namespace GameControllerSimulator.Connection
             return "";
         }
 
+        private int GetClientIndex(BluetoothSocketServer.Client client)
+        {
+            for (int i = 0; i < clients.Length; i++)
+            {
+                if (clients[i] == client)
+                {
+                    return i;
+                }
+            }
+            return -1;
+        }
         private bool SetClient(BluetoothSocketServer.Client client)
         {
             for (int i = 0; i < clientIds.Length; i++)
@@ -147,15 +205,84 @@ namespace GameControllerSimulator.Connection
                 callback?.OnFaulted("OnDataReady. Unknow client data.", new Exception());
                 return;
             }
-
-
-
             string jsonStr = Encoding.UTF8.GetString(data);
             using JsonDocument doc = JsonDocument.Parse(jsonStr);
             JsonElement root = doc.RootElement;
+            int type = -1;
+            if (root.TryGetProperty("type", out JsonElement t))
+            {
+                type = t.ValueKind == JsonValueKind.Number ? t.GetInt32() : -1;
+            }
+            Type dataType = type == -1 ? typeof(JsonElement) : GetTypeClass(type);
+            Type entityType = typeof(BaseEntity<>).MakeGenericType(dataType);
+            object? entity = JsonSerializer.Deserialize(jsonStr, entityType);
+            if (entity != null && entity is IBaseEntity baseEntity)
+            {
+                if (FilterById(baseEntity))
+                {
+                    OnDataReadyInner(client, baseEntity);
+                }
+                else
+                {
+                    callback?.OnDataReady(clientId, baseEntity);
+                }
+            }
+            else
+            {
+                callback?.OnFaulted("OnDataReady. Deserialize data failed.", new Exception());
+            }
+        }
+
+        private bool FilterById(IBaseEntity entity)
+        {
+            return INTERNAL_ID_ARRAY.Contains(entity.Id);
+        }
+
+        #endregion
+
+        #region 结果处理方法
+        private Type GetTypeClass(int type)
+        {
+            Type? typeClass = callback?.GetTypeClass(type);
+            if (typeClass != null && typeClass != typeof(JsonElement))
+            {
+                return typeClass;
+            }
+            switch (type)
+            {
+                case EntityType.TYPE_REQUEST_CLIENT_ID:
+                    return typeof(string);
+                case EntityType.TYPE_UNREGISTER_CLIENT_ID:
+                    return typeof(string);
+
+                default:
+                    return typeof(JsonElement);
+            }
+        }
 
 
+        private void OnDataReadyInner(BluetoothSocketServer.Client client, IBaseEntity entity)
+        {
+            switch (entity.Type)
+            {
+                case EntityType.TYPE_REQUEST_CLIENT_ID:
+                    client.SendData(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new BaseEntity<string>()
+                    {
+                        Type = EntityType.TYPE_REQUEST_CLIENT_ID,
+                        Id = EntityId.CONNECTION_MANAGER_INTERNAL_ID,
+                        Timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
+                        Data = GetClientId(client)
+                    })));
+                    callback?.OnNewClientConnection(GetClientId(client), GetClientIndex(client));
+                    break;
+                case EntityType.TYPE_UNREGISTER_CLIENT_ID:
+                    RemoveClient(client);
+                    client.Disconnect();
+                    break;
 
+                default:
+                    break;
+            }
         }
         #endregion
 
@@ -263,12 +390,18 @@ namespace GameControllerSimulator.Connection
 
     public interface IConnectionManagerCallback 
     {
-        public void OnManagerAvaiable();
-        public void OnManagerUnavailable();
+        void OnManagerAvaiable();
+        void OnManagerUnavailable();
 
-        public void OnFaulted(string msg, Exception ex);
+        void OnFaulted(string msg, Exception ex);
 
-        public void OnDataReady(string clientId, object data);
+        void OnDataReady(string clientId, IBaseEntity
+            data);
+
+        Type GetTypeClass(int type);
+
+        void OnNewClientConnection(string clientId, int index);
+
     }
 
 }

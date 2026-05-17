@@ -1,4 +1,7 @@
 using BluetoothLibrary;
+using GameControllerSimulator.Bean;
+using GameControllerSimulator.Connection;
+using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
@@ -12,6 +15,8 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Text;
+using System.Text.Json;
+using System.Threading.Tasks;
 using ViGEmBusLibrary;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
@@ -27,96 +32,154 @@ namespace GameControllerSimulator
     /// </summary>
     public sealed partial class MainWindow : Window
     {
+        private DispatcherQueue _dispatcher = DispatcherQueue.GetForCurrentThread();
+        private bool _isInitialized = false;
 
-        private BluetoothLibrary.BluetoothSocketServer bluetoothSocketServer;
         public MainWindow()
         {
             InitializeComponent();
+            this.Activated += OnActivated;
+            this.Closed += OnClosed;
         }
-        private void StatusText_PointerPressed(object sender, PointerRoutedEventArgs e)
+        private async void OnActivated(object sender, WindowActivatedEventArgs args)
         {
-            //bluetoothSocketServer = new BluetoothLibrary.BluetoothSocketServer(Guid.Parse("0000180D-0000-1000-8000-00805f9b34fb"), "BLE", new Callback());
-            //System.Diagnostics.Debug.WriteLine("start listener");
-            //bluetoothSocketServer.StartListener();
-            if (ViGEmBusUtils.IsDriverInstalled())
+            if (_isInitialized) return;
+            _isInitialized = true;
+            this.Activated -= OnActivated;
+            try
             {
-                System.Diagnostics.Debug.WriteLine("installed");
-                ViGEmBusUtils.test();
+                await Init();
             }
-            else
+            catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine("not installed");
+            }
+        }
+
+        private async void OnClosed(object sender, WindowEventArgs args)
+        {
+            try
+            {
+                await Destroy();
+            }
+            catch (Exception ex)
+            {
+            }
+        }
+        private async Task Init()
+        {
+            await CheckBaseComponent();
+            await InitConnectionManager();
+        }
+
+        private async Task CheckBaseComponent()
+        {
+            if (!ViGEmBusUtils.IsDriverInstalled())
+            {
                 ViGEmBusUtils.InstallDriver();
             }
-
-
+            if (!ViGEmBusUtils.IsDriverInstalled())
+            {
+                var messageDialog = new ContentDialog
+                {
+                    Title = "提示",
+                    Content = "未安装驱动，应用不可用。",
+                    CloseButtonText = "确定"
+                };
+                messageDialog.XamlRoot = this.Content.XamlRoot;
+                await messageDialog.ShowAsync();
+                this.Close();
+                return;
+            }
+            if (!await BluetoothUtils.IsBluetoothAvailableAsync())
+            {
+                var messageDialog = new ContentDialog
+                {
+                    Title = "提示",
+                    Content = "蓝牙不可用，应用不可用。",
+                    CloseButtonText = "确定"
+                };
+                messageDialog.XamlRoot = this.Content.XamlRoot;
+                await messageDialog.ShowAsync();
+                this.Close();
+                return;
+            }
         }
 
-        class ClientCallback : BluetoothLibrary.BluetoothSocketCallback.ClientCallback
+        private async Task Destroy()
         {
-            public void OnDataReady(BluetoothSocketServer.Client client, byte[] data)
+            if (await BluetoothUtils.IsBluetoothAvailableAsync())
             {
-                string received = Encoding.UTF8.GetString(data, 0, data.Length);
-                System.Diagnostics.Debug.WriteLine(received);
-            }
-
-            public void OnDataRevException(BluetoothSocketServer.Client client, Exception ex)
-            {
-                
-            }
-
-            public void OnDisconnect(BluetoothSocketServer.Client client)
-            {
-            }
-
-            public void OnSendDataException(BluetoothSocketServer.Client client, Exception ex, int id = -1)
-            {
+                await DestroyConnectionManager();
             }
         }
 
-        class Callback : BluetoothLibrary.BluetoothSocketCallback
+        #region 连接管理处理
+        private ConnectionManager? connectionManager;
+        private async Task InitConnectionManager()
         {
-            public BluetoothSocketCallback.ClientCallback CreateNewClientCallback()
+            connectionManager = new ConnectionManager(new ConnectionManagerCallback(this));
+            connectionManager?.Init();
+        }
+
+        private void OnConnectionAvaiableChange(bool avaiable)
+        {
+            _dispatcher.TryEnqueue(() =>
             {
-                return new ClientCallback();
+                if (avaiable)
+                {
+                    Bluetooth.Text = "Bluetooth Status: Running";
+                }
+                else
+                {
+                    Bluetooth.Text = "Bluetooth Status: Stopped";
+                }
+            });
+        }
+
+        private async Task DestroyConnectionManager()
+        {
+            connectionManager?.Destroy();
+        }
+
+        class ConnectionManagerCallback : IConnectionManagerCallback
+        {
+            private MainWindow window;
+            public ConnectionManagerCallback(MainWindow window)
+            {
+                this.window = window;
             }
 
-            public void OnForeverLoopException(Exception ex)
+            public Type GetTypeClass(int type)
             {
-                
+                return typeof(JsonElement);
             }
 
-            public void OnNewClientConnect(BluetoothSocketServer.Client client)
+            public void OnDataReady(string clientId, IBaseEntity data)
             {
-                System.Diagnostics.Debug.WriteLine("OnNewClientConnect");
-                client.SendData(Encoding.UTF8.GetBytes("Hello from server!"));
+
             }
 
-            public void OnNewClientException(Exception ex)
+            public void OnFaulted(string msg, Exception ex)
             {
-                
+
             }
 
-            public void OnStartServerFailed(Exception ex)
+            public void OnManagerAvaiable()
             {
-                
+                window.OnConnectionAvaiableChange(true);
             }
 
-            public void OnStartServerSuccess()
+            public void OnManagerUnavailable()
             {
-                System.Diagnostics.Debug.WriteLine("OnStartServerSuccess");
+                window.OnConnectionAvaiableChange(false);
             }
 
-            public void OnStopServer()
-            {
-                
-            }
-
-            public void OnStopServerException(Exception ex)
+            public void OnNewClientConnection(string clientId, int index)
             {
                 
             }
         }
 
+        #endregion
     }
 }

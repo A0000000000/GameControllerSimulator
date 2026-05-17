@@ -7,7 +7,16 @@ using System.Threading.Tasks;
 
 namespace GameControllerSimulator.Bean
 {
-    public class BaseEntity<T> where T : class
+    public interface IBaseEntity
+    {
+        int Type { get; }
+        int Id { get; }
+        long Timestamp { get; }
+
+        object? Data { get; }
+    }
+
+    public class BaseEntity<T> : IBaseEntity where T : class
     {
         [JsonPropertyName("type")]
         public int Type
@@ -36,6 +45,6 @@ namespace GameControllerSimulator.Bean
             get;
             set;
         }
-
+        object? IBaseEntity.Data { get => Data; }
     }
 }

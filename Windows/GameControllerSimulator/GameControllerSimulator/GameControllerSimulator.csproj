@@ -46,9 +46,6 @@
     <ProjectReference Include="..\BluetoothLibrary\BluetoothLibrary.csproj" />
     <ProjectReference Include="..\ViGEmBusLibrary\ViGEmBusLibrary.csproj" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Constant\" />
-  </ItemGroup>
 
   <!--
     Defining the "HasPackageAndPublishMenuAddedByProject" property here allows the Solution

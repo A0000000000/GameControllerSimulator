@@ -39,10 +39,10 @@
 
             <StackPanel HorizontalAlignment="Center" Spacing="8">
 
-                <TextBlock x:Name="DriverStatus" Text="Driver Status: Running" HorizontalAlignment="Center" PointerPressed="StatusText_PointerPressed"/>
-                <TextBlock x:Name="BluetoothUUID" Text="Bluetooth UUID: 00001124-0000-1000-8000-00805f9b34fb" HorizontalAlignment="Center"/>
-                <TextBlock x:Name="TcpInfo" Text="UDP: 0.0.0.0:9000" HorizontalAlignment="Center"/>
-                <TextBlock x:Name="UdpInfo" Text="TCP: 0.0.0.0:9100" HorizontalAlignment="Center"/>
+                <TextBlock x:Name="DriverStatus" Text="Driver Status: Unknown" HorizontalAlignment="Center" />
+                <TextBlock x:Name="Bluetooth" Text="Bluetooth Status: Unknown" HorizontalAlignment="Center"/>
+                <!--<TextBlock x:Name="TcpInfo" Text="UDP: 0.0.0.0:9000" HorizontalAlignment="Center"/>-->
+                <!--<TextBlock x:Name="UdpInfo" Text="TCP: 0.0.0.0:9100" HorizontalAlignment="Center"/>-->
 
             </StackPanel>
         </Border>
