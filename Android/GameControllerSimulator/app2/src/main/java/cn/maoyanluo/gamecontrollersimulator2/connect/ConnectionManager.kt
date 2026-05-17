@@ -139,7 +139,7 @@ class ConnectionManager(
                 gson.toJson(data).toByteArray(), id
             )
 
-            else -> throw IllegalStateException("Not support type: $connectionType.")
+            else -> callback.onSendDataException(IllegalStateException("Not support type: $connectionType."), -1, connectionType)
         }
     }
 
