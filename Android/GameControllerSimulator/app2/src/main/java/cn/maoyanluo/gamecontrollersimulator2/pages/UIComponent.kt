@@ -5,10 +5,14 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.TextUnit
 import cn.maoyanluo.gamecontrollersimulator2.generator.GamepadButton
 import cn.maoyanluo.ui_library.CircleTextButton
@@ -155,21 +159,12 @@ fun LTLBButtons(
     onTriggerChanged: (value: Int) -> Unit,
     onKeyEvent: (btn: GamepadButton, on: Boolean) -> Unit
 ) {
-    Row(modifier = modifier) {
-        GameControllerTriggerButton(
-            text = "LT",
-            fontSize = fontSize,
-            modifier = Modifier
-                .fillMaxHeight()
-                .weight(1f),
-            reverseDirection = true,
-            onValueChanged = onTriggerChanged,
-            minValue = 0,
-            maxValue = 255,
-            initialValue = 0
-        )
-
-        SquareTextButton(
+    Row(
+        modifier = modifier.padding(horizontal = 4.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        CircleTextButton(
             text = "LB",
             fontSize = fontSize,
             modifier = Modifier
@@ -182,6 +177,23 @@ fun LTLBButtons(
                 onKeyEvent(GamepadButton.LB, false)
             }
         )
+
+        Box(
+            modifier = Modifier
+                .fillMaxHeight()
+                .weight(1f)
+        ) {
+            GameControllerTriggerButton(
+                text = "LT",
+                fontSize = fontSize,
+                modifier = Modifier.fillMaxHeight(),
+                reverseDirection = true,
+                onValueChanged = onTriggerChanged,
+                minValue = 0,
+                maxValue = 255,
+                initialValue = 0
+            )
+        }
     }
 }
 
@@ -192,8 +204,28 @@ fun RBRTButtons(
     onTriggerChanged: (value: Int) -> Unit,
     onKeyEvent: (btn: GamepadButton, on: Boolean) -> Unit
 ) {
-    Row(modifier = modifier) {
-        SquareTextButton(
+    Row(
+        modifier = modifier.padding(horizontal = 4.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxHeight()
+                .weight(1f)
+        ) {
+            GameControllerTriggerButton(
+                text = "RT",
+                fontSize = fontSize,
+                modifier = Modifier.fillMaxHeight(),
+                reverseDirection = false,
+                onValueChanged = onTriggerChanged,
+                minValue = 0,
+                maxValue = 255,
+                initialValue = 0
+            )
+        }
+        CircleTextButton(
             text = "RB",
             fontSize = fontSize,
             modifier = Modifier
@@ -205,19 +237,6 @@ fun RBRTButtons(
             onUp = {
                 onKeyEvent(GamepadButton.RB, false)
             }
-        )
-
-        GameControllerTriggerButton(
-            text = "RT",
-            fontSize = fontSize,
-            modifier = Modifier
-                .fillMaxHeight()
-                .weight(1f),
-            reverseDirection = false,
-            onValueChanged = onTriggerChanged,
-            minValue = 0,
-            maxValue = 255,
-            initialValue = 0
         )
     }
 }
