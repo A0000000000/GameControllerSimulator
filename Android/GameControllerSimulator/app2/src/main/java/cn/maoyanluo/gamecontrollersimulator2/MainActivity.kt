@@ -83,7 +83,8 @@ fun MainContainer(modifier: Modifier = Modifier) {
             fun requestPermission() {
                 launcher.launch(
                     arrayOf(
-                        Manifest.permission.BLUETOOTH_CONNECT
+                        Manifest.permission.BLUETOOTH_CONNECT,
+                        Manifest.permission.BLUETOOTH_SCAN
                     )
                 )
             }
@@ -107,9 +108,7 @@ fun MainContainer(modifier: Modifier = Modifier) {
             }
             ConnectingPage(
                 modifier = pageModifier,
-                device = uiState.device,
-                isAvailable = uiState.isAvailable,
-                onReInitConnection = viewModel::reInitConnectionManager,
+                uiState = uiState,
                 onOpenGamepad = viewModel::onEnterGamepad
             )
         }

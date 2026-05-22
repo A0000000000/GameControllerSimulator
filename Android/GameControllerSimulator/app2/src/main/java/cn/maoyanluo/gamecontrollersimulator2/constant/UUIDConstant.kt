@@ -1,0 +1,14 @@
+package cn.maoyanluo.gamecontrollersimulator2.constant
+
+import java.util.UUID
+
+object UUIDConstant {
+
+    val DEFAULT_RFCOMM_UUID = UUID.fromString("0000180D-0000-1000-8000-00805f9b34fb")!!
+    val GATT_FUN_UUID = UUID.fromString("09251205-1113-1998-2026-000000000000")!!
+    val GATT_DATA_RFCOMM_UUID = UUID.fromString("09251205-1113-1998-2026-000000000001")!!
+    val HOST_UUID = UUID.fromString("09251205-1113-1998-2026-000000000002")!!
+    val TCP_INFO_UUID = UUID.fromString("09251205-1113-1998-2026-000000000003")!!
+    val UDP_INFO_UUID = UUID.fromString("09251205-1113-1998-2026-000000000004")!!
+
+}

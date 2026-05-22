@@ -10,6 +10,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import cn.maoyanluo.bluetooth_library.BluetoothManagerWrapper
+import cn.maoyanluo.bluetooth_library.gatt.BluetoothGATTManager
 import cn.maoyanluo.coroutine_library.CoroutineManager
 import cn.maoyanluo.gamecontrollersimulator2.bean.BaseEntity
 import cn.maoyanluo.gamecontrollersimulator2.bean.DeviceInfo
@@ -18,16 +19,20 @@ import cn.maoyanluo.gamecontrollersimulator2.connect.ConnectionCallback
 import cn.maoyanluo.gamecontrollersimulator2.connect.ConnectionManager
 import cn.maoyanluo.gamecontrollersimulator2.constant.EntityId
 import cn.maoyanluo.gamecontrollersimulator2.constant.EntityType
+import cn.maoyanluo.gamecontrollersimulator2.constant.UUIDConstant
 import cn.maoyanluo.log_library.LogUtils
 import com.google.gson.JsonElement
 import kotlinx.coroutines.launch
+import java.util.UUID
 
-class MainViewModel(application: Application) : AndroidViewModel(application) {
+class MainViewModel(private val application: Application) : AndroidViewModel(application) {
 
     companion object {
         const val TAG = "MainViewModel"
     }
 
+    var mainUiState by mutableStateOf<MainUiState>(MainUiState.NoPermissionPage)
+        private set
     val deviceInfo = DeviceInfo(
         osVersion = "Android ${Build.VERSION.RELEASE}",
         sdk = "${Build.VERSION.SDK_INT}",
@@ -43,15 +48,63 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         fingerprint = "${Build.FINGERPRINT}",
         supportedAbis = Build.SUPPORTED_ABIS.joinToString(),
     )
-
-    var mainUiState by mutableStateOf<MainUiState>(MainUiState.NoPermissionPage)
-        private set
-
-    private val bluetoothManagerWrapper = BluetoothManagerWrapper(application)
     val coroutineManager = CoroutineManager()
-    private var connectionManager: ConnectionManager? = null
+    private val bluetoothManagerWrapper = BluetoothManagerWrapper(application)
+    private var bluetoothGATTManager: BluetoothGATTManager? = null
+    private val bluetoothGATTManagerCallback = object : BluetoothGATTManager.BluetoothGATTManagerCallback {
+        override fun onAvailable(device: BluetoothDevice) {
+            bluetoothGATTManager?.readCharacteristic(UUIDConstant.GATT_FUN_UUID, UUIDConstant.GATT_DATA_RFCOMM_UUID)
+            bluetoothGATTManager?.readCharacteristic(UUIDConstant.GATT_FUN_UUID, UUIDConstant.TCP_INFO_UUID)
+            mainUiState = MainUiState.ConnectingPage(
+                device = device,
+                isGATTAvailable = true,
+                isRFCOMMAvailable = false
+            )
+        }
 
-    private val connectionCallback = object : ConnectionCallback {
+        override fun onCharacteristicRead(
+            data: ByteArray,
+            svcUuid: UUID,
+            dataUuid: UUID,
+            device: BluetoothDevice
+        ) {
+            if (UUIDConstant.GATT_FUN_UUID == svcUuid)
+            {
+                when(dataUuid)
+                {
+                    UUIDConstant.GATT_DATA_RFCOMM_UUID -> {
+                        connectionManager.initRFCOMM(
+                            bluetoothManagerWrapper.getAdapter(),
+                            device,
+                            UUID.fromString(String(data))
+                        )
+                    }
+                    UUIDConstant.TCP_INFO_UUID -> {
+                        val tcpInfo = String(data).split(":")
+                        connectionManager.initTcpSocket(tcpInfo[0], tcpInfo[1].toInt())
+                    }
+                    UUIDConstant.UDP_INFO_UUID -> {
+
+                    }
+                }
+            }
+        }
+
+        override fun onFault(device: BluetoothDevice) {
+            mainUiState = MainUiState.ConnectingPage(
+                device = device,
+                isGATTAvailable = false,
+                isRFCOMMAvailable = false
+            )
+            connectionManager.initRFCOMM(bluetoothManagerWrapper.getAdapter(), device, UUIDConstant.DEFAULT_RFCOMM_UUID)
+        }
+
+        override fun onDestroy() {
+
+        }
+
+    }
+    private val connectionManager: ConnectionManager = ConnectionManager(object : ConnectionCallback {
         override fun onManagerAvailable() {
             updateConnectionAvailability(true)
         }
@@ -68,7 +121,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             if (data != null) {
                 when (data.type) {
                     EntityType.TYPE_QUERY_CLIENT_INFO -> {
-                        connectionManager?.sendData(BaseEntity(
+                        connectionManager.sendData(BaseEntity(
                             type = EntityType.TYPE_QUERY_CLIENT_INFO_RESULT,
                             id = EntityId.GAMEPAD_PAGE_EVENT,
                             timestamp = System.currentTimeMillis(),
@@ -114,7 +167,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 ).show()
             }
         }
-    }
+    }, coroutineManager)
 
     init {
         coroutineManager.init()
@@ -140,47 +193,40 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         clearConnection()
         mainUiState = MainUiState.ConnectingPage(
             device = device,
-            isAvailable = false
+            isGATTAvailable = false,
+            isRFCOMMAvailable = false
         )
-        connectionManager = ConnectionManager(
-            device,
-            bluetoothManagerWrapper.getAdapter(),
-            connectionCallback,
-            coroutineManager
-        ).also { it.init() }
-    }
-
-    fun reInitConnectionManager() {
-        connectionManager?.init()
+        bluetoothGATTManager = BluetoothGATTManager(application, device, coroutineManager, bluetoothGATTManagerCallback)
+        bluetoothGATTManager?.init()
     }
 
     fun onEnterGamepad() {
         val currentState = mainUiState
-        val cm = connectionManager
-        if (currentState is MainUiState.ConnectingPage && currentState.isAvailable && cm != null) {
+        if (currentState is MainUiState.ConnectingPage && connectionManager.isAvailable) {
             mainUiState = MainUiState.GamepadPage
         }
-        if (cm == null) {
+        if (!connectionManager.isAvailable) {
             mainUiState = MainUiState.SelectPage
         }
     }
 
     fun onBackFromGamepad() {
         val currentState = mainUiState
-        val cm = connectionManager
-        if (currentState is MainUiState.GamepadPage && cm != null) {
+        val bm = bluetoothGATTManager
+        if (currentState is MainUiState.GamepadPage && bm != null) {
             mainUiState = MainUiState.ConnectingPage(
-                device = cm.device,
-                isAvailable = connectionManager?.isAvailable == true
+                device = bm.device,
+                isGATTAvailable = bluetoothGATTManager?.isAvailable == true,
+                isRFCOMMAvailable = connectionManager.isAvailable
             )
         }
-        if (cm == null) {
+        if (bm == null) {
             mainUiState = MainUiState.SelectPage
         }
     }
 
     fun onGamepadEvent(data: ByteArray) {
-        connectionManager?.sendData(
+        connectionManager.sendData(
             BaseEntity(
                 type = EntityType.TYPE_SEND_GAME_EVENT,
                 id = EntityId.GAMEPAD_PAGE_EVENT,
@@ -200,17 +246,18 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private fun updateConnectionAvailability(isAvailable: Boolean) {
         when (val currentState = mainUiState) {
             is MainUiState.ConnectingPage -> {
-                mainUiState = currentState.copy(isAvailable = isAvailable)
+                mainUiState = currentState.copy(isRFCOMMAvailable = connectionManager.bluetoothAvailable)
             }
             is MainUiState.GamepadPage -> {
-                val cm = connectionManager
-                if (!isAvailable && cm != null) {
+                val bm = bluetoothGATTManager
+                if (!isAvailable && bm != null) {
                     mainUiState = MainUiState.ConnectingPage(
-                        device = cm.device,
-                        isAvailable = false
+                        device = bm.device,
+                        isGATTAvailable = bluetoothGATTManager?.isAvailable == true,
+                        isRFCOMMAvailable = false
                     )
                 }
-                if (cm == null) {
+                if (bm == null) {
                     mainUiState = MainUiState.SelectPage
                 }
             }
@@ -219,7 +266,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     private fun clearConnection() {
-        connectionManager?.destroy()
-        connectionManager = null
+        connectionManager.destroy()
+        bluetoothGATTManager?.destroy()
+        bluetoothGATTManager = null
     }
+
 }

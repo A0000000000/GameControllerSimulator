@@ -1,7 +1,6 @@
 package cn.maoyanluo.gamecontrollersimulator2.pages
 
 import android.annotation.SuppressLint
-import android.bluetooth.BluetoothDevice
 import android.view.KeyEvent
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -38,6 +37,7 @@ import androidx.compose.ui.unit.sp
 import cn.maoyanluo.coroutine_library.CoroutineManager
 import cn.maoyanluo.gamecontrollersimulator2.R
 import cn.maoyanluo.gamecontrollersimulator2.MainActivity
+import cn.maoyanluo.gamecontrollersimulator2.MainUiState
 import cn.maoyanluo.gamecontrollersimulator2.generator.GamepadAxis
 import cn.maoyanluo.gamecontrollersimulator2.generator.GamepadButton
 import cn.maoyanluo.gamecontrollersimulator2.generator.GamepadEventGenerator
@@ -59,9 +59,7 @@ private fun invertShortAxisValue(value: Int): Short {
 @Composable
 fun ConnectingPage(
     modifier: Modifier,
-    device: BluetoothDevice,
-    isAvailable: Boolean,
-    onReInitConnection: () -> Unit,
+    uiState: MainUiState.ConnectingPage,
     onOpenGamepad: () -> Unit
 ) {
     Column(
@@ -83,13 +81,22 @@ fun ConnectingPage(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             ConnectionStatusCard(
-                title = "蓝牙",
+                title = "Bluetooth GATT",
                 primaryLabel = "设备名称",
-                primaryValue = device.name ?: "未知设备",
-                statusText = if (isAvailable) "就绪" else "未就绪",
-                statusColor = if (isAvailable) Color(0xFF2E7D32) else Color(0xFF8A5A00)
+                primaryValue = uiState.device.name ?: "未知设备",
+                statusText = if (uiState.isGATTAvailable) "就绪" else "未就绪",
+                statusColor = if (uiState.isGATTAvailable) Color(0xFF2E7D32) else Color(0xFF8A5A00)
             ) {
-                onReInitConnection()
+
+            }
+            ConnectionStatusCard(
+                title = "Bluetooth RFCOMM",
+                primaryLabel = "设备名称",
+                primaryValue = uiState.device.name ?: "未知设备",
+                statusText = if (uiState.isRFCOMMAvailable) "就绪" else "未就绪",
+                statusColor = if (uiState.isRFCOMMAvailable) Color(0xFF2E7D32) else Color(0xFF8A5A00)
+            ) {
+
             }
             ConnectionStatusCard(
                 title = "TCP",
@@ -111,7 +118,7 @@ fun ConnectingPage(
 
         Button(
             onClick = onOpenGamepad,
-            enabled = isAvailable,
+            enabled = uiState.isRFCOMMAvailable,
             modifier = Modifier.fillMaxWidth()
         ) {
             Text(text = "->")

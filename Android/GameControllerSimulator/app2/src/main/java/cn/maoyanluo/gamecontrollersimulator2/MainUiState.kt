@@ -7,7 +7,8 @@ sealed interface MainUiState {
     data object SelectPage : MainUiState
     data class ConnectingPage(
         val device: BluetoothDevice,
-        val isAvailable: Boolean = false
+        val isGATTAvailable: Boolean = false,
+        val isRFCOMMAvailable: Boolean = false
     ) : MainUiState
     data object GamepadPage : MainUiState
 }
