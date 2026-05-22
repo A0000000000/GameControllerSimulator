@@ -50,6 +50,7 @@ Windows/**/*.VC.db
 Windows/**/*.VC.opendb
 Windows/**/*.pdb
 Windows/**/.vs/
+Windows/**/AppPackages/
 # ==========================
 # 通用
 # ==========================

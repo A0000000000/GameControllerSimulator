@@ -25,5 +25,12 @@ namespace BluetoothLibrary
             }
             return bluetoothRadio.State == RadioState.On;
         }
+
+        public static async Task<bool> SupportBLEPerpheralAsync()
+        {
+            BluetoothAdapter adapter = await BluetoothAdapter.GetDefaultAsync();
+            return adapter.IsPeripheralRoleSupported;
+        }
+
     }
 }

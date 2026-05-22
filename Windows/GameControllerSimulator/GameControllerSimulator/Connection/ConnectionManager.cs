@@ -14,18 +14,18 @@ namespace GameControllerSimulator.Connection
     {
 
         #region 内部使用的常量
-        private static readonly Guid HOST_GUID = Guid.Parse("0000180D-0000-1000-8000-00805f9b34fb");
-
-        private const string BLUETOOTH_SERVICE_NAME = "GameControllerSimulator2";
 
         private static readonly int[] INTERNAL_ID_ARRAY = new int[] { EntityId.CONNECTION_MANAGER_INTERNAL_ID };
         #endregion
 
+
         #region 对外暴露接口
-        public ConnectionManager(IConnectionManagerCallback callback)
+        public ConnectionManager(Guid rfcommGuid, string svcName, int connectionCount, IConnectionManagerCallback callback)
         {
             this.callback = callback;
-            bluetoothSocketServer = new BluetoothSocketServer(HOST_GUID, BLUETOOTH_SERVICE_NAME, new ServerCallback(this));
+            clientIds = Enumerable.Repeat("", connectionCount).ToArray();
+            clients = new BluetoothSocketServer.Client[connectionCount];
+            bluetoothSocketServer = new BluetoothSocketServer(rfcommGuid, svcName, new ServerCallback(this));
             IsBluetoothAvailable = false;
             IsTcpAvailable = false;
             IsUdpAvailable = false;
@@ -92,7 +92,7 @@ namespace GameControllerSimulator.Connection
 
         #region 内部字段
         private IConnectionManagerCallback? callback;
-        private string[] clientIds = new string[4] { "", "", "", "" };
+        private string[] clientIds;
         #endregion
 
         #region 蓝牙相关逻辑
@@ -108,7 +108,7 @@ namespace GameControllerSimulator.Connection
             }
         }
         private BluetoothSocketServer? bluetoothSocketServer;
-        private BluetoothSocketServer.Client?[] clients = new BluetoothSocketServer.Client[4];
+        private BluetoothSocketServer.Client?[] clients;
         #endregion
 
         #region Todo: TCP相关逻辑

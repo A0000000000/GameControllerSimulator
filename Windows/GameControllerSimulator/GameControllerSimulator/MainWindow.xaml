@@ -40,7 +40,8 @@
             <StackPanel HorizontalAlignment="Center" Spacing="8">
 
                 <TextBlock x:Name="DriverStatus" Text="Driver Status: Unknown" HorizontalAlignment="Center" />
-                <TextBlock x:Name="Bluetooth" Text="Bluetooth Status: Unknown" HorizontalAlignment="Center"/>
+                <TextBlock x:Name="BluetoothGATT" Text="Bluetooth GATT Status: Unknown" HorizontalAlignment="Center"/>
+                <TextBlock x:Name="BluetoothRFCOMM" Text="Bluetooth RFCOMM Status: Unknown" HorizontalAlignment="Center"/>
                 <!--<TextBlock x:Name="TcpInfo" Text="UDP: 0.0.0.0:9000" HorizontalAlignment="Center"/>-->
                 <!--<TextBlock x:Name="UdpInfo" Text="TCP: 0.0.0.0:9100" HorizontalAlignment="Center"/>-->
 

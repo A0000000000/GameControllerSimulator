@@ -14,6 +14,7 @@ using Microsoft.UI.Xaml.Data;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Navigation;
+using NetworkLibrary;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -24,6 +25,7 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using ViGEmBusLibrary;
+using Windows.Devices.Bluetooth.GenericAttributeProfile;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.Storage.Streams;
@@ -38,10 +40,13 @@ namespace GameControllerSimulator
     /// </summary>
     public sealed partial class MainWindow : Window
     {
+        public const int CONTROLLER_COUNT = 4;
+        private const string APP_NAME = "GameControllerSimulator2";
+
         private DispatcherQueue _dispatcher = DispatcherQueue.GetForCurrentThread();
         private bool _isInitialized = false;
-        private DeviceUIManager[] deviceUIManagers = new DeviceUIManager[4];
-        private GamepadStatePacket[] gamepadStatePackets = new GamepadStatePacket[4]
+        private DeviceUIManager[] deviceUIManagers = new DeviceUIManager[CONTROLLER_COUNT];
+        private GamepadStatePacket[] gamepadStatePackets = new GamepadStatePacket[CONTROLLER_COUNT]
         {
             new GamepadStatePacket(),
             new GamepadStatePacket(),
@@ -55,6 +60,9 @@ namespace GameControllerSimulator
             this.Activated += OnActivated;
             this.Closed += OnClosed;
         }
+
+        
+
         private async void OnActivated(object sender, WindowActivatedEventArgs args)
         {
             if (_isInitialized) return;
@@ -84,7 +92,14 @@ namespace GameControllerSimulator
             await CheckBaseComponent();
             await InitControllerUI();
             await InitGameControllerManager();
+            await InitGATTService();
             await InitConnectionManager();
+        }
+        private async Task Destroy()
+        {
+            await DestroyConnectionManager();
+            await DestroyGATTService();
+            await DestroyGameControllerManager();
         }
 
         private async Task CheckBaseComponent()
@@ -122,17 +137,6 @@ namespace GameControllerSimulator
             }
         }
 
-        private async Task Destroy()
-        {
-            if (await BluetoothUtils.IsBluetoothAvailableAsync())
-            {
-                await DestroyConnectionManager();
-            }
-            if (ViGEmBusUtils.IsDriverInstalled())
-            {
-                await DestroyGameControllerManager(); 
-            }
-        }
 
         #region 控制器UI管理
 
@@ -146,11 +150,95 @@ namespace GameControllerSimulator
 
         #endregion
 
+
+        #region GATT管理
+
+        private List<GATTProperties> GATTProperties = new List<GATTProperties>();
+        private BluetoothGATTManager? bluetoothGATTManager;
+        private async Task InitGATTService()
+        {
+            if (await BluetoothUtils.SupportBLEPerpheralAsync())
+            {
+                rfcommGuid = Guid.NewGuid();
+                GATTProperties.Add(new ()
+                {
+                    PropertiesGuid = GUIDConstant.GATT_DATA_RFCOMM_GUID,
+                    PropertiesKey = "RFCOMMGuid",
+                    PropertiesValue = Encoding.UTF8.GetBytes(rfcommGuid.ToString())
+                });
+                bluetoothGATTManager = new BluetoothGATTManager(GATTProperties, GUIDConstant.GATT_FUN_GUID, new GATTCallback(this));
+                bluetoothGATTManager?.StartService();
+            }
+        }
+
+        private async Task DestroyGATTService()
+        {
+            if (await BluetoothUtils.SupportBLEPerpheralAsync())
+            {
+                bluetoothGATTManager?.StopService();
+                bluetoothGATTManager = null;
+                GATTProperties.Clear();
+            }
+        }
+
+        private void OnGATTStatusChanged(GattServiceProviderAdvertisementStatus status)
+        {
+            _dispatcher.TryEnqueue(() =>
+            {
+                switch(status)
+                {
+                    case GattServiceProviderAdvertisementStatus.Started:
+                        BluetoothGATT.Text = $"Bluetooth GATT Status: Running";
+                        break;
+                    case GattServiceProviderAdvertisementStatus.Aborted:
+                    case GattServiceProviderAdvertisementStatus.Stopped:
+                        BluetoothGATT.Text = $"Bluetooth GATT Status: Stopped";
+                        break;
+                    default:
+                        BluetoothGATT.Text = $"Bluetooth GATT Status: {status}";
+                        break;
+                }
+            });
+        }
+
+        class GATTCallback : IBluetoothGATTManagerCallback
+        {
+            private MainWindow window;
+            public GATTCallback(MainWindow window)
+            {
+                this.window = window;
+            }
+
+            public void OnException(Exception ex)
+            {
+                window.OnFaulted("GATT Service Exception", ex);
+            }
+
+            public void OnGATTStatusChanged(GattServiceProviderAdvertisementStatus status)
+            {
+                window.OnGATTStatusChanged(status);
+            }
+
+            public void OnStartService()
+            {
+
+            }
+
+            public void OnStopService()
+            {
+
+            }
+        }
+
+        #endregion
+
         #region 连接管理处理
         private ConnectionManager? connectionManager;
+        private Guid rfcommGuid = GUIDConstant.DEFAULT_RFCOMM_GUID;
+
         private async Task InitConnectionManager()
         {
-            connectionManager = new ConnectionManager(new ConnectionManagerCallback(this));
+            connectionManager = new ConnectionManager(rfcommGuid, APP_NAME, CONTROLLER_COUNT, new ConnectionManagerCallback(this));
             connectionManager?.Init();
         }
 
@@ -160,18 +248,21 @@ namespace GameControllerSimulator
             {
                 if (avaiable)
                 {
-                    Bluetooth.Text = "Bluetooth Status: Running";
+                    BluetoothRFCOMM.Text = "Bluetooth RFCOMM Status: Running";
                 }
                 else
                 {
-                    Bluetooth.Text = "Bluetooth Status: Stopped";
+                    BluetoothRFCOMM.Text = "Bluetooth RFCOMM Status: Stopped";
                 }
             });
         }
 
         private async Task DestroyConnectionManager()
         {
-            connectionManager?.Destroy();
+            if (await BluetoothUtils.IsBluetoothAvailableAsync())
+            {
+                connectionManager?.Destroy();
+            }
         }
 
         class ConnectionManagerCallback : IConnectionManagerCallback
@@ -222,7 +313,7 @@ namespace GameControllerSimulator
 
         #region 手柄管理器
         private ViGEmBusManager? viGEmBusManager;
-        private ViGEmBusGameController?[] gameControllers = new ViGEmBusGameController[4];
+        private ViGEmBusGameController?[] gameControllers = new ViGEmBusGameController[CONTROLLER_COUNT];
 
         private async Task InitGameControllerManager()
         {
@@ -241,12 +332,15 @@ namespace GameControllerSimulator
 
         private async Task DestroyGameControllerManager()
         {
-            viGEmBusManager?.Dispose();
-            viGEmBusManager = null;
-            for (int i = 0; i < gameControllers.Length; i++)
+            if (ViGEmBusUtils.IsDriverInstalled())
             {
-                gameControllers[i]?.Dispose();
-                gameControllers[i] = null;
+                viGEmBusManager?.Dispose();
+                viGEmBusManager = null;
+                for (int i = 0; i < gameControllers.Length; i++)
+                {
+                    gameControllers[i]?.Dispose();
+                    gameControllers[i] = null;
+                }
             }
         }
         #endregion

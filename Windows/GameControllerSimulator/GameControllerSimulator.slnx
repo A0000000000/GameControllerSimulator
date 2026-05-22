@@ -12,5 +12,7 @@
     <Platform Solution="*|x86" Project="x86" />
     <Deploy />
   </Project>
+  <Project Path="NetworkLibrary/NetworkLibrary.csproj" Id="400af4a0-f977-4dfe-88a0-1b7e88d0b2ad" />
+  <Project Path="SocketCommonLibrary/SocketCommonLibrary.csproj" Id="bca6725b-99e9-41e5-92eb-08df45a76e95" />
   <Project Path="ViGEmBusLibrary/ViGEmBusLibrary.csproj" Id="6cd5dc52-d488-43be-a30b-666824a4d5db" />
 </Solution>

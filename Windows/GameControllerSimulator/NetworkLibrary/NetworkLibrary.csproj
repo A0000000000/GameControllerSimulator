@@ -1,21 +1,14 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <!--<TargetFramework>net8.0-windows10.0.19041.0</TargetFramework>-->
-	  <TargetFramework>net9.0-windows10.0.19041.0</TargetFramework>
-
-	  <RuntimeIdentifiers>win-x86;win-x64;win-arm64</RuntimeIdentifiers>
+    <TargetFramework>net8.0-windows10.0.19041.0</TargetFramework>
     <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
-    <RootNamespace>BluetoothLibrary</RootNamespace>
+    <RootNamespace>NetworkLibrary</RootNamespace>
     <UseWinUI>true</UseWinUI>
     <WinUISDKReferences>false</WinUISDKReferences>
     <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="InTheHand.Net.Bluetooth" Version="4.2.4" />
     <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.28000.1839" />
     <PackageReference Include="Microsoft.WindowsAppSDK" Version="2.0.1" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\SocketCommonLibrary\SocketCommonLibrary.csproj" />
   </ItemGroup>
 </Project>
