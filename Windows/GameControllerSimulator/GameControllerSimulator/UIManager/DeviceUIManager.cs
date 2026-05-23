@@ -1,4 +1,5 @@
-﻿using Microsoft.UI.Dispatching;
+﻿using LogLibrary;
+using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml.Controls;
 using System;
 using System.Collections.Generic;
@@ -10,6 +11,7 @@ namespace GameControllerSimulator.UIManager
 {
     public class DeviceUIManager
     {
+        public static string TAG = "DeviceUIManager";
         private DispatcherQueue mainDispatcher;
 
         private TextBlock statusText;
@@ -19,6 +21,7 @@ namespace GameControllerSimulator.UIManager
 
         public DeviceUIManager(DispatcherQueue dispatcher, TextBlock statusText, TextBlock deviceNameText, TextBlock osNameText, TextBlock currentEventText)
         {
+            LogUtils.I(TAG, "Create DeviceUIManager");
             mainDispatcher = dispatcher;
             this.statusText = statusText;
             this.deviceNameText = deviceNameText;
@@ -30,6 +33,7 @@ namespace GameControllerSimulator.UIManager
 
         public void Reset()
         {
+            LogUtils.I(TAG, "DeviceUIManager Reset");
             mainDispatcher.TryEnqueue(() =>
             {
                 statusText.Text = "状态: Disconnected";
@@ -41,6 +45,7 @@ namespace GameControllerSimulator.UIManager
 
         public void SetStatus(string status)
         {
+            LogUtils.I(TAG, $"DeviceUIManager SetStatus status = [{status}]");
             mainDispatcher.TryEnqueue(() =>
             {
                 statusText.Text = $"状态: {status}";
@@ -48,6 +53,7 @@ namespace GameControllerSimulator.UIManager
         }
         public void SetDeviceName(string deviceName)
         {
+            LogUtils.I(TAG, $"DeviceUIManager SetDeviceName deviceName = [{deviceName}]");
             mainDispatcher.TryEnqueue(() =>
             {
                 deviceNameText.Text = $"设备名称: {deviceName}";
@@ -56,6 +62,7 @@ namespace GameControllerSimulator.UIManager
 
         public void SetOsName(string osName)
         {
+            LogUtils.I(TAG, $"DeviceUIManager SetOsName osName = [{osName}]");
             mainDispatcher.TryEnqueue(() =>
             {
                 osNameText.Text = $"系统版本: {osName}";
@@ -64,6 +71,7 @@ namespace GameControllerSimulator.UIManager
 
         public void SetCurrentEvent(string currentEvent)
         {
+            LogUtils.I(TAG, $"DeviceUIManager SetCurrentEvent currentEvent = [{currentEvent}]");
             mainDispatcher.TryEnqueue(() =>
             {
                 currentEventText.Text = $"当前事件: {currentEvent}";

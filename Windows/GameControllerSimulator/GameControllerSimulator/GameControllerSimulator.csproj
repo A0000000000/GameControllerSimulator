@@ -45,7 +45,9 @@
   <ItemGroup>
     <ProjectReference Include="..\BluetoothLibrary\BluetoothLibrary.csproj" />
     <ProjectReference Include="..\CommonLibrary\CommonLibrary.csproj" />
+    <ProjectReference Include="..\LogLibrary\LogLibrary.csproj" />
     <ProjectReference Include="..\NetworkLibrary\NetworkLibrary.csproj" />
+    <ProjectReference Include="..\SocketCommonLibrary\SocketCommonLibrary.csproj" />
     <ProjectReference Include="..\ViGEmBusLibrary\ViGEmBusLibrary.csproj" />
   </ItemGroup>
 

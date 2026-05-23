@@ -1,4 +1,5 @@
-﻿using System;
+﻿using LogLibrary;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,17 +11,20 @@ namespace BluetoothLibrary
 {
     public class BluetoothUtils
     {
+        public static string TAG = "BluetoothUtils";
         public static async Task<bool> IsBluetoothAvailableAsync()
         {
             var btAdapter = await BluetoothAdapter.GetDefaultAsync();
             if (btAdapter == null)
             {
+                LogUtils.W(TAG, "IsBluetoothAvailableAsync BluetoothAdapter is null.");
                 return false;
             }
             var radios = await Radio.GetRadiosAsync();
             var bluetoothRadio = radios.FirstOrDefault(radio => radio.Kind == RadioKind.Bluetooth);
             if (bluetoothRadio == null)
             {
+                LogUtils.W(TAG, "IsBluetoothAvailableAsync Radio is null.");
                 return false;
             }
             return bluetoothRadio.State == RadioState.On;
@@ -29,6 +33,11 @@ namespace BluetoothLibrary
         public static async Task<bool> SupportBLEPerpheralAsync()
         {
             BluetoothAdapter adapter = await BluetoothAdapter.GetDefaultAsync();
+            if (adapter == null)
+            {
+                LogUtils.W(TAG, "IsBluetoothAvailableAsync BluetoothAdapter is null.");
+                return false;
+            }
             return adapter.IsPeripheralRoleSupported;
         }
 

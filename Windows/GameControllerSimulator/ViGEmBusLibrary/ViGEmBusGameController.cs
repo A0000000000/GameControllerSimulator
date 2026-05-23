@@ -1,22 +1,27 @@
 ﻿using CommonLibrary.Bean;
 using CommonLibrary.Generator;
+using LogLibrary;
 using Nefarius.ViGEm.Client.Targets;
 using Nefarius.ViGEm.Client.Targets.Xbox360;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
+using System.Threading.Channels;
 using System.Threading.Tasks;
 
 namespace ViGEmBusLibrary
 {
     public class ViGEmBusGameController: IDisposable
     {
+        public static string TAG = "ViGEmBusGameController";
         private IXbox360Controller controller;
         private int index;
 
         public ViGEmBusGameController(IXbox360Controller controller, int index)
         {
+            LogUtils.I(TAG, $"Create ViGEmBusGameController index = [{index}]");
             this.controller = controller;
             this.index = index;
         }
@@ -24,16 +29,19 @@ namespace ViGEmBusLibrary
 
         public void Connect()
         {
+            LogUtils.I(TAG, $"Connect index = [{index}]");
             controller.Connect();
         }
 
         public void Disconnect()
         {
+            LogUtils.I(TAG, $"Disconnect index = [{index}]");
             controller.Disconnect();
         }
 
         public void AddFeedbackEventHandler(Action<FeedbackReceived> handler)
         {
+            LogUtils.I(TAG, $"AddFeedbackEventHandler index = [{index}]");
             controller.FeedbackReceived += (sender, args) =>
             {
                 var feedback = new FeedbackReceived
@@ -42,12 +50,14 @@ namespace ViGEmBusLibrary
                     SmallMotor = args.SmallMotor,
                     LedNumber = args.LedNumber
                 };
+                LogUtils.I(TAG, $"AddFeedbackEventHandler FeedbackReceived index = [{index}], Feedback = [{JsonSerializer.Serialize(feedback)}]");
                 handler(feedback);
             };
         }
 
         public void UpdateState(List<GamepadStateChange> changes)
         {
+            LogUtils.I(TAG, $"UpdateState index = [{index}], count = [{changes?.Count ?? -1}]");
             if (changes == null || changes.Count == 0)
             {
                 return;
@@ -60,6 +70,7 @@ namespace ViGEmBusLibrary
 
         public void UpdateState(GamepadStateChange change)
         {
+            LogUtils.I(TAG, $"UpdateState index = [{index}], change = [{change}]");
             if (change.Type == GamepadChangeType.Button && change.Button != null)
             {
                 if (change.Button.Value != GamepadButton.Function)

@@ -6,6 +6,7 @@ using GameControllerSimulator.Constant;
 using GameControllerSimulator.Generator;
 using GameControllerSimulator.Generator.GamepadProtocol;
 using GameControllerSimulator.UIManager;
+using LogLibrary;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -16,6 +17,7 @@ using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Navigation;
 using NetworkLibrary;
 using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -29,6 +31,7 @@ using Windows.Devices.Bluetooth.GenericAttributeProfile;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.Storage.Streams;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -40,6 +43,7 @@ namespace GameControllerSimulator
     /// </summary>
     public sealed partial class MainWindow : Window
     {
+        public static string TAG = "MainWindow";
         public const int CONTROLLER_COUNT = 4;
         private const string APP_NAME = "GameControllerSimulator2";
 
@@ -89,6 +93,7 @@ namespace GameControllerSimulator
         }
         private async Task Init()
         {
+            LogUtils.I(TAG, "init window");
             await CheckBaseComponent();
             await InitControllerUI();
             await InitGameControllerManager();
@@ -97,6 +102,7 @@ namespace GameControllerSimulator
         }
         private async Task Destroy()
         {
+            LogUtils.I(TAG, "destroy window");
             await DestroyConnectionManager();
             await DestroyGATTService();
             await DestroyGameControllerManager();
@@ -111,6 +117,7 @@ namespace GameControllerSimulator
             }
             if (!ViGEmBusUtils.IsDriverInstalled())
             {
+                LogUtils.E(TAG, "driver not installed.");
                 var messageDialog = new ContentDialog
                 {
                     Title = "提示",
@@ -124,6 +131,7 @@ namespace GameControllerSimulator
             }
             if (!await BluetoothUtils.IsBluetoothAvailableAsync())
             {
+                LogUtils.E(TAG, "bluetooth not available.");
                 var messageDialog = new ContentDialog
                 {
                     Title = "提示",
@@ -157,32 +165,47 @@ namespace GameControllerSimulator
         private BluetoothGATTManager? bluetoothGATTManager;
         private async Task InitGATTService()
         {
+            LogUtils.I(TAG, "prepare init gatt.");
             if (await BluetoothUtils.SupportBLEPerpheralAsync())
             {
+                LogUtils.I(TAG, "init gatt.");
                 rfcommGuid = Guid.NewGuid();
-                GATTProperties.Add(new ()
+                LogUtils.I(TAG, $"generator RFCOMM GUID. guid = [{rfcommGuid.ToString()}]");
+                GATTProperties.Add(new()
                 {
                     PropertiesGuid = GUIDConstant.GATT_DATA_RFCOMM_GUID,
                     PropertiesKey = "RFCOMMGuid",
                     PropertiesValue = Encoding.UTF8.GetBytes(rfcommGuid.ToString())
                 });
                 bluetoothGATTManager = new BluetoothGATTManager(GATTProperties, GUIDConstant.GATT_FUN_GUID, new GATTCallback(this));
+                LogUtils.I(TAG, "start gatt service.");
                 bluetoothGATTManager?.StartService();
+            }
+            else
+            {
+                LogUtils.W(TAG, "not support gatt.");
             }
         }
 
         private async Task DestroyGATTService()
         {
+            LogUtils.I(TAG, "prepare destroy gatt.");
             if (await BluetoothUtils.SupportBLEPerpheralAsync())
             {
+                LogUtils.I(TAG, "destroy gatt.");
                 bluetoothGATTManager?.StopService();
                 bluetoothGATTManager = null;
                 GATTProperties.Clear();
+            }
+            else
+            {
+                LogUtils.W(TAG, "not support gatt.");
             }
         }
 
         private void OnGATTStatusChanged(GattServiceProviderAdvertisementStatus status)
         {
+            LogUtils.I(TAG, $"OnGATTStatusChanged status = [{status}].");
             _dispatcher.TryEnqueue(() =>
             {
                 switch(status)
@@ -203,30 +226,34 @@ namespace GameControllerSimulator
 
         class GATTCallback : IBluetoothGATTManagerCallback
         {
+            public static string TAG = "GATTCallback";
             private MainWindow window;
             public GATTCallback(MainWindow window)
             {
+                LogUtils.I(TAG, "Create GATTCallback");
                 this.window = window;
             }
 
             public void OnException(Exception ex)
             {
+                LogUtils.E(TAG, "GATTCallback OnException", ex);
                 window.OnFaulted("GATT Service Exception", ex);
             }
 
             public void OnGATTStatusChanged(GattServiceProviderAdvertisementStatus status)
             {
+                LogUtils.I(TAG, $"GATTCallback OnGATTStatusChanged status = [{status}]");
                 window.OnGATTStatusChanged(status);
             }
 
             public void OnStartService()
             {
-
+                LogUtils.I(TAG, "GATTCallback OnStartService");
             }
 
             public void OnStopService()
             {
-
+                LogUtils.I(TAG, "GATTCallback OnStopService");
             }
         }
 
@@ -238,12 +265,14 @@ namespace GameControllerSimulator
 
         private async Task InitConnectionManager()
         {
+            LogUtils.I(TAG, "InitConnectionManager");
             connectionManager = new ConnectionManager(rfcommGuid, APP_NAME, CONTROLLER_COUNT, new ConnectionManagerCallback(this));
             connectionManager?.Init();
         }
 
         private void OnConnectionAvaiableChange(bool avaiable)
         {
+            LogUtils.I(TAG, $"OnConnectionAvaiableChange avaiable = [{avaiable}]");
             _dispatcher.TryEnqueue(() =>
             {
                 if (avaiable)
@@ -259,17 +288,25 @@ namespace GameControllerSimulator
 
         private async Task DestroyConnectionManager()
         {
+            LogUtils.I(TAG, "DestroyConnectionManager");
             if (await BluetoothUtils.IsBluetoothAvailableAsync())
             {
                 connectionManager?.Destroy();
+            }
+            else
+            {
+                LogUtils.I(TAG, "not support bluetooth");
             }
         }
 
         class ConnectionManagerCallback : IConnectionManagerCallback
         {
+            public static string TAG = "ConnectionManagerCallback";
+
             private MainWindow window;
             public ConnectionManagerCallback(MainWindow window)
             {
+                LogUtils.I(TAG, "Create ConnectionManagerCallback");
                 this.window = window;
             }
 
@@ -280,31 +317,37 @@ namespace GameControllerSimulator
 
             public void OnClientDisconnected(int index)
             {
+                LogUtils.I(TAG, $"ConnectionManagerCallback OnClientDisconnected index = [{index}]");
                 window.OnClientDisconnected(index);
             }
 
             public void OnDataReady(string clientId, IBaseEntity data)
             {
+                LogUtils.I(TAG, $"ConnectionManagerCallback OnClientDisconnected clientId = [{clientId}], data = [{JsonSerializer.Serialize(data)}]");
                 window.OnDataReady(clientId, data);
             }
 
             public void OnFaulted(string msg, Exception ex)
             {
+                LogUtils.W(TAG, $"ConnectionManagerCallback OnFaulted msg = [{msg}]", ex);
                 window.OnFaulted(msg, ex);
             }
 
             public void OnManagerAvaiable()
             {
+                LogUtils.I(TAG, "ConnectionManagerCallback OnManagerAvaiable");
                 window.OnConnectionAvaiableChange(true);
             }
 
             public void OnManagerUnavailable()
             {
+                LogUtils.I(TAG, "ConnectionManagerCallback OnManagerUnavailable");
                 window.OnConnectionAvaiableChange(false);
             }
 
             public void OnNewClientConnection(string clientId, int index)
             {
+                LogUtils.I(TAG, $"ConnectionManagerCallback OnNewClientConnection clientId = [{clientId}], index = [{index}]");
                 window.OnNewClientConnection(clientId, index);
             }
         }
@@ -317,14 +360,17 @@ namespace GameControllerSimulator
 
         private async Task InitGameControllerManager()
         {
+            LogUtils.I(TAG, "InitGameControllerManager");
             DriverStatus.Text = "Driver Status: Installed";
             viGEmBusManager = new ViGEmBusManager();
         }
 
         private void CreateGameController(int index)
         {
+            LogUtils.I(TAG, $"CreateGameController index = [{index}]");
             if (viGEmBusManager == null || index < 0 || index >= gameControllers.Length)
             {
+                LogUtils.I(TAG, $"CreateGameController failed index = [{index}], viGEmBusManager = [{(viGEmBusManager == null ? "null" : "not null")}]");
                 return;
             }
             gameControllers[index] = viGEmBusManager.CreateXboxController(index);
@@ -332,15 +378,21 @@ namespace GameControllerSimulator
 
         private async Task DestroyGameControllerManager()
         {
+            LogUtils.I(TAG, "DestroyGameControllerManager");
             if (ViGEmBusUtils.IsDriverInstalled())
             {
                 viGEmBusManager?.Dispose();
                 viGEmBusManager = null;
                 for (int i = 0; i < gameControllers.Length; i++)
                 {
+                    LogUtils.I(TAG, $"DestroyGameController index = [{i}]");
                     gameControllers[i]?.Dispose();
                     gameControllers[i] = null;
                 }
+            }
+            else
+            {
+                LogUtils.W(TAG, "DestroyGameControllerManager. driver not install");
             }
         }
         #endregion
@@ -349,9 +401,11 @@ namespace GameControllerSimulator
 
         private void OnDataReady(string clientId, IBaseEntity data)
         {
+            LogUtils.I(TAG, $"OnDataReady clientId = [{clientId}], data = [{JsonSerializer.Serialize(data)}]");
             int index = connectionManager?.GetClientIndex(clientId) ?? -1;
             if (index < 0 || index >= deviceUIManagers.Length)
             {
+                LogUtils.W(TAG, $"OnDataReady not find index. index = [{index}], clientId = [{clientId}]");
                 return;
             }
             switch (data.Type)
@@ -388,6 +442,7 @@ namespace GameControllerSimulator
 
         private void OnNewClientConnection(string clientId, int index)
         {
+            LogUtils.I(TAG, $"OnNewClientConnection clientId = [{clientId}], index = [{index}]");
             if (index < 0 || index > deviceUIManagers.Length)
             {
                 return;
@@ -405,6 +460,7 @@ namespace GameControllerSimulator
 
         private void OnClientDisconnected(int index)
         {
+            LogUtils.I(TAG, $"OnClientDisconnected index = [{index}]");
             if (index < 0 || index > deviceUIManagers.Length)
             {
                 return;

@@ -14,6 +14,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\CommonLibrary\CommonLibrary.csproj" />
+    <ProjectReference Include="..\LogLibrary\LogLibrary.csproj" />
   </ItemGroup>
   <ItemGroup>
     <None Update="ViGEmBus_1.22.0_x64_x86_arm64.exe">

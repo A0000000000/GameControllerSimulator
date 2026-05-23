@@ -1,3 +1,4 @@
+using LogLibrary;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -14,6 +15,8 @@ namespace SocketCommonLibrary
 {
     public abstract class SocketServer<TServerSocker, TSocket> where TServerSocker : class, IDisposable where TSocket : class, IDisposable
     {
+        public static string TAG = "SocketServer";
+
         private readonly object _lock = new();
         private TServerSocker _serverSocker;
         private CancellationTokenSource cts;
@@ -21,6 +24,7 @@ namespace SocketCommonLibrary
 
         public SocketServer(SocketServerCallback<TServerSocker, TSocket> callback)
         {
+            LogUtils.I(TAG, "Create SocketServer");
             this.callback = callback;
         }
 
@@ -33,23 +37,28 @@ namespace SocketCommonLibrary
 
         public void StartListener()
         {
+            LogUtils.I(TAG, "SocketServer StartListener");
             Post(() =>
             {
+                LogUtils.I(TAG, "SocketServer StartListenerPost");
                 lock (_lock)
                 {
                     if (cts != null)
                     {
+                        LogUtils.I(TAG, "SocketServer StartListenerPost Service has already running.");
                         return;
                     }
                     cts = new CancellationTokenSource();
                     try
                     {
+                        LogUtils.I(TAG, "SocketServer StartListenerPost CreateServerSocket");
                         _serverSocker = CreateServerSocket();
                         callback?.OnStartServerSuccess();
                         Task.Run(async () => StartForeverLoop());
                     }
                     catch (Exception ex)
                     {
+                        LogUtils.E(TAG, "SocketServer StartListenerPost CreateServerSocket failed.", ex);
                         _serverSocker = null;
                         cts.Dispose();
                         cts = null;
@@ -61,6 +70,7 @@ namespace SocketCommonLibrary
 
         private async Task StartForeverLoop()
         {
+            LogUtils.I(TAG, "SocketServer StartForeverLoop");
             try
             {
                 while (!cts.IsCancellationRequested)
@@ -68,17 +78,20 @@ namespace SocketCommonLibrary
                     try
                     {
                         TSocket socket = await Task.Run(async () => await AcceptSocket(_serverSocker), cts.Token);
+                        LogUtils.I(TAG, "SocketServer StartForeverLoop CreateAcceptClient");
                         Client<TSocket> client = CreateAcceptClient(socket, callback?.CreateNewClientCallback());
                         Post(() => callback?.OnNewClientConnect(client));
                     }
                     catch (Exception ex)
                     {
+                        LogUtils.W(TAG, "SocketServer StartForeverLoop AcceptSocket failed.", ex);
                         Post(() => callback?.OnNewClientException(ex));
                     }
                 }
             }
             catch (Exception ex)
             {
+                LogUtils.E(TAG, "SocketServer StartForeverLoop failed.", ex);
                 Post(() => callback?.OnForeverLoopException(ex));
             }
         }
@@ -87,12 +100,15 @@ namespace SocketCommonLibrary
 
         public void StopListener()
         {
+            LogUtils.I(TAG, "SocketServer StopListener");
             Post(() =>
             {
                 lock (_lock)
                 {
+                    LogUtils.I(TAG, "SocketServer StopListenerPost");
                     if (cts == null)
                     {
+                        LogUtils.I(TAG, "SocketServer StopListenerPost Service has already stop.");
                         return;
                     }
                     try
@@ -113,6 +129,7 @@ namespace SocketCommonLibrary
 
         private void Post(Action action)
         {
+            LogUtils.I(TAG, "SocketServer Post");
             if (action == null) return;
             _ = Task.Run(() =>
             {
@@ -122,6 +139,7 @@ namespace SocketCommonLibrary
                 }
                 catch (Exception ex)
                 {
+                    LogUtils.I(TAG, "SocketServer Post Failed", ex);
                     Post(() => callback?.OnTaskException(ex));
                 }
             });
@@ -131,6 +149,8 @@ namespace SocketCommonLibrary
 
     public abstract class Client<TSocket> where TSocket: class, IDisposable
     {
+        public static string TAG = "Client";
+
         private readonly object _lock = new();
         private TSocket socket;
         private ClientCallback<TSocket> callback;
@@ -143,6 +163,7 @@ namespace SocketCommonLibrary
 
         public Client(TSocket socket, ClientCallback<TSocket> callback)
         {
+            LogUtils.I(TAG, "Create Client");
             this.socket = socket;
             this.callback = callback;
             stream = GetStream(socket);
@@ -152,10 +173,12 @@ namespace SocketCommonLibrary
 
         public void SendData(byte[] data, int id = -1)
         {
+            LogUtils.I(TAG, $"Client SendData id = [{id}]");
             Post(() =>
             {
                 try
                 {
+                    LogUtils.I(TAG, $"Client SendDataPost id = [{id}]");
                     lock (_lock)
                     {
                         stream.Write(IntConverter.ToBigEndian(data.Length), 0, 4);
@@ -165,17 +188,24 @@ namespace SocketCommonLibrary
                 }
                 catch (Exception ex)
                 {
+                    LogUtils.D(TAG, $"Client SendData Failed id = [{id}]", ex);
                     Post(() => callback?.OnSendDataException(this, ex, id));
                 }
             });
         }
         public void Disconnect()
         {
+            LogUtils.I(TAG, "Client Disconnect");
             Post(() =>
             {
+                LogUtils.I(TAG, "Client DisconnectPost");
                 lock (_lock)
                 {
-                    if (!IsAvailable) return;
+                    if (!IsAvailable) 
+                    {
+                        LogUtils.I(TAG, "Client DisconnectPost client has already disconnect");
+                        return;
+                    }
                     IsAvailable = false;
                 }
                 try
@@ -189,6 +219,7 @@ namespace SocketCommonLibrary
 
         private async Task ReceiveLoop()
         {
+            LogUtils.I(TAG, "Client ReceiveLoop");
             try
             {
                 byte[] sizeBuff = new byte[4];
@@ -211,6 +242,7 @@ namespace SocketCommonLibrary
             }
             catch (Exception ex)
             {
+                LogUtils.E(TAG, "Client ReceiveLoop Failed", ex);
                 Post(() => callback?.OnDataRevException(this, ex));
             }
         }
@@ -229,6 +261,7 @@ namespace SocketCommonLibrary
 
         private void Post(Action action)
         {
+            LogUtils.I(TAG, "Client Post");
             if (action == null) return;
             _ = Task.Run(() =>
             {
@@ -238,6 +271,7 @@ namespace SocketCommonLibrary
                 }
                 catch (Exception ex)
                 {
+                    LogUtils.W(TAG, "Client Post Failed", ex);
                     Post(() => callback?.OnTaskException(ex));
                 }
             });

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace CommonLibrary.Generator
@@ -18,5 +19,11 @@ namespace CommonLibrary.Generator
 
         public GamepadTrigger? Trigger { get; set; }
         public byte TriggerValue { get; set; }
+
+        public override string ToString()
+        {
+            return JsonSerializer.Serialize(this);
+        }
+
     }
 }

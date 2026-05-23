@@ -16,6 +16,7 @@
     <PackageReference Include="Microsoft.WindowsAppSDK" Version="2.0.1" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\LogLibrary\LogLibrary.csproj" />
     <ProjectReference Include="..\SocketCommonLibrary\SocketCommonLibrary.csproj" />
   </ItemGroup>
 </Project>
