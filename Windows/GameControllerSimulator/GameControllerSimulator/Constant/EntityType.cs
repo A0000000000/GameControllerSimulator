@@ -21,6 +21,8 @@ namespace GameControllerSimulator.Constant
         public const int TYPE_FEEDBACK_RECEIVED_RESULT = 8;
         public const int TYPE_QUERY_CLIENT_INFO = 9;
         public const int TYPE_QUERY_CLIENT_INFO_RESULT = 10;
+        public const int TYPE_NEW_TYPE_CONNECT = 11;
+        public const int TYPE_NEW_TYPE_CONNECT_RESULT = 12;
 
         public static readonly Dictionary<int, Type> TYPE_MAPPING = new()
     {
@@ -33,7 +35,9 @@ namespace GameControllerSimulator.Constant
         { TYPE_FEEDBACK_RECEIVED, typeof(FeedbackReceived) },
         { TYPE_FEEDBACK_RECEIVED_RESULT, typeof(object) },
         { TYPE_QUERY_CLIENT_INFO, typeof(object) },
-        { TYPE_QUERY_CLIENT_INFO_RESULT, typeof(DeviceInfo) }
+        { TYPE_QUERY_CLIENT_INFO_RESULT, typeof(DeviceInfo) },
+        { TYPE_NEW_TYPE_CONNECT, typeof(string) },
+        { TYPE_NEW_TYPE_CONNECT_RESULT, typeof(string) },
     };
     }
 }

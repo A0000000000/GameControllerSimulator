@@ -266,8 +266,8 @@ namespace GameControllerSimulator
         private async Task InitConnectionManager()
         {
             LogUtils.I(TAG, "InitConnectionManager");
-            connectionManager = new ConnectionManager(rfcommGuid, APP_NAME, CONTROLLER_COUNT, new ConnectionManagerCallback(this));
-            connectionManager?.Init();
+            connectionManager = new ConnectionManager(CONTROLLER_COUNT, new ConnectionManagerCallback(this));
+            connectionManager?.InitRFCOMM(rfcommGuid, APP_NAME);
         }
 
         private void OnConnectionAvaiableChange(bool avaiable)
@@ -321,10 +321,10 @@ namespace GameControllerSimulator
                 window.OnClientDisconnected(index);
             }
 
-            public void OnDataReady(string clientId, IBaseEntity data)
+            public void OnDataReady(int index, IBaseEntity data)
             {
-                LogUtils.I(TAG, $"ConnectionManagerCallback OnClientDisconnected clientId = [{clientId}], data = [{JsonSerializer.Serialize(data)}]");
-                window.OnDataReady(clientId, data);
+                LogUtils.I(TAG, $"ConnectionManagerCallback OnClientDisconnected index = [{index}], data = [{JsonSerializer.Serialize(data)}]");
+                window.OnDataReady(index, data);
             }
 
             public void OnFaulted(string msg, Exception ex)
@@ -345,10 +345,10 @@ namespace GameControllerSimulator
                 window.OnConnectionAvaiableChange(false);
             }
 
-            public void OnNewClientConnection(string clientId, int index)
+            public void OnNewClientConnection(int index)
             {
-                LogUtils.I(TAG, $"ConnectionManagerCallback OnNewClientConnection clientId = [{clientId}], index = [{index}]");
-                window.OnNewClientConnection(clientId, index);
+                LogUtils.I(TAG, $"ConnectionManagerCallback OnNewClientConnection index = [{index}]");
+                window.OnNewClientConnection(index);
             }
         }
 
@@ -399,13 +399,12 @@ namespace GameControllerSimulator
 
         #region 数据处理
 
-        private void OnDataReady(string clientId, IBaseEntity data)
+        private void OnDataReady(int index, IBaseEntity data)
         {
-            LogUtils.I(TAG, $"OnDataReady clientId = [{clientId}], data = [{JsonSerializer.Serialize(data)}]");
-            int index = connectionManager?.GetClientIndex(clientId) ?? -1;
+            LogUtils.I(TAG, $"OnDataReady index = [{index}], data = [{JsonSerializer.Serialize(data)}]");
             if (index < 0 || index >= deviceUIManagers.Length)
             {
-                LogUtils.W(TAG, $"OnDataReady not find index. index = [{index}], clientId = [{clientId}]");
+                LogUtils.W(TAG, $"OnDataReady not find index. index = [{index}]");
                 return;
             }
             switch (data.Type)
@@ -440,16 +439,16 @@ namespace GameControllerSimulator
             Debug.WriteLine($"OnFaulted msg: {msg}, ex: {ex.Message}");
         }
 
-        private void OnNewClientConnection(string clientId, int index)
+        private void OnNewClientConnection(int index)
         {
-            LogUtils.I(TAG, $"OnNewClientConnection clientId = [{clientId}], index = [{index}]");
+            LogUtils.I(TAG, $"OnNewClientConnection index = [{index}]");
             if (index < 0 || index > deviceUIManagers.Length)
             {
                 return;
             }
             deviceUIManagers[index].SetStatus("Connected");
             CreateGameController(index);
-            connectionManager?.SendData(clientId, new BaseEntity<object>
+            connectionManager?.SendData(index, new BaseEntity<object>
             {
                 Type = EntityType.TYPE_QUERY_CLIENT_INFO,
                 Id = EntityId.GAMEPAD_PAGE_EVENT,

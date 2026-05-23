@@ -13,5 +13,6 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\LogLibrary\LogLibrary.csproj" />
+    <ProjectReference Include="..\SocketCommonLibrary\SocketCommonLibrary.csproj" />
   </ItemGroup>
 </Project>
