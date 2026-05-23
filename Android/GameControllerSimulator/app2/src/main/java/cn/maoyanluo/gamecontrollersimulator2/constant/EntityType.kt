@@ -17,6 +17,10 @@ object EntityType {
     const val TYPE_QUERY_CLIENT_INFO_RESULT = 10
     const val TYPE_NEW_TYPE_CONNECT = 11
     const val TYPE_NEW_TYPE_CONNECT_RESULT = 12
+    const val TYPE_ECHO = 13
+    const val TYPE_ECHO_RESULT = 14
+    const val TYPE_RTT = 15
+    const val TYPE_RTT_RESULT = 16
 
     val TYPE_MAPPING = mapOf(
         Pair(TYPE_REQUEST_CLIENT_ID, JsonElement::class.java),
@@ -30,7 +34,11 @@ object EntityType {
         Pair(TYPE_QUERY_CLIENT_INFO, JsonElement::class.java),
         Pair(TYPE_QUERY_CLIENT_INFO_RESULT, DeviceInfo::class.java),
         Pair(TYPE_NEW_TYPE_CONNECT, String::class.java),
-        Pair(TYPE_NEW_TYPE_CONNECT_RESULT, String::class.java)
+        Pair(TYPE_NEW_TYPE_CONNECT_RESULT, String::class.java),
+        Pair(TYPE_ECHO, String::class.java),
+        Pair(TYPE_ECHO_RESULT, String::class.java),
+        Pair(TYPE_RTT, String::class.java),
+        Pair(TYPE_RTT_RESULT, String::class.java)
     )
 
 }

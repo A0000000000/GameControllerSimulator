@@ -62,7 +62,8 @@ fun ConnectingPage(
     modifier: Modifier,
     uiState: MainUiState.ConnectingPage,
     onOpenGamepad: () -> Unit,
-    onSelectConnectType: (type: ConnectionManager.ConnectionType) -> Unit
+    onSelectConnectType: (type: ConnectionManager.ConnectionType) -> Unit,
+    onRequestRtt: (type: ConnectionManager.ConnectionType) -> Unit
 ) {
     Column(
         modifier = modifier
@@ -88,9 +89,7 @@ fun ConnectingPage(
                 primaryValue = uiState.device.name ?: "未知设备",
                 statusText = if (uiState.isGATTAvailable) "就绪" else "未就绪",
                 statusColor = if (uiState.isGATTAvailable) Color(0xFF2E7D32) else Color(0xFF8A5A00)
-            ) {
-
-            }
+            )
             ConnectionStatusCard(
                 title = "Bluetooth RFCOMM",
                 primaryLabel = "设备名称",
@@ -98,15 +97,19 @@ fun ConnectingPage(
                 statusText = if (uiState.isRFCOMMAvailable) "就绪" else "未就绪",
                 statusColor = if (uiState.isRFCOMMAvailable) Color(0xFF2E7D32) else Color(0xFF8A5A00)
             ) {
-
+                onRequestRtt(ConnectionManager.ConnectionType.BLE)
             }
+
             ConnectionStatusCard(
                 title = "TCP",
                 primaryLabel = "对端地址",
                 primaryValue = uiState.tcpInfo,
                 statusText = if (uiState.isTcpAvailable) "就绪" else "未就绪",
                 statusColor = if (uiState.isTcpAvailable) Color(0xFF2E7D32) else Color(0xFF8A5A00)
-            )
+            ) {
+                onRequestRtt(ConnectionManager.ConnectionType.TCP)
+            }
+
             ConnectionStatusCard(
                 title = "UDP",
                 primaryLabel = "对端地址",

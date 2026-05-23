@@ -84,11 +84,7 @@ class MainViewModel(private val application: Application) : AndroidViewModel(app
                 {
                     UUIDConstant.GATT_DATA_RFCOMM_UUID -> {
                         rfcommUuid = String(data)
-                        connectionManager.initRFCOMM(
-                            bluetoothManagerWrapper.getAdapter(),
-                            device,
-                            UUID.fromString(rfcommUuid)
-                        )
+                        connectionManager.initRFCOMM(bluetoothManagerWrapper.getAdapter(), device, UUID.fromString(rfcommUuid))
                     }
                     UUIDConstant.TCP_INFO_UUID -> {
                         tcpInfo = String(data)
@@ -180,6 +176,13 @@ class MainViewModel(private val application: Application) : AndroidViewModel(app
                 ).show()
             }
         }
+
+        override fun onRttResult(
+            diff: Long,
+            type: ConnectionManager.ConnectionType
+        ) {
+            LogUtils.d(TAG, "onRttResult. diff = $diff, type = $type")
+        }
     }, coroutineManager)
 
     init {
@@ -225,6 +228,10 @@ class MainViewModel(private val application: Application) : AndroidViewModel(app
 
     fun onSelectConnectType(type: ConnectionManager.ConnectionType) {
         connectionManager.connectionType = type
+    }
+
+    fun onRequestRtt(type: ConnectionManager.ConnectionType) {
+        connectionManager.requestRtt(type)
     }
 
     fun onBackFromGamepad() {

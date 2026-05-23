@@ -37,6 +37,8 @@ class ConnectionManager(
         val INTERNAL_ID_ARRAY = arrayOf(EntityId.CONNECTION_MANAGER_INTERNAL_ID)
     }
 
+    private val gson = Gson()
+
     var connectionType = ConnectionType.BLE
         set(value) {
             if (value == ConnectionType.UDP) {
@@ -45,7 +47,9 @@ class ConnectionManager(
             field = value
         }
 
-    private val gson = Gson()
+    var isAvailable = false
+        private set
+        get() = (bluetoothAvailable || tcpAvailable || udpAvailable) && !TextUtils.isEmpty(clientId)
 
     private var clientId = ""
         set(value) {
@@ -53,10 +57,6 @@ class ConnectionManager(
             field = value
             onAvailableChange(current, isAvailable)
         }
-
-    var isAvailable = false
-        private set
-        get() = (bluetoothAvailable || tcpAvailable || udpAvailable) && !TextUtils.isEmpty(clientId)
 
     var bluetoothAvailable = false
         private set(value) {
@@ -96,30 +96,7 @@ class ConnectionManager(
         }
 
     private var bluetoothSocketClient: BluetoothSocketClient? = null
-    private val bluetoothClientCallback: SocketClientCallback = object : SocketClientCallback {
-
-        override fun onConnectSuccess() {
-            bluetoothAvailable = true
-            requestClientId()
-        }
-
-        override fun onConnectException(e: Exception) {
-            bluetoothAvailable = false
-        }
-
-        override fun onSendDataException(e: Exception, id: Int) = callback.onSendDataException(e, id, ConnectionType.BLE)
-
-        override fun onDisconnect() {
-            bluetoothAvailable = false
-        }
-
-        override fun onDataReady(data: ByteArray) {
-            this@ConnectionManager.onDataReady(data)
-        }
-
-        override fun onDataRevException(e: Exception) = callback.onDataRevException(e, ConnectionType.BLE)
-
-    }
+    private var tcpSocketClient: TcpSocketClient? = null
 
     fun initRFCOMM(adapter: BluetoothAdapter, device: BluetoothDevice, uuid: UUID) {
         coroutineManager.getIOScope().launch {
@@ -130,35 +107,11 @@ class ConnectionManager(
                 adapter,
                 device,
                 uuid,
-                bluetoothClientCallback,
+                SocketClientCallbackImpl(this@ConnectionManager, ConnectionType.BLE),
                 coroutineManager
             )
             bluetoothSocketClient?.connect()
         }
-    }
-
-    private var tcpSocketClient: TcpSocketClient? = null
-    private val tcpClientCallback: SocketClientCallback = object : SocketClientCallback {
-        override fun onConnectSuccess() {
-            tcpAvailable = true
-            requestClientId()
-        }
-
-        override fun onConnectException(e: Exception) {
-            tcpAvailable = false
-        }
-
-        override fun onSendDataException(e: Exception, id: Int) = callback.onSendDataException(e, id, ConnectionType.TCP)
-
-        override fun onDisconnect() {
-            tcpAvailable = false
-        }
-
-        override fun onDataReady(data: ByteArray) {
-            this@ConnectionManager.onDataReady(data)
-        }
-
-        override fun onDataRevException(e: Exception) = callback.onDataRevException(e, ConnectionType.TCP)
     }
 
     fun initTcpSocket(host: String, port: Int) {
@@ -166,7 +119,12 @@ class ConnectionManager(
             if (tcpAvailable) {
                 return@launch
             }
-            tcpSocketClient = TcpSocketClient(host, port, tcpClientCallback, coroutineManager)
+            tcpSocketClient = TcpSocketClient(
+                host, port, SocketClientCallbackImpl(
+                    this@ConnectionManager,
+                    ConnectionType.TCP
+                ), coroutineManager
+            )
             tcpSocketClient?.connect()
         }
     }
@@ -181,18 +139,57 @@ class ConnectionManager(
 
     fun <T> sendData(data: BaseEntity<T>, id: Int = -1) {
         when (connectionType) {
-            ConnectionType.BLE if bluetoothAvailable -> bluetoothSocketClient?.sendData(gson.toJson(data).toByteArray(), id)
-            ConnectionType.TCP if tcpAvailable -> tcpSocketClient?.sendData(gson.toJson(data).toByteArray(), id)
+            ConnectionType.BLE if bluetoothAvailable -> bluetoothSocketClient?.sendData(
+                gson.toJson(
+                    data
+                ).toByteArray(), id
+            )
+
+            ConnectionType.TCP if tcpAvailable -> tcpSocketClient?.sendData(
+                gson.toJson(data).toByteArray(), id
+            )
+
             else -> {
                 when {
-                    bluetoothAvailable -> bluetoothSocketClient?.sendData(gson.toJson(data).toByteArray(), id)
+                    bluetoothAvailable -> bluetoothSocketClient?.sendData(
+                        gson.toJson(data).toByteArray(), id
+                    )
+
                     tcpAvailable -> tcpSocketClient?.sendData(gson.toJson(data).toByteArray(), id)
-                    else -> callback.onSendDataException(IllegalStateException("Not support type: $connectionType."), -1, connectionType)
+                    else -> callback.onSendDataException(
+                        IllegalStateException("Not support type: $connectionType."),
+                        -1,
+                        connectionType
+                    )
                 }
             }
         }
     }
 
+    fun requestRtt(type: ConnectionType) {
+        val currentTime = System.currentTimeMillis()
+        val rttEntity = BaseEntity(
+            id = EntityId.CONNECTION_MANAGER_INTERNAL_ID,
+            type = EntityType.TYPE_RTT,
+            timestamp = currentTime,
+            data = currentTime.toString()
+        )
+        when (type) {
+            ConnectionType.BLE -> {
+                if (bluetoothAvailable) {
+                    bluetoothSocketClient?.sendData(gson.toJson(rttEntity).toByteArray())
+                }
+            }
+
+            ConnectionType.TCP -> {
+                if (tcpAvailable) {
+                    tcpSocketClient?.sendData(gson.toJson(rttEntity).toByteArray())
+                }
+            }
+
+            else -> Unit
+        }
+    }
     fun destroy() {
         canRequestClientId = true
         coroutineManager.getIOScope().launch {
@@ -220,13 +217,17 @@ class ConnectionManager(
         }
     }
 
-    private fun <T: Closeable> registerNewType(client: SocketClient<T>) {
-        client.sendData(gson.toJson(BaseEntity(
-            type = EntityType.TYPE_NEW_TYPE_CONNECT,
-            id = EntityId.CONNECTION_MANAGER_INTERNAL_ID,
-            timestamp = System.currentTimeMillis(),
-            clientId
-        )).toByteArray())
+    private fun <T : Closeable> registerNewType(client: SocketClient<T>) {
+        client.sendData(
+            gson.toJson(
+                BaseEntity(
+                    type = EntityType.TYPE_NEW_TYPE_CONNECT,
+                    id = EntityId.CONNECTION_MANAGER_INTERNAL_ID,
+                    timestamp = System.currentTimeMillis(),
+                    clientId
+                )
+            ).toByteArray()
+        )
     }
 
     private fun unregisterClientId() = sendData(
@@ -248,7 +249,7 @@ class ConnectionManager(
         return EntityType.TYPE_MAPPING[type] ?: JsonElement::class.java
     }
 
-    private fun onDataReady(data: ByteArray) {
+    private fun onDataReady(data: ByteArray, connType: ConnectionType) {
         val jsonStr = String(data)
         val jsonObject = gson.fromJson(jsonStr, JsonObject::class.java)
         val type = jsonObject.get("type")?.asInt ?: -1
@@ -259,21 +260,29 @@ class ConnectionManager(
         }
         val entity = gson.fromJson<BaseEntity<*>>(jsonStr, typeTokenType)
         if (filterById(entity)) {
-            onDataReady(entity)
+            onDataReadyInner(entity, connType)
         } else {
             callback.onDataReady(entity)
         }
     }
 
-    private fun onDataReady(entity: BaseEntity<*>) {
+    private fun onDataReadyInner(entity: BaseEntity<*>, type: ConnectionType) {
         when (entity.type) {
             EntityType.TYPE_REQUEST_CLIENT_ID_RESULT -> {
                 clientId = entity.data?.toString() ?: ""
-                bluetoothSocketClient?.let {
-                    registerNewType(it)
-                }
-                tcpSocketClient?.let {
-                    registerNewType(it)
+                when (type) {
+                    ConnectionType.BLE -> {
+                        tcpSocketClient?.let {
+                            registerNewType(it)
+                        }
+                    }
+
+                    ConnectionType.TCP -> {
+                        bluetoothSocketClient?.let {
+                            registerNewType(it)
+                        }
+                    }
+                    else -> Unit
                 }
             }
 
@@ -285,6 +294,29 @@ class ConnectionManager(
                 tcpSocketClient = null
                 clientId = ""
             }
+
+            EntityType.TYPE_ECHO -> {
+                sendData(entity.copy(type = EntityType.TYPE_ECHO_RESULT))
+            }
+
+            EntityType.TYPE_ECHO_RESULT -> {
+
+            }
+
+            EntityType.TYPE_RTT -> {
+
+            }
+
+            EntityType.TYPE_RTT_RESULT -> {
+                try {
+                    callback.onRttResult(
+                        System.currentTimeMillis() - entity.data.toString().toLong(), type
+                    )
+                } catch (e: Exception) {
+                    callback.onDataRevException(e, type)
+                }
+            }
+
         }
     }
 
@@ -298,5 +330,67 @@ class ConnectionManager(
     }
 
     override fun close() = destroy()
+
+    private class SocketClientCallbackImpl(
+        private val manager: ConnectionManager,
+        private val type: ConnectionType
+    ) : SocketClientCallback {
+
+        override fun onConnectSuccess() {
+            when (type) {
+                ConnectionType.BLE -> {
+                    manager.bluetoothAvailable = true
+                }
+
+                ConnectionType.TCP -> {
+                    manager.tcpAvailable = true
+                }
+
+                else -> Unit
+            }
+            manager.requestClientId()
+        }
+
+        override fun onConnectException(e: Exception) {
+            when (type) {
+                ConnectionType.BLE -> {
+                    manager.bluetoothAvailable = false
+                }
+
+                ConnectionType.TCP -> {
+                    manager.tcpAvailable = false
+                }
+
+                else -> Unit
+            }
+        }
+
+        override fun onSendDataException(e: Exception, id: Int) {
+            manager.callback.onSendDataException(e, id, type)
+        }
+
+        override fun onDisconnect() {
+            when (type) {
+                ConnectionType.BLE -> {
+                    manager.bluetoothAvailable = false
+                }
+
+                ConnectionType.TCP -> {
+                    manager.tcpAvailable = false
+                }
+
+                else -> Unit
+            }
+        }
+
+        override fun onDataReady(data: ByteArray) {
+            manager.onDataReady(data, type)
+        }
+
+        override fun onDataRevException(e: Exception) {
+            manager.callback.onDataRevException(e, type)
+        }
+
+    }
 
 }

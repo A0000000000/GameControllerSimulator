@@ -111,7 +111,8 @@ fun MainContainer(modifier: Modifier = Modifier) {
                 modifier = pageModifier,
                 uiState = uiState,
                 onOpenGamepad = viewModel::onEnterGamepad,
-                onSelectConnectType = viewModel::onSelectConnectType
+                onSelectConnectType = viewModel::onSelectConnectType,
+                onRequestRtt = viewModel::onRequestRtt
             )
         }
         MainUiState.GamepadPage -> {

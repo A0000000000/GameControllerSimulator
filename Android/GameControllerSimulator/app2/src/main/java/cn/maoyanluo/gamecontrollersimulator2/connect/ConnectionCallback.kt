@@ -17,4 +17,5 @@ interface ConnectionCallback {
     )
     fun onDataRevException(e: Exception, connectionType: ConnectionManager.ConnectionType)
 
+    fun onRttResult(diff: Long, type: ConnectionManager.ConnectionType)
 }
