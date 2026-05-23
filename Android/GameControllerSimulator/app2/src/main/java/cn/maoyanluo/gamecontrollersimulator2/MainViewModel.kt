@@ -105,8 +105,7 @@ class MainViewModel(private val application: Application) : AndroidViewModel(app
         override fun onFault(device: BluetoothDevice) {
             mainUiState = MainUiState.ConnectingPage(
                 device = device,
-                isGATTAvailable = false,
-                isRFCOMMAvailable = false
+                isGATTAvailable = false
             )
             connectionManager.initRFCOMM(bluetoothManagerWrapper.getAdapter(), device, UUIDConstant.DEFAULT_RFCOMM_UUID)
         }
@@ -215,7 +214,6 @@ class MainViewModel(private val application: Application) : AndroidViewModel(app
     }
 
     fun onEnterGamepad() {
-//        connectionManager.connectionType = ConnectionManager.ConnectionType.TCP
         val currentState = mainUiState
         if (currentState is MainUiState.ConnectingPage && connectionManager.isAvailable) {
             mainUiState = MainUiState.GamepadPage
@@ -225,6 +223,10 @@ class MainViewModel(private val application: Application) : AndroidViewModel(app
         }
     }
 
+    fun onSelectConnectType(type: ConnectionManager.ConnectionType) {
+        connectionManager.connectionType = type
+    }
+
     fun onBackFromGamepad() {
         val currentState = mainUiState
         val bm = bluetoothGATTManager
@@ -232,7 +234,12 @@ class MainViewModel(private val application: Application) : AndroidViewModel(app
             mainUiState = MainUiState.ConnectingPage(
                 device = bm.device,
                 isGATTAvailable = bluetoothGATTManager?.isAvailable == true,
-                isRFCOMMAvailable = connectionManager.isAvailable
+                isRFCOMMAvailable = connectionManager.bluetoothAvailable,
+                isTcpAvailable = connectionManager.tcpAvailable,
+                isUdpAvailable = connectionManager.udpAvailable,
+                rfcommUuid = rfcommUuid,
+                tcpInfo = tcpInfo,
+                udpInfo = udpInfo
             )
         }
         if (bm == null) {

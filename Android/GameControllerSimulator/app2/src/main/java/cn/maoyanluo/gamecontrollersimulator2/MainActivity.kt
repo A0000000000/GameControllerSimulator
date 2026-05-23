@@ -110,7 +110,8 @@ fun MainContainer(modifier: Modifier = Modifier) {
             ConnectingPage(
                 modifier = pageModifier,
                 uiState = uiState,
-                onOpenGamepad = viewModel::onEnterGamepad
+                onOpenGamepad = viewModel::onEnterGamepad,
+                onSelectConnectType = viewModel::onSelectConnectType
             )
         }
         MainUiState.GamepadPage -> {

@@ -38,6 +38,7 @@ import cn.maoyanluo.coroutine_library.CoroutineManager
 import cn.maoyanluo.gamecontrollersimulator2.R
 import cn.maoyanluo.gamecontrollersimulator2.MainActivity
 import cn.maoyanluo.gamecontrollersimulator2.MainUiState
+import cn.maoyanluo.gamecontrollersimulator2.connect.ConnectionManager
 import cn.maoyanluo.gamecontrollersimulator2.generator.GamepadAxis
 import cn.maoyanluo.gamecontrollersimulator2.generator.GamepadButton
 import cn.maoyanluo.gamecontrollersimulator2.generator.GamepadEventGenerator
@@ -60,7 +61,8 @@ private fun invertShortAxisValue(value: Int): Short {
 fun ConnectingPage(
     modifier: Modifier,
     uiState: MainUiState.ConnectingPage,
-    onOpenGamepad: () -> Unit
+    onOpenGamepad: () -> Unit,
+    onSelectConnectType: (type: ConnectionManager.ConnectionType) -> Unit
 ) {
     Column(
         modifier = modifier
@@ -113,6 +115,31 @@ fun ConnectingPage(
                 statusColor = if (uiState.isUdpAvailable) Color(0xFF2E7D32) else Color(0xFF8A5A00)
             )
         }
+        Spacer(modifier = Modifier.height(12.dp))
+
+        Row(modifier = Modifier) {
+            Button(
+                onClick = { onSelectConnectType(ConnectionManager.ConnectionType.BLE) },
+                enabled = uiState.isRFCOMMAvailable,
+                modifier = Modifier.fillMaxWidth().weight(1f).padding(6.dp,  0.dp),
+            ) {
+                Text(text = "BLE")
+            }
+            Button(
+                onClick = { onSelectConnectType(ConnectionManager.ConnectionType.TCP) },
+                enabled = uiState.isTcpAvailable,
+                modifier = Modifier.fillMaxWidth().weight(1f).padding(6.dp,  0.dp),
+            ) {
+                Text(text = "TCP")
+            }
+            Button(
+                onClick = { onSelectConnectType(ConnectionManager.ConnectionType.UDP) },
+                enabled = uiState.isUdpAvailable,
+                modifier = Modifier.fillMaxWidth().weight(1f).padding(6.dp,  0.dp),
+            ) {
+                Text(text = "UDP")
+            }
+        }
 
         Spacer(modifier = Modifier.height(12.dp))
 
@@ -136,9 +163,11 @@ private fun ConnectionStatusCard(
     onClick: (() -> Unit)? = null
 ) {
     Card(
-        modifier = Modifier.fillMaxWidth().clickable {
-            onClick?.invoke()
-        },
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable {
+                onClick?.invoke()
+            },
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(containerColor = Color(0xFFF3F4F6))
     ) {
@@ -234,10 +263,14 @@ fun GamepadPage(modifier: Modifier, coroutineManager: CoroutineManager, receiver
             generator.stopCollection()
         }
     }
-    Column(modifier.fillMaxSize().padding(0.dp)) {
+    Column(modifier
+        .fillMaxSize()
+        .padding(0.dp)) {
         Row(modifier = Modifier.fillMaxWidth()) {
             Box(
-                modifier = Modifier.padding(50.dp, 0.dp, 0.dp, 0.dp).weight(1f),
+                modifier = Modifier
+                    .padding(50.dp, 0.dp, 0.dp, 0.dp)
+                    .weight(1f),
                 contentAlignment = Alignment.CenterStart
             ) {
                 LTLBButtons(
@@ -253,7 +286,9 @@ fun GamepadPage(modifier: Modifier, coroutineManager: CoroutineManager, receiver
                 )
             }
             Box(
-                modifier = Modifier.padding(0.dp, 0.dp, 50.dp, 0.dp).weight(1f),
+                modifier = Modifier
+                    .padding(0.dp, 0.dp, 50.dp, 0.dp)
+                    .weight(1f),
                 contentAlignment = Alignment.CenterEnd
             ) {
                 RBRTButtons(
@@ -271,9 +306,12 @@ fun GamepadPage(modifier: Modifier, coroutineManager: CoroutineManager, receiver
         }
         Box(modifier = Modifier.weight(1f)) {
             Row(modifier = Modifier.fillMaxSize()) {
-                Box(modifier = Modifier.weight(1f).fillMaxHeight()) {
+                Box(modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight()) {
                     Box(
-                        modifier = Modifier.padding(50.dp, 0.dp, 0.dp, 0.dp)
+                        modifier = Modifier
+                            .padding(50.dp, 0.dp, 0.dp, 0.dp)
                             .align(Alignment.TopStart)
                     ) {
                         Joystick(
@@ -294,7 +332,8 @@ fun GamepadPage(modifier: Modifier, coroutineManager: CoroutineManager, receiver
                     }
 
                     Box(
-                        modifier = Modifier.padding(0.dp, 0.dp, 50.dp, 0.dp)
+                        modifier = Modifier
+                            .padding(0.dp, 0.dp, 50.dp, 0.dp)
                             .align(Alignment.BottomEnd)
                     ) {
                         DPadButtons(modifier = Modifier.size(180.dp), fontSize = 30.sp) { btn, on ->
@@ -304,9 +343,12 @@ fun GamepadPage(modifier: Modifier, coroutineManager: CoroutineManager, receiver
 
                 }
 
-                Box(modifier = Modifier.weight(1f).fillMaxHeight()) {
+                Box(modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight()) {
                     Box(
-                        modifier = Modifier.padding(50.dp, 0.dp, 0.dp, 0.dp)
+                        modifier = Modifier
+                            .padding(50.dp, 0.dp, 0.dp, 0.dp)
                             .align(Alignment.BottomStart)
                     ) {
                         Joystick(
@@ -327,7 +369,9 @@ fun GamepadPage(modifier: Modifier, coroutineManager: CoroutineManager, receiver
                     }
 
                     Box(
-                        modifier = Modifier.padding(0.dp, 0.dp, 50.dp, 0.dp).align(Alignment.TopEnd)
+                        modifier = Modifier
+                            .padding(0.dp, 0.dp, 50.dp, 0.dp)
+                            .align(Alignment.TopEnd)
                     ) {
                         ActionButtons(
                             modifier = Modifier.size(180.dp),
@@ -339,11 +383,16 @@ fun GamepadPage(modifier: Modifier, coroutineManager: CoroutineManager, receiver
 
                 }
             }
-            Box(modifier = Modifier.align(Alignment.TopCenter).height(180.dp).width(180.dp)) {
+            Box(modifier = Modifier
+                .align(Alignment.TopCenter)
+                .height(180.dp)
+                .width(180.dp)) {
                 CircleTextButton(
                     text = "G",
                     fontSize = 20.sp,
-                    modifier = Modifier.size(60.dp).align(Alignment.TopCenter),
+                    modifier = Modifier
+                        .size(60.dp)
+                        .align(Alignment.TopCenter),
                     onDown = {
                         generator.setButton(GamepadButton.Guide, true)
                     },
@@ -354,7 +403,9 @@ fun GamepadPage(modifier: Modifier, coroutineManager: CoroutineManager, receiver
                 SquareTextButton(
                     text = "BACK",
                     fontSize = 20.sp,
-                    modifier = Modifier.size(60.dp).align(Alignment.CenterStart),
+                    modifier = Modifier
+                        .size(60.dp)
+                        .align(Alignment.CenterStart),
                     onDown = {
                         generator.setButton(GamepadButton.Back, true)
                     },
@@ -365,7 +416,9 @@ fun GamepadPage(modifier: Modifier, coroutineManager: CoroutineManager, receiver
                 CircleTextButton(
                     text = "FN",
                     fontSize = 20.sp,
-                    modifier = Modifier.size(60.dp).align(Alignment.BottomCenter),
+                    modifier = Modifier
+                        .size(60.dp)
+                        .align(Alignment.BottomCenter),
                     onDown = {
                         generator.setButton(GamepadButton.Function, true)
                     },
@@ -376,7 +429,9 @@ fun GamepadPage(modifier: Modifier, coroutineManager: CoroutineManager, receiver
                 SquareTextButton(
                     text = "START",
                     fontSize = 20.sp,
-                    modifier = Modifier.size(60.dp).align(Alignment.CenterEnd),
+                    modifier = Modifier
+                        .size(60.dp)
+                        .align(Alignment.CenterEnd),
                     onDown = {
                         generator.setButton(GamepadButton.Start, true)
                     },
