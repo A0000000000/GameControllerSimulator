@@ -23,21 +23,29 @@ namespace GameControllerSimulator.Constant
         public const int TYPE_QUERY_CLIENT_INFO_RESULT = 10;
         public const int TYPE_NEW_TYPE_CONNECT = 11;
         public const int TYPE_NEW_TYPE_CONNECT_RESULT = 12;
+        public const int TYPE_ECHO = 13;
+        public const int TYPE_ECHO_RESULT = 14;
+        public const int TYPE_RTT = 15;
+        public const int TYPE_RTT_RESULT = 16;
 
-        public static readonly Dictionary<int, Type> TYPE_MAPPING = new()
-    {
-        { TYPE_REQUEST_CLIENT_ID, typeof(object) },
-        { TYPE_REQUEST_CLIENT_ID_RESULT, typeof(string) },
-        { TYPE_UNREGISTER_CLIENT_ID, typeof(string) },
-        { TYPE_UNREGISTER_CLIENT_ID_RESULT, typeof(object) },
-        { TYPE_SEND_GAME_EVENT, typeof(string) },
-        { TYPE_SEND_GAME_EVENT_RESULT, typeof(object) },
-        { TYPE_FEEDBACK_RECEIVED, typeof(FeedbackReceived) },
-        { TYPE_FEEDBACK_RECEIVED_RESULT, typeof(object) },
-        { TYPE_QUERY_CLIENT_INFO, typeof(object) },
-        { TYPE_QUERY_CLIENT_INFO_RESULT, typeof(DeviceInfo) },
-        { TYPE_NEW_TYPE_CONNECT, typeof(string) },
-        { TYPE_NEW_TYPE_CONNECT_RESULT, typeof(string) },
-    };
+        public static readonly Dictionary<int, Type> TYPE_MAPPING = new Dictionary<int, Type>()
+        {
+            { TYPE_REQUEST_CLIENT_ID, typeof(object) },
+            { TYPE_REQUEST_CLIENT_ID_RESULT, typeof(string) },
+            { TYPE_UNREGISTER_CLIENT_ID, typeof(string) },
+            { TYPE_UNREGISTER_CLIENT_ID_RESULT, typeof(object) },
+            { TYPE_SEND_GAME_EVENT, typeof(string) },
+            { TYPE_SEND_GAME_EVENT_RESULT, typeof(object) },
+            { TYPE_FEEDBACK_RECEIVED, typeof(FeedbackReceived) },
+            { TYPE_FEEDBACK_RECEIVED_RESULT, typeof(object) },
+            { TYPE_QUERY_CLIENT_INFO, typeof(object) },
+            { TYPE_QUERY_CLIENT_INFO_RESULT, typeof(DeviceInfo) },
+            { TYPE_NEW_TYPE_CONNECT, typeof(string) },
+            { TYPE_NEW_TYPE_CONNECT_RESULT, typeof(string) },
+            { TYPE_ECHO, typeof(string) },
+            { TYPE_ECHO_RESULT, typeof(string) },
+            { TYPE_RTT, typeof(string) },
+            { TYPE_RTT_RESULT, typeof(string) }
+        };
     }
 }

@@ -28,7 +28,6 @@ namespace GameControllerSimulator.Connection
         {
             BLE, TCP, UDP
         }
-
         #endregion
 
         #region 对外暴露接口
@@ -40,10 +39,10 @@ namespace GameControllerSimulator.Connection
             clientIds = Enumerable.Repeat("", connectionCount).ToArray();
             bluetoothClients = new BluetoothSocketClient[connectionCount];
             tcpClients = new TcpSocketClient[connectionCount];
+            clientUseType = Enumerable.Repeat(ConnectionType.BLE, connectionCount).ToArray();
             IsBluetoothAvailable = false;
             IsTcpAvailable = false;
             IsUdpAvailable = false;
-            CurrentConnectionType = ConnectionType.BLE;
         }
 
 
@@ -61,7 +60,8 @@ namespace GameControllerSimulator.Connection
             {
                 return;
             }
-            switch (CurrentConnectionType)
+            // 优先使用客户端使用的方式
+            switch (clientUseType[index])
             {
                 case ConnectionType.BLE:
                     if (bluetoothClients[index] != null)
@@ -77,11 +77,8 @@ namespace GameControllerSimulator.Connection
                         return;
                     }
                     break;
-
-                case ConnectionType.UDP:
-
-                    break;
             }
+            // fallback 选择一个能用的通信方式
             if (bluetoothClients[index] != null)
             {
                 bluetoothClients[index]?.SendData(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(data)));
@@ -107,16 +104,12 @@ namespace GameControllerSimulator.Connection
         {
             get => IsBluetoothAvailable || IsTcpAvailable || IsUdpAvailable;
         }
-        public ConnectionType CurrentConnectionType
-        {
-            get;
-            set;
-        }
         #endregion
 
         #region 内部字段
         private IConnectionManagerCallback? callback;
         private string[] clientIds;
+        private ConnectionType[] clientUseType;
         private int connectionCount;
         #endregion
 
@@ -205,23 +198,6 @@ namespace GameControllerSimulator.Connection
             return false;
         }
 
-        private bool SetClient<T>(SocketClient<T> client, string clientId) where T : class, IDisposable
-        {
-            LogUtils.I(TAG, $"ConnectionManager SetClient<{typeof(T).Name}> clientId = [{clientId}]");
-            SocketClient<T>[]? socketClients = typeof(T) switch
-            {
-                Type t when t == typeof(BluetoothClient) => bluetoothClients as SocketClient<T>[],
-                Type t when t == typeof(TcpClient) => tcpClients as SocketClient<T>[],
-                _ => null
-            };
-            int index = GetClientIndex(clientId);
-            if (socketClients == null || (index < 0 || index >= connectionCount))
-            {
-                return false;
-            }
-            socketClients[index] = client;
-            return true;
-        }
 
         private bool RemoveClient<T>(SocketClient<T> client) where T : class, IDisposable 
         {
@@ -250,17 +226,19 @@ namespace GameControllerSimulator.Connection
         {
             public static string TAG = $"ServerCallbackImpl<{typeof(TServerSocket).Name}, {typeof(TSocket).Name}>";
             private ConnectionManager? connectionManager;
+            private ConnectionType type;
 
-            public ServerCallbackImpl(ConnectionManager? bluetoothSocketServer)
+            public ServerCallbackImpl(ConnectionManager? bluetoothSocketServer, ConnectionType type)
             {
                 LogUtils.I(TAG, "Create ServerCallbackImpl");
                 this.connectionManager = bluetoothSocketServer;
+                this.type = type;
             }
 
             public SocketClientCallback<TSocket> CreateNewClientCallback()
             {
                 LogUtils.I(TAG, "ServerCallbackImpl CreateNewClientCallback");
-                return new SocketClientCallbackImpl<TSocket>(connectionManager);
+                return new SocketClientCallbackImpl<TSocket>(connectionManager, type);
             }
 
             public void OnForeverLoopException(Exception ex)
@@ -291,14 +269,14 @@ namespace GameControllerSimulator.Connection
                 LogUtils.I(TAG, "ServerCallbackImpl OnStartServerSuccess");
                 if (connectionManager != null)
                 {
-                    Type type = typeof(TServerSocket);
-                    if (type == typeof(BluetoothListener))
+                    switch (type)
                     {
-                        connectionManager.IsBluetoothAvailable = true;
-                    }
-                    if (type == typeof(TcpListener))
-                    {
-                        connectionManager.IsTcpAvailable = true;
+                        case ConnectionType.BLE:
+                            connectionManager.IsBluetoothAvailable = true;
+                            break;
+                        case ConnectionType.TCP:
+                            connectionManager.IsTcpAvailable = true;
+                            break;
                     }
                 }
             }
@@ -308,14 +286,14 @@ namespace GameControllerSimulator.Connection
                 LogUtils.I(TAG, "ServerCallbackImpl OnStopServer");
                 if (connectionManager != null)
                 {
-                    Type type = typeof(TServerSocket);
-                    if (type == typeof(BluetoothListener))
+                    switch (type)
                     {
-                        connectionManager.IsBluetoothAvailable = false;
-                    }
-                    if (type == typeof(TcpListener))
-                    {
-                        connectionManager.isTcpAvailable = false;
+                        case ConnectionType.BLE:
+                            connectionManager.IsBluetoothAvailable = false;
+                            break;
+                        case ConnectionType.TCP:
+                            connectionManager.IsTcpAvailable = false;
+                            break;
                     }
                 }
             }
@@ -337,17 +315,19 @@ namespace GameControllerSimulator.Connection
         {
             public static string TAG = $"SocketClientCallbackImpl<{typeof(TSocket).Name}>";
             private ConnectionManager? connectionManager;
+            private ConnectionType type;
 
-            public SocketClientCallbackImpl(ConnectionManager? connectionManager)
+            public SocketClientCallbackImpl(ConnectionManager? connectionManager, ConnectionType type)
             {
                 LogUtils.I(TAG, "Create SocketClientCallbackImpl");
                 this.connectionManager = connectionManager;
+                this.type = type;
             }
 
             public void OnDataReady(SocketClient<TSocket> client, byte[] data)
             {
                 LogUtils.I(TAG, "SocketClientCallbackImpl OnDataReady");
-                connectionManager?.OnDataReady(client, data);
+                connectionManager?.OnDataReady(client, data, type);
             }
 
             public void OnDataRevException(SocketClient<TSocket> client, Exception ex)
@@ -403,7 +383,7 @@ namespace GameControllerSimulator.Connection
         public void InitRFCOMM(Guid rfcommGuid, string svcName)
         {
             LogUtils.I(TAG, $"ConnectionManager InitRFCOMM rfcommGuid = [{rfcommGuid.ToString()}], svcName = [{svcName}]");
-            bluetoothSocketServer = new BluetoothSocketServer(rfcommGuid, svcName, new ServerCallbackImpl<BluetoothListener, BluetoothClient>(this));
+            bluetoothSocketServer = new BluetoothSocketServer(rfcommGuid, svcName, new ServerCallbackImpl<BluetoothListener, BluetoothClient>(this, ConnectionType.BLE));
             bluetoothSocketServer?.StartListener();
         }
 
@@ -448,7 +428,7 @@ namespace GameControllerSimulator.Connection
         public void InitTcp(int port)
         {
             LogUtils.I(TAG, $"ConnectionManager InitTcp port = [{port}]");
-            tcpSocketServer = new TcpSocketServer(port, new ServerCallbackImpl<TcpListener, TcpClient>(this));
+            tcpSocketServer = new TcpSocketServer(port, new ServerCallbackImpl<TcpListener, TcpClient>(this, ConnectionType.TCP));
             tcpSocketServer?.StartListener();
         }
 
@@ -526,25 +506,30 @@ namespace GameControllerSimulator.Connection
             return EntityType.TYPE_MAPPING.ContainsKey(type) ? EntityType.TYPE_MAPPING[type] : typeof(JsonElement);
         }
 
-        private void OnDataReady<T>(SocketClient<T> client, byte[] data) where T : class, IDisposable
+        private void OnDataReady<T>(SocketClient<T> client, byte[] data, ConnectionType type) where T : class, IDisposable
         {
             LogUtils.I(TAG, $"ConnectionManager OnDataReady<{typeof(T).Name}>");
+            int index = GetClientIndex(client);
+            if (index >= 0 && index < connectionCount)
+            {
+                clientUseType[index] = type;
+            }
             string jsonStr = Encoding.UTF8.GetString(data);
             using JsonDocument doc = JsonDocument.Parse(jsonStr);
             JsonElement root = doc.RootElement;
-            int type = -1;
+            int elementType = -1;
             if (root.TryGetProperty("type", out JsonElement t))
             {
-                type = t.ValueKind == JsonValueKind.Number ? t.GetInt32() : -1;
+                elementType = t.ValueKind == JsonValueKind.Number ? t.GetInt32() : -1;
             }
-            Type dataType = type == -1 ? typeof(JsonElement) : GetTypeClass(type);
+            Type dataType = elementType == -1 ? typeof(JsonElement) : GetTypeClass(elementType);
             Type entityType = typeof(BaseEntity<>).MakeGenericType(dataType);
             object? entity = JsonSerializer.Deserialize(jsonStr, entityType);
             if (entity != null && entity is IBaseEntity baseEntity)
             {
                 if (FilterById(baseEntity))
                 {
-                    OnDataReadyInner(client, baseEntity);
+                    OnDataReadyInner(client, baseEntity, type);
                 }
                 else
                 {
@@ -557,7 +542,7 @@ namespace GameControllerSimulator.Connection
             }
         }
 
-        private void OnDataReadyInner<T>(SocketClient<T> client, IBaseEntity entity) where T : class, IDisposable
+        private void OnDataReadyInner<T>(SocketClient<T> client, IBaseEntity entity, ConnectionType type) where T : class, IDisposable
         {
             LogUtils.I(TAG, $"ConnectionManager OnDataReadyInner<{typeof(T).Name}>");
             switch (entity.Type)
@@ -578,10 +563,10 @@ namespace GameControllerSimulator.Connection
                     client.Disconnect();
                     break;
                 case EntityType.TYPE_NEW_TYPE_CONNECT:
-                    SocketClient<T>[]? socketClients = typeof(T) switch
+                    SocketClient<T>[]? socketClients = type switch
                     {
-                        Type t when t == typeof(BluetoothClient) => bluetoothClients as SocketClient<T>[],
-                        Type t when t == typeof(TcpClient) => tcpClients as SocketClient<T>[],
+                        var t when t == ConnectionType.BLE => bluetoothClients as SocketClient<T>[],
+                        var t when t == ConnectionType.TCP => tcpClients as SocketClient<T>[],
                         _ => null
                     };
                     int index = GetClientIndex(entity.Data?.ToString() ?? "");
@@ -606,6 +591,30 @@ namespace GameControllerSimulator.Connection
                             Data = "failed"
                         })));
                     }
+                    break;
+                case EntityType.TYPE_ECHO:
+                    client.SendData(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new BaseEntity<string>()
+                    {
+                        Type = EntityType.TYPE_ECHO_RESULT,
+                        Id = EntityId.CONNECTION_MANAGER_INTERNAL_ID,
+                        Timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
+                        Data = entity.Data?.ToString() ?? ""
+                    })));
+                    break;
+                case EntityType.TYPE_ECHO_RESULT:
+
+                    break;
+                case EntityType.TYPE_RTT:
+                    client.SendData(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new BaseEntity<string>()
+                    {
+                        Type = EntityType.TYPE_RTT_RESULT,
+                        Id = EntityId.CONNECTION_MANAGER_INTERNAL_ID,
+                        Timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
+                        Data = entity.Data?.ToString() ?? entity.Timestamp.ToString()
+                    })));
+                    break;
+                case EntityType.TYPE_RTT_RESULT:
+
                     break;
                 default:
                     break;
