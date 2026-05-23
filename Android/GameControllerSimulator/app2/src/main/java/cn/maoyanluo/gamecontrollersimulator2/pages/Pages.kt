@@ -101,16 +101,16 @@ fun ConnectingPage(
             ConnectionStatusCard(
                 title = "TCP",
                 primaryLabel = "对端地址",
-                primaryValue = "0.0.0.0:1234",
-                statusText = "未就绪",
-                statusColor = Color(0xFF8A5A00)
+                primaryValue = uiState.tcpInfo,
+                statusText = if (uiState.isTcpAvailable) "就绪" else "未就绪",
+                statusColor = if (uiState.isTcpAvailable) Color(0xFF2E7D32) else Color(0xFF8A5A00)
             )
             ConnectionStatusCard(
                 title = "UDP",
                 primaryLabel = "对端地址",
-                primaryValue = "0.0.0.0:1234",
-                statusText = "未就绪",
-                statusColor = Color(0xFF8A5A00)
+                primaryValue = uiState.udpInfo,
+                statusText = if (uiState.isUdpAvailable) "就绪" else "未就绪",
+                statusColor = if (uiState.isUdpAvailable) Color(0xFF2E7D32) else Color(0xFF8A5A00)
             )
         }
 
@@ -118,7 +118,7 @@ fun ConnectingPage(
 
         Button(
             onClick = onOpenGamepad,
-            enabled = uiState.isRFCOMMAvailable,
+            enabled = uiState.isAvailable,
             modifier = Modifier.fillMaxWidth()
         ) {
             Text(text = "->")

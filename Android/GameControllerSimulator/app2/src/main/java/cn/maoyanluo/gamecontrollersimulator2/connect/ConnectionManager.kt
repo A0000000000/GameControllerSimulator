@@ -9,6 +9,7 @@ import cn.maoyanluo.gamecontrollersimulator2.bean.BaseEntity
 import cn.maoyanluo.gamecontrollersimulator2.constant.EntityId
 import cn.maoyanluo.gamecontrollersimulator2.constant.EntityType
 import cn.maoyanluo.network_library.tcp.TcpSocketClient
+import cn.maoyanluo.socket_common_library.SocketClient
 import cn.maoyanluo.socket_common_library.SocketClientCallback
 import com.google.gson.Gson
 import com.google.gson.JsonElement
@@ -59,18 +60,36 @@ class ConnectionManager(
 
     var bluetoothAvailable = false
         private set(value) {
+            if (value && !field) {
+                callback.onConnectionAvailable(true, ConnectionType.BLE)
+            }
+            if (!value && field) {
+                callback.onConnectionAvailable(false, ConnectionType.BLE)
+            }
             val current = isAvailable
             field = value
             onAvailableChange(current, isAvailable)
         }
     var tcpAvailable = false
         private set(value) {
+            if (value && !field) {
+                callback.onConnectionAvailable(true, ConnectionType.TCP)
+            }
+            if (!value && field) {
+                callback.onConnectionAvailable(false, ConnectionType.TCP)
+            }
             val current = isAvailable
             field = value
             onAvailableChange(current, isAvailable)
         }
     var udpAvailable = false
         private set(value) {
+            if (value && !field) {
+                callback.onConnectionAvailable(true, ConnectionType.UDP)
+            }
+            if (!value && field) {
+                callback.onConnectionAvailable(false, ConnectionType.UDP)
+            }
             val current = isAvailable
             field = value
             onAvailableChange(current, isAvailable)
@@ -201,6 +220,15 @@ class ConnectionManager(
         }
     }
 
+    private fun <T: Closeable> registerNewType(client: SocketClient<T>) {
+        client.sendData(gson.toJson(BaseEntity(
+            type = EntityType.TYPE_NEW_TYPE_CONNECT,
+            id = EntityId.CONNECTION_MANAGER_INTERNAL_ID,
+            timestamp = System.currentTimeMillis(),
+            clientId
+        )).toByteArray())
+    }
+
     private fun unregisterClientId() = sendData(
         BaseEntity(
             type = EntityType.TYPE_UNREGISTER_CLIENT_ID,
@@ -241,6 +269,12 @@ class ConnectionManager(
         when (entity.type) {
             EntityType.TYPE_REQUEST_CLIENT_ID_RESULT -> {
                 clientId = entity.data?.toString() ?: ""
+                bluetoothSocketClient?.let {
+                    registerNewType(it)
+                }
+                tcpSocketClient?.let {
+                    registerNewType(it)
+                }
             }
 
             EntityType.TYPE_UNREGISTER_CLIENT_ID_RESULT -> {
@@ -256,10 +290,10 @@ class ConnectionManager(
 
     private fun onAvailableChange(current: Boolean, now: Boolean) {
         if (!current && now) {
-            callback.onManagerAvailable()
+            callback.onManagerAvailableChange(true)
         }
         if (current && !now) {
-            callback.onManagerUnavailable()
+            callback.onManagerAvailableChange(false)
         }
     }
 

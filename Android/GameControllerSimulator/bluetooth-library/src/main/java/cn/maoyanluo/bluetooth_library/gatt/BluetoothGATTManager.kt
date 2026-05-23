@@ -27,7 +27,7 @@ class BluetoothGATTManager(
     companion object {
         const val TAG = "BluetoothGATTManager"
         const val RETRY_COUNT = 3
-        const val RETRY_DIFF_TIME = 200L
+        const val RETRY_DIFF_TIME = 500L
     }
     private var bluetoothGatt: BluetoothGatt? = null
     @Volatile
@@ -186,6 +186,7 @@ class BluetoothGATTManager(
     }
 
     private fun processNextRequest() {
+        LogUtils.i(TAG, "processNextRequest isRequest = $isRequest")
         if (!isRequest && requestQueue.isNotEmpty()) {
             val request = requestQueue.poll()
             if (request != null) {

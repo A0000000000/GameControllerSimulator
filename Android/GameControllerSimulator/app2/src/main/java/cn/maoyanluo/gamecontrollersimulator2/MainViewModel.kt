@@ -51,15 +51,19 @@ class MainViewModel(private val application: Application) : AndroidViewModel(app
     )
     val coroutineManager = CoroutineManager()
     private val bluetoothManagerWrapper = BluetoothManagerWrapper(application)
+
+    private var rfcommUuid: String = ""
+    private var tcpInfo: String = ""
+    private var udpInfo: String = ""
+
     private var bluetoothGATTManager: BluetoothGATTManager? = null
     private val bluetoothGATTManagerCallback = object : BluetoothGATTManager.BluetoothGATTManagerCallback {
         override fun onAvailable(device: BluetoothDevice) {
             bluetoothGATTManager?.readCharacteristic(UUIDConstant.GATT_FUN_UUID, UUIDConstant.GATT_DATA_RFCOMM_UUID)
-//            bluetoothGATTManager?.readCharacteristic(UUIDConstant.GATT_FUN_UUID, UUIDConstant.TCP_INFO_UUID)
+            bluetoothGATTManager?.readCharacteristic(UUIDConstant.GATT_FUN_UUID, UUIDConstant.TCP_INFO_UUID)
             mainUiState = MainUiState.ConnectingPage(
                 device = device,
-                isGATTAvailable = true,
-                isRFCOMMAvailable = false
+                isGATTAvailable = true
             )
         }
 
@@ -79,15 +83,17 @@ class MainViewModel(private val application: Application) : AndroidViewModel(app
                 when(dataUuid)
                 {
                     UUIDConstant.GATT_DATA_RFCOMM_UUID -> {
+                        rfcommUuid = String(data)
                         connectionManager.initRFCOMM(
                             bluetoothManagerWrapper.getAdapter(),
                             device,
-                            UUID.fromString(String(data))
+                            UUID.fromString(rfcommUuid)
                         )
                     }
                     UUIDConstant.TCP_INFO_UUID -> {
-                        val tcpInfo = String(data).split(":")
-                        connectionManager.initTcpSocket(tcpInfo[0], tcpInfo[1].toInt())
+                        tcpInfo = String(data)
+                        val tcpInfos = tcpInfo.split(":")
+                        connectionManager.initTcpSocket(tcpInfos[0], tcpInfos[1].toInt())
                     }
                     UUIDConstant.UDP_INFO_UUID -> {
 
@@ -111,13 +117,17 @@ class MainViewModel(private val application: Application) : AndroidViewModel(app
 
     }
     private val connectionManager: ConnectionManager = ConnectionManager(object : ConnectionCallback {
-        override fun onManagerAvailable() {
-            updateConnectionAvailability(true)
+        override fun onManagerAvailableChange(available: Boolean) {
+            onConnectionManagerAvailableChange(available)
         }
 
-        override fun onManagerUnavailable() {
-            updateConnectionAvailability(false)
+        override fun onConnectionAvailable(
+            available: Boolean,
+            type: ConnectionManager.ConnectionType
+        ) {
+            onConnectionTypeAvailableChange(available, type)
         }
+
 
         override fun getTypeClass(type: Int): Class<*> {
             return EntityType.TYPE_MAPPING[type] ?: JsonElement::class.java
@@ -141,8 +151,6 @@ class MainViewModel(private val application: Application) : AndroidViewModel(app
                             LogUtils.d(TAG, "Feedback received. received is $received")
                         }
                     }
-
-
                 }
             }
         }
@@ -207,6 +215,7 @@ class MainViewModel(private val application: Application) : AndroidViewModel(app
     }
 
     fun onEnterGamepad() {
+//        connectionManager.connectionType = ConnectionManager.ConnectionType.TCP
         val currentState = mainUiState
         if (currentState is MainUiState.ConnectingPage && connectionManager.isAvailable) {
             mainUiState = MainUiState.GamepadPage
@@ -249,22 +258,40 @@ class MainViewModel(private val application: Application) : AndroidViewModel(app
 
     fun getBoundDevices() = bluetoothManagerWrapper.getBondedDevice()
 
-    private fun updateConnectionAvailability(isAvailable: Boolean) {
+    private fun onConnectionManagerAvailableChange(isAvailable: Boolean) {
         when (val currentState = mainUiState) {
             is MainUiState.ConnectingPage -> {
-                mainUiState = currentState.copy(isRFCOMMAvailable = connectionManager.bluetoothAvailable)
+                mainUiState = currentState.copy(isAvailable = isAvailable)
             }
             is MainUiState.GamepadPage -> {
                 val bm = bluetoothGATTManager
                 if (!isAvailable && bm != null) {
                     mainUiState = MainUiState.ConnectingPage(
                         device = bm.device,
-                        isGATTAvailable = bluetoothGATTManager?.isAvailable == true,
-                        isRFCOMMAvailable = false
+                        isAvailable = false,
+                        isRFCOMMAvailable = connectionManager.bluetoothAvailable,
+                        isTcpAvailable = connectionManager.tcpAvailable,
+                        isUdpAvailable = connectionManager.udpAvailable,
+                        rfcommUuid = rfcommUuid,
+                        tcpInfo = tcpInfo,
+                        udpInfo = udpInfo
                     )
                 }
                 if (bm == null) {
                     mainUiState = MainUiState.SelectPage
+                }
+            }
+            else -> Unit
+        }
+    }
+
+    private fun onConnectionTypeAvailableChange(isAvailable: Boolean, type: ConnectionManager.ConnectionType) {
+        when (val currentState = mainUiState) {
+            is MainUiState.ConnectingPage -> {
+                mainUiState = when (type) {
+                    ConnectionManager.ConnectionType.BLE -> currentState.copy(isRFCOMMAvailable = isAvailable, rfcommUuid = rfcommUuid)
+                    ConnectionManager.ConnectionType.TCP -> currentState.copy(isTcpAvailable = isAvailable, tcpInfo = tcpInfo)
+                    ConnectionManager.ConnectionType.UDP -> currentState.copy(isUdpAvailable = isAvailable, udpInfo = udpInfo)
                 }
             }
             else -> Unit

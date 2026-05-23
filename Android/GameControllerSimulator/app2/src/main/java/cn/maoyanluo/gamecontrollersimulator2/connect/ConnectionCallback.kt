@@ -4,8 +4,8 @@ import cn.maoyanluo.gamecontrollersimulator2.bean.BaseEntity
 
 interface ConnectionCallback {
 
-    fun onManagerAvailable()
-    fun onManagerUnavailable()
+    fun onManagerAvailableChange(available: Boolean)
+    fun onConnectionAvailable(available: Boolean, type: ConnectionManager.ConnectionType)
 
     fun getTypeClass(type: Int): Class<*>
     fun onDataReady(data: BaseEntity<*>?)
