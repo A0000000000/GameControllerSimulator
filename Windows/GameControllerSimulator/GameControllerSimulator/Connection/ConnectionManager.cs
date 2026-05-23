@@ -1,7 +1,9 @@
 ﻿using BluetoothLibrary;
 using GameControllerSimulator.Bean;
 using GameControllerSimulator.Constant;
+using InTheHand.Net.Sockets;
 using LogLibrary;
+using SocketCommonLibrary;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace GameControllerSimulator.Connection
 {
-    public class ConnectionManager: IDisposable
+    public class ConnectionManager : IDisposable
     {
         public static string TAG = "ConnectionManager";
 
@@ -27,7 +29,7 @@ namespace GameControllerSimulator.Connection
             LogUtils.I(TAG, $"Create ConnectionManager RFCOMM CUID = [{rfcommGuid.ToString()}], svcName = [{svcName}], connectionCount = [{connectionCount}]");
             this.callback = callback;
             clientIds = Enumerable.Repeat("", connectionCount).ToArray();
-            clients = new BluetoothSocketServer.Client[connectionCount];
+            bluetoothClients = new BluetoothSocketClient[connectionCount];
             bluetoothSocketServer = new BluetoothSocketServer(rfcommGuid, svcName, new ServerCallback(this));
             IsBluetoothAvailable = false;
             IsTcpAvailable = false;
@@ -46,9 +48,9 @@ namespace GameControllerSimulator.Connection
             LogUtils.I(TAG, $"ConnectionManager Destroy");
             bluetoothSocketServer?.StopListener();
             bluetoothSocketServer = null;
-            for (int i = 0; i < clients.Length; i++)
+            for (int i = 0; i < bluetoothClients.Length; i++)
             {
-                clients[i]?.Disconnect();
+                bluetoothClients[i]?.Disconnect();
             }
         }
 
@@ -72,7 +74,7 @@ namespace GameControllerSimulator.Connection
             {
                 if (clientIds[i] == clientId)
                 {
-                    clients[i]?.SendData(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(data)));
+                    bluetoothClients[i]?.SendData(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(data)));
                     break;
                 }
             }
@@ -115,8 +117,8 @@ namespace GameControllerSimulator.Connection
                 OnAvailableChange(current, IsAvailable);
             }
         }
-        private BluetoothSocketServer? bluetoothSocketServer;
-        private BluetoothSocketServer.Client?[] clients;
+        private SocketServer<BluetoothListener, BluetoothClient>? bluetoothSocketServer;
+        private SocketClient<BluetoothClient>?[] bluetoothClients;
         #endregion
 
         #region Todo: TCP相关逻辑
@@ -149,12 +151,12 @@ namespace GameControllerSimulator.Connection
 
         #region 内部方法
 
-        private string GetClientId(BluetoothSocketServer.Client client)
+        private string GetClientId(SocketClient<BluetoothClient> client)
         {
             LogUtils.I(TAG, $"ConnectionManager GetClientId");
-            for (int i = 0; i < clients.Length; i++)
+            for (int i = 0; i < bluetoothClients.Length; i++)
             {
-                if (clients[i] == client)
+                if (bluetoothClients[i] == client)
                 {
                     return clientIds[i];
                 }
@@ -162,12 +164,12 @@ namespace GameControllerSimulator.Connection
             return "";
         }
 
-        private int GetClientIndex(BluetoothSocketServer.Client client)
+        private int GetClientIndex(SocketClient<BluetoothClient> client)
         {
             LogUtils.I(TAG, $"ConnectionManager GetClientIndex");
-            for (int i = 0; i < clients.Length; i++)
+            for (int i = 0; i < bluetoothClients.Length; i++)
             {
-                if (clients[i] == client)
+                if (bluetoothClients[i] == client)
                 {
                     return i;
                 }
@@ -175,7 +177,7 @@ namespace GameControllerSimulator.Connection
             return -1;
         }
 
-        private bool SetClient(BluetoothSocketServer.Client client)
+        private bool SetClient(SocketClient<BluetoothClient> client)
         {
             LogUtils.I(TAG, $"ConnectionManager SetClient");
             for (int i = 0; i < clientIds.Length; i++)
@@ -183,21 +185,21 @@ namespace GameControllerSimulator.Connection
                 if (clientIds[i] == "" || clientIds[i] == null)
                 {
                     clientIds[i] = Guid.NewGuid().ToString();
-                    clients[i] = client;
+                    bluetoothClients[i] = client;
                     return true;
                 }
             }
             return false;
         }
 
-        private bool RemoveClient(BluetoothSocketServer.Client client)
+        private bool RemoveClient(SocketClient<BluetoothClient> client)
         {
             LogUtils.I(TAG, $"ConnectionManager RemoveClient");
-            for (int i = 0; i < clients.Length; i++)
+            for (int i = 0; i < bluetoothClients.Length; i++)
             {
-                if (clients[i] == client) 
+                if (bluetoothClients[i] == client)
                 {
-                    clients[i] = null;
+                    bluetoothClients[i] = null;
                     clientIds[i] = "";
                     callback?.OnClientDisconnected(i);
                     return true;
@@ -227,7 +229,7 @@ namespace GameControllerSimulator.Connection
             callback?.OnFaulted(msg, ex);
         }
 
-        private void OnDataReady(BluetoothSocketServer.Client client, byte[] data)
+        private void OnDataReady(SocketClient<BluetoothClient> client, byte[] data)
         {
             string clientId = GetClientId(client);
             LogUtils.I(TAG, $"ConnectionManager OnDataReady clientId = [{clientId}]");
@@ -284,7 +286,7 @@ namespace GameControllerSimulator.Connection
         }
 
 
-        private void OnDataReadyInner(BluetoothSocketServer.Client client, IBaseEntity entity)
+        private void OnDataReadyInner(SocketClient<BluetoothClient> client, IBaseEntity entity)
         {
             LogUtils.I(TAG, $"ConnectionManager OnDataReadyInner");
             switch (entity.Type)
@@ -316,7 +318,7 @@ namespace GameControllerSimulator.Connection
             BLE, TCP, UDP
         }
 
-        private class ServerCallback : BluetoothSocketCallback
+        private class ServerCallback : SocketServerCallback<BluetoothListener, BluetoothClient>
         {
             public static string TAG = "ServerCallback";
 
@@ -328,20 +330,13 @@ namespace GameControllerSimulator.Connection
                 this.connectionManager = bluetoothSocketServer;
             }
 
-
-            public BluetoothSocketCallback.ClientCallback CreateNewClientCallback()
-            {
-                LogUtils.I(TAG, "ServerCallback CreateNewClientCallback");
-                return new ClientCallback(connectionManager);
-            }
-
             public void OnForeverLoopException(Exception ex)
             {
                 LogUtils.D(TAG, "ServerCallback OnForeverLoopException", ex);
                 connectionManager?.OnManagerError("ServerCallback.OnForeverLoopException", ex);
             }
 
-            public void OnNewClientConnect(BluetoothSocketServer.Client client)
+            public void OnNewClientConnect(SocketClient<BluetoothClient> client)
             {
                 LogUtils.I(TAG, "ServerCallback OnNewClientConnect");
                 if (false == connectionManager?.SetClient(client))
@@ -391,10 +386,16 @@ namespace GameControllerSimulator.Connection
                 LogUtils.W(TAG, "ServerCallback OnTaskException", ex);
                 connectionManager?.OnManagerError("ServerCallback.OnTaskException", ex);
             }
+
+            public SocketClientCallback<BluetoothClient> CreateNewClientCallback()
+            {
+                LogUtils.I(TAG, "ServerCallback CreateNewClientCallback");
+                return new ClientCallback(connectionManager);
+            }
         }
 
 
-        private class ClientCallback : BluetoothSocketCallback.ClientCallback
+        private class ClientCallback : SocketClientCallback<BluetoothClient>
         {
             public static string TAG = "ClientCallback";
             private ConnectionManager? connectionManager;
@@ -404,25 +405,26 @@ namespace GameControllerSimulator.Connection
                 this.connectionManager = connectionManager;
             }
 
-            public void OnDataReady(BluetoothSocketServer.Client client, byte[] data)
+            public void OnDataReady(SocketClient<BluetoothClient> client, byte[] data)
             {
                 LogUtils.I(TAG, "ClientCallback OnDataReady");
                 connectionManager?.OnDataReady(client, data);
             }
 
-            public void OnDataRevException(BluetoothSocketServer.Client client, Exception ex)
+            public void OnDataRevException(SocketClient<BluetoothClient> client, Exception ex)
             {
                 LogUtils.W(TAG, "ClientCallback OnDataRevException", ex);
                 connectionManager?.OnManagerError($"ClientCallback.OnDataRevException, clientId: {connectionManager.GetClientId(client)}", ex);
             }
 
-            public void OnDisconnect(BluetoothSocketServer.Client client)
+
+            public void OnDisconnect(SocketClient<BluetoothClient> client)
             {
                 LogUtils.I(TAG, "ClientCallback OnDisconnect");
                 this.connectionManager?.RemoveClient(client);
             }
 
-            public void OnSendDataException(BluetoothSocketServer.Client client, Exception ex, int id = -1)
+            public void OnSendDataException(SocketClient<BluetoothClient> client, Exception ex, int id = -1)
             {
                 LogUtils.W(TAG, $"ClientCallback OnSendDataException id = [{id}]", ex);
                 connectionManager?.OnManagerError($"ClientCallback.OnSendDataException, clientId: {connectionManager.GetClientId(client)}, id: {id}", ex);
@@ -435,11 +437,11 @@ namespace GameControllerSimulator.Connection
             }
         }
         #endregion
-    
+
     }
 
 
-    public interface IConnectionManagerCallback 
+    public interface IConnectionManagerCallback
     {
         void OnManagerAvaiable();
         void OnManagerUnavailable();

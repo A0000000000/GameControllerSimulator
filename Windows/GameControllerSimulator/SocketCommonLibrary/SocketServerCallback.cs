@@ -17,20 +17,20 @@ namespace SocketCommonLibrary
 
         void OnForeverLoopException(Exception ex);
 
-        ClientCallback<TSocket> CreateNewClientCallback();
-        void OnNewClientConnect(Client<TSocket> client);
+        SocketClientCallback<TSocket> CreateNewClientCallback();
+        void OnNewClientConnect(SocketClient<TSocket> client);
         void OnNewClientException(Exception ex);
 
         void OnTaskException(Exception ex);
 
     }
 
-    public interface ClientCallback<TSocket> where TSocket : class, IDisposable
+    public interface SocketClientCallback<TSocket> where TSocket : class, IDisposable
     {
-        void OnSendDataException(Client<TSocket> client, Exception ex, int id = -1);
-        void OnDisconnect(Client<TSocket> client);
-        void OnDataReady(Client<TSocket> client, byte[] data);
-        void OnDataRevException(Client<TSocket> client, Exception ex);
+        void OnSendDataException(SocketClient<TSocket> client, Exception ex, int id = -1);
+        void OnDisconnect(SocketClient<TSocket> client);
+        void OnDataReady(SocketClient<TSocket> client, byte[] data);
+        void OnDataRevException(SocketClient<TSocket> client, Exception ex);
         void OnTaskException(Exception ex);
     }
 
