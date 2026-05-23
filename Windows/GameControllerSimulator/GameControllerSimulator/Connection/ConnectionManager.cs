@@ -61,7 +61,37 @@ namespace GameControllerSimulator.Connection
             {
                 return;
             }
-            bluetoothClients[index]?.SendData(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(data)));
+            switch (CurrentConnectionType)
+            {
+                case ConnectionType.BLE:
+                    if (bluetoothClients[index] != null)
+                    {
+                        bluetoothClients[index]?.SendData(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(data)));
+                        return;
+                    }
+                    break;
+                case ConnectionType.TCP:
+                    if (tcpClients[index] != null)
+                    {
+                        tcpClients[index]?.SendData(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(data)));
+                        return;
+                    }
+                    break;
+
+                case ConnectionType.UDP:
+
+                    break;
+            }
+            if (bluetoothClients[index] != null)
+            {
+                bluetoothClients[index]?.SendData(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(data)));
+                return;
+            }
+            if (tcpClients[index] != null)
+            {
+                tcpClients[index]?.SendData(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(data)));
+                return;
+            }
         }
 
         public void Dispose()
@@ -268,7 +298,7 @@ namespace GameControllerSimulator.Connection
                     }
                     if (type == typeof(TcpListener))
                     {
-                        connectionManager.isTcpAvailable = true;
+                        connectionManager.IsTcpAvailable = true;
                     }
                 }
             }
@@ -354,6 +384,14 @@ namespace GameControllerSimulator.Connection
             get => isBluetoothAvailable;
             set
             {
+                if (value && !isBluetoothAvailable)
+                {
+                    callback?.OnConnectionAvaiableChange(true, ConnectionType.BLE);
+                }
+                if (!value && isBluetoothAvailable)
+                {
+                    callback?.OnConnectionAvaiableChange(false, ConnectionType.BLE);
+                }
                 bool current = IsAvailable;
                 isBluetoothAvailable = value;
                 OnAvailableChange(current, IsAvailable);
@@ -390,6 +428,14 @@ namespace GameControllerSimulator.Connection
             get => isTcpAvailable;
             set
             {
+                if (value && !isTcpAvailable)
+                {
+                    callback?.OnConnectionAvaiableChange(true, ConnectionType.TCP);
+                }
+                if (!value && isTcpAvailable)
+                {
+                    callback?.OnConnectionAvaiableChange(false, ConnectionType.TCP);
+                }
                 bool current = IsAvailable;
                 isTcpAvailable = value;
                 OnAvailableChange(current, IsAvailable);
@@ -427,6 +473,14 @@ namespace GameControllerSimulator.Connection
             get => isUdpAvailable;
             set
             {
+                if (value && !isUdpAvailable)
+                {
+                    callback?.OnConnectionAvaiableChange(true, ConnectionType.UDP);
+                }
+                if (!value && isUdpAvailable)
+                {
+                    callback?.OnConnectionAvaiableChange(false, ConnectionType.UDP);
+                }
                 bool current = IsAvailable;
                 isUdpAvailable = value;
                 OnAvailableChange(current, IsAvailable);
@@ -440,11 +494,11 @@ namespace GameControllerSimulator.Connection
             LogUtils.I(TAG, $"ConnectionManager OnAvailableChange current = [{current}], now = [{now}]");
             if (!current && now)
             {
-                callback?.OnManagerAvaiable();
+                callback?.OnManagerAvaiableChange(true);
             }
             if (current && !now)
             {
-                callback?.OnManagerUnavailable();
+                callback?.OnManagerAvaiableChange(false);
             }
         }
 
@@ -534,6 +588,13 @@ namespace GameControllerSimulator.Connection
                     if (socketClients != null && (index >= 0 && index < connectionCount))
                     {
                         socketClients[index] = client;
+                        client.SendData(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new BaseEntity<string>()
+                        {
+                            Type = EntityType.TYPE_NEW_TYPE_CONNECT_RESULT,
+                            Id = EntityId.CONNECTION_MANAGER_INTERNAL_ID,
+                            Timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
+                            Data = "success"
+                        })));
                     }
                     else
                     {
@@ -542,7 +603,7 @@ namespace GameControllerSimulator.Connection
                             Type = EntityType.TYPE_NEW_TYPE_CONNECT_RESULT,
                             Id = EntityId.CONNECTION_MANAGER_INTERNAL_ID,
                             Timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
-                            Data = "set new type failed"
+                            Data = "failed"
                         })));
                     }
                     break;

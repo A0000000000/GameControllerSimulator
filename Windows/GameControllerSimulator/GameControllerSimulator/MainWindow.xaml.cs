@@ -44,6 +44,8 @@ namespace GameControllerSimulator
     public sealed partial class MainWindow : Window
     {
         public static string TAG = "MainWindow";
+        public static readonly int MIN_PORT = 40000;
+        public static readonly int MAX_PORT = 49152;
         public const int CONTROLLER_COUNT = 4;
         private const string APP_NAME = "GameControllerSimulator2";
 
@@ -78,6 +80,7 @@ namespace GameControllerSimulator
             }
             catch (Exception ex)
             {
+                LogUtils.E(TAG, "OnActivated Failed", ex);
             }
         }
 
@@ -89,6 +92,7 @@ namespace GameControllerSimulator
             }
             catch (Exception ex)
             {
+                LogUtils.E(TAG, "OnClosed Failed", ex);
             }
         }
         private async Task Init()
@@ -177,9 +181,28 @@ namespace GameControllerSimulator
                     PropertiesKey = "RFCOMMGuid",
                     PropertiesValue = Encoding.UTF8.GetBytes(rfcommGuid.ToString())
                 });
+                if (address != null && address != string.Empty && address != "")
+                {
+                    Random random = new Random();
+                    tcpPort = random.Next(MIN_PORT, MAX_PORT);
+                    udpPort = random.Next(MIN_PORT, MAX_PORT);
+                    GATTProperties.Add(new()
+                    {
+                        PropertiesGuid = GUIDConstant.TCP_INFO_GUID,
+                        PropertiesKey = "TCPServer",
+                        PropertiesValue = Encoding.UTF8.GetBytes($"{address}:{tcpPort}")
+                    });
+                    GATTProperties.Add(new()
+                    {
+                        PropertiesGuid = GUIDConstant.UDP_INFO_GUID,
+                        PropertiesKey = "UDPServer",
+                        PropertiesValue = Encoding.UTF8.GetBytes($"{address}:{udpPort}")
+                    });
+                }
                 bluetoothGATTManager = new BluetoothGATTManager(GATTProperties, GUIDConstant.GATT_FUN_GUID, new GATTCallback(this));
                 LogUtils.I(TAG, "start gatt service.");
                 bluetoothGATTManager?.StartService();
+
             }
             else
             {
@@ -262,28 +285,62 @@ namespace GameControllerSimulator
         #region 连接管理处理
         private ConnectionManager? connectionManager;
         private Guid rfcommGuid = GUIDConstant.DEFAULT_RFCOMM_GUID;
+        private string address = NetworkUtils.GetLocalIPv4();
+        private int tcpPort;
+        private int udpPort;
 
         private async Task InitConnectionManager()
         {
             LogUtils.I(TAG, "InitConnectionManager");
             connectionManager = new ConnectionManager(CONTROLLER_COUNT, new ConnectionManagerCallback(this));
             connectionManager?.InitRFCOMM(rfcommGuid, APP_NAME);
+            connectionManager?.InitTcp(tcpPort);
         }
 
-        private void OnConnectionAvaiableChange(bool avaiable)
+        private void OnConnectionAvaiableChange(bool available, ConnectionManager.ConnectionType type)
         {
-            LogUtils.I(TAG, $"OnConnectionAvaiableChange avaiable = [{avaiable}]");
+            LogUtils.I(TAG, $"OnConnectionAvaiableChange avaiable = [{available}] type = [{type}]");
             _dispatcher.TryEnqueue(() =>
             {
-                if (avaiable)
+                switch (type) 
                 {
-                    BluetoothRFCOMM.Text = "Bluetooth RFCOMM Status: Running";
-                }
-                else
-                {
-                    BluetoothRFCOMM.Text = "Bluetooth RFCOMM Status: Stopped";
+                    case ConnectionManager.ConnectionType.BLE:
+                        if (available)
+                        {
+                            BluetoothRFCOMM.Text = $"Bluetooth RFCOMM Status: Running at {rfcommGuid.ToString()}";
+                        }
+                        else
+                        {
+                            BluetoothRFCOMM.Text = "Bluetooth RFCOMM Status: Stopped";
+                        }
+                        break;
+                    case ConnectionManager.ConnectionType.TCP:
+                        if (available)
+                        {
+                            TcpInfo.Text = $"TCP Status: Running at {address}:{tcpPort}";
+                        }
+                        else
+                        {
+                            TcpInfo.Text = "TCP Status: Stopped";
+                        }
+                        break;
+                    case ConnectionManager.ConnectionType.UDP:
+                        if (available)
+                        {
+                            UdpInfo.Text = $"UDP Status: Running at {address}:{udpPort}";
+                        }
+                        else
+                        {
+                            UdpInfo.Text = "UDP Status: Stopped";
+                        }
+                        break;
                 }
             });
+        }
+
+        private void OnManagerAvaiableChange(bool available)
+        {
+            LogUtils.I(TAG, $"OnManagerAvaiableChange avaiable = [{available}]");
         }
 
         private async Task DestroyConnectionManager()
@@ -321,6 +378,12 @@ namespace GameControllerSimulator
                 window.OnClientDisconnected(index);
             }
 
+            public void OnConnectionAvaiableChange(bool available, ConnectionManager.ConnectionType type)
+            {
+                LogUtils.I(TAG, "ConnectionManagerCallback OnManagerAvaiable");
+                window.OnConnectionAvaiableChange(available, type);
+            }
+
             public void OnDataReady(int index, IBaseEntity data)
             {
                 LogUtils.I(TAG, $"ConnectionManagerCallback OnClientDisconnected index = [{index}], data = [{JsonSerializer.Serialize(data)}]");
@@ -333,16 +396,10 @@ namespace GameControllerSimulator
                 window.OnFaulted(msg, ex);
             }
 
-            public void OnManagerAvaiable()
+            public void OnManagerAvaiableChange(bool available)
             {
                 LogUtils.I(TAG, "ConnectionManagerCallback OnManagerAvaiable");
-                window.OnConnectionAvaiableChange(true);
-            }
-
-            public void OnManagerUnavailable()
-            {
-                LogUtils.I(TAG, "ConnectionManagerCallback OnManagerUnavailable");
-                window.OnConnectionAvaiableChange(false);
+                window.OnManagerAvaiableChange(available);
             }
 
             public void OnNewClientConnection(int index)
@@ -398,6 +455,7 @@ namespace GameControllerSimulator
         #endregion
 
         #region 数据处理
+        private object gameEventLock = new object();
 
         private void OnDataReady(int index, IBaseEntity data)
         {
@@ -416,15 +474,18 @@ namespace GameControllerSimulator
                     gameControllers[index]?.Connect();
                     break;
                 case EntityType.TYPE_SEND_GAME_EVENT:
-                    string? eventsBase64 = data.Data as string;
-                    if (eventsBase64 != null)
+                    lock (gameEventLock)
                     {
-                        byte[] events = Convert.FromBase64String(eventsBase64);
-                        deviceUIManagers[index].SetCurrentEvent(Convert.ToHexString(events));
-                        gamepadStatePackets[index].CopyEventToCurrent(events);
-                        List<GamepadStateChange> changes = gamepadStatePackets[index].GetChanges();
-                        gameControllers[index]?.UpdateState(changes);
-                        gamepadStatePackets[index].CopyCurrentToLast();
+                        string? eventsBase64 = data.Data as string;
+                        if (eventsBase64 != null)
+                        {
+                            byte[] events = Convert.FromBase64String(eventsBase64);
+                            deviceUIManagers[index].SetCurrentEvent(Convert.ToHexString(events));
+                            gamepadStatePackets[index].CopyEventToCurrent(events);
+                            List<GamepadStateChange> changes = gamepadStatePackets[index].GetChanges();
+                            gameControllers[index]?.UpdateState(changes);
+                            gamepadStatePackets[index].CopyCurrentToLast();
+                        }
                     }
                     break;
                 default:
