@@ -83,6 +83,7 @@ fun MainContainer(modifier: Modifier = Modifier) {
             fun requestPermission() {
                 launcher.launch(
                     arrayOf(
+                        Manifest.permission.BLUETOOTH_ADMIN,
                         Manifest.permission.BLUETOOTH_CONNECT,
                         Manifest.permission.BLUETOOTH_SCAN
                     )

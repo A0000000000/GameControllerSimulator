@@ -2,6 +2,7 @@ package cn.maoyanluo.ui_library.pages
 
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothDevice
+import android.text.TextUtils
 import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -44,7 +45,7 @@ fun SelectDevicePages(modifier: Modifier = Modifier, getBoundsDevices: (() -> Li
         LazyColumn(modifier.fillMaxWidth().weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
             for (device in devicesList) {
                 item {
-                    Text(text = device.name, fontSize = 20.sp, modifier = Modifier.padding(0.dp, 3.dp).clickable {
+                    Text(text = device.name ?: device.address ?: "", fontSize = 20.sp, modifier = Modifier.padding(0.dp, 3.dp).clickable {
                         onBluetoothDeviceSelected(device)
                     })
                 }

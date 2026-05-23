@@ -2,6 +2,7 @@ package cn.maoyanluo.gamecontrollersimulator2
 
 import android.app.Application
 import android.bluetooth.BluetoothDevice
+import android.bluetooth.BluetoothGatt
 import android.os.Build
 import android.util.Base64
 import android.widget.Toast
@@ -54,7 +55,7 @@ class MainViewModel(private val application: Application) : AndroidViewModel(app
     private val bluetoothGATTManagerCallback = object : BluetoothGATTManager.BluetoothGATTManagerCallback {
         override fun onAvailable(device: BluetoothDevice) {
             bluetoothGATTManager?.readCharacteristic(UUIDConstant.GATT_FUN_UUID, UUIDConstant.GATT_DATA_RFCOMM_UUID)
-            bluetoothGATTManager?.readCharacteristic(UUIDConstant.GATT_FUN_UUID, UUIDConstant.TCP_INFO_UUID)
+//            bluetoothGATTManager?.readCharacteristic(UUIDConstant.GATT_FUN_UUID, UUIDConstant.TCP_INFO_UUID)
             mainUiState = MainUiState.ConnectingPage(
                 device = device,
                 isGATTAvailable = true,
@@ -66,8 +67,13 @@ class MainViewModel(private val application: Application) : AndroidViewModel(app
             data: ByteArray,
             svcUuid: UUID,
             dataUuid: UUID,
+            status: Int,
             device: BluetoothDevice
         ) {
+            if (status != BluetoothGatt.GATT_SUCCESS) {
+                LogUtils.e(TAG, "onCharacteristicRead failed. status = $status svcUuid = $svcUuid, dataUuid = $dataUuid")
+                return
+            }
             if (UUIDConstant.GATT_FUN_UUID == svcUuid)
             {
                 when(dataUuid)

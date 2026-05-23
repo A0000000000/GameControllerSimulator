@@ -175,6 +175,7 @@ class ConnectionManager(
     }
 
     fun destroy() {
+        canRequestClientId = true
         coroutineManager.getIOScope().launch {
             if (isAvailable) {
                 unregisterClientId()
