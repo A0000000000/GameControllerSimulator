@@ -233,6 +233,7 @@ class MainViewModel(private val application: Application) : AndroidViewModel(app
         if (currentState is MainUiState.GamepadPage && bm != null) {
             mainUiState = MainUiState.ConnectingPage(
                 device = bm.device,
+                isAvailable = connectionManager.isAvailable,
                 isGATTAvailable = bluetoothGATTManager?.isAvailable == true,
                 isRFCOMMAvailable = connectionManager.bluetoothAvailable,
                 isTcpAvailable = connectionManager.tcpAvailable,
