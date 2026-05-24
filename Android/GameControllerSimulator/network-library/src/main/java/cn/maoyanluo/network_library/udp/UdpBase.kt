@@ -53,16 +53,9 @@ abstract class UdpBase(
                     val targetPort = packet.port
                     if (filterReceiveData(targetAddress, targetPort)) {
                         coroutineManager.getIOScope().launch {
-                            callback.onDataReceive(data) { sendData, id ->
+                            callback.onDataReceive(data) { d, id ->
                                 try {
-                                    val targetPacket =
-                                        DatagramPacket(
-                                            sendData,
-                                            sendData.size,
-                                            targetAddress,
-                                            targetPort
-                                        )
-                                    sendPacket(targetPacket)
+                                    sendData(d, id)
                                 } catch (e: Exception) {
                                     callback.onDataSendException(e, id)
                                 }
