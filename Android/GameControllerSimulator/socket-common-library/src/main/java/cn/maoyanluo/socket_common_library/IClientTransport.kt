@@ -15,6 +15,5 @@ interface IClientTransport {
     fun connect()
     fun disconnect()
     fun sendData(data: ByteArray, id: Int = -1)
-    val receiveData: SharedFlow<ByteArray>
 
 }

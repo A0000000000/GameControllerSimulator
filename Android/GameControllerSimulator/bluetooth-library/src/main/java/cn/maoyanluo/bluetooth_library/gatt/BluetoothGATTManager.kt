@@ -215,6 +215,7 @@ class BluetoothGATTManager(
     }
 
     private fun onReadCharacteristic(status: Int, data: ByteArray, characteristic: BluetoothGattCharacteristic) {
+        LogUtils.i(TAG, "onReadCharacteristic status = $status, svc uuid = ${characteristic.service.uuid}, data uuid = ${characteristic.uuid}")
         val svcUuid = characteristic.service.uuid
         val dataUuid = characteristic.uuid
         var delayTime = 0L
@@ -235,6 +236,7 @@ class BluetoothGATTManager(
     }
 
     private fun clear() {
+        LogUtils.i(TAG, "clear")
         isAvailable = false
         bluetoothGatt?.disconnect()
         bluetoothGatt?.close()
@@ -246,6 +248,7 @@ class BluetoothGATTManager(
     }
 
     fun destroy() {
+        LogUtils.i(TAG, "destroy")
         handler?.post {
             synchronized(this@BluetoothGATTManager) {
                 if (!isInit) {

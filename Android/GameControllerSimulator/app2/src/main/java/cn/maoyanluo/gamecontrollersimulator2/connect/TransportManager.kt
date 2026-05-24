@@ -2,14 +2,18 @@ package cn.maoyanluo.gamecontrollersimulator2.connect
 
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
+import android.util.Log
 import cn.maoyanluo.bluetooth_library.socket.BluetoothSocketClient
 import cn.maoyanluo.coroutine_library.CoroutineManager
+import cn.maoyanluo.log_library.LogUtils
 import cn.maoyanluo.network_library.tcp.TcpSocketClient
 import cn.maoyanluo.socket_common_library.IClientTransport
 import cn.maoyanluo.socket_common_library.SocketClientCallback
 import kotlinx.coroutines.launch
 import java.util.EnumMap
 import java.util.UUID
+import java.util.concurrent.atomic.AtomicInteger
+import kotlin.concurrent.atomics.AtomicInt
 
 
 class TransportManager(
@@ -22,9 +26,10 @@ class TransportManager(
     }
 
     private val transports: EnumMap<ConnectionType, IClientTransport> = EnumMap(ConnectionType::class.java)
-    private var available = false
+    private var availableCallbackCount: AtomicInteger = AtomicInteger(0)
 
     fun initRFCOMM(adapter: BluetoothAdapter, device: BluetoothDevice, uuid: UUID) {
+        LogUtils.d(TAG, "init RFCOMM. uuid = $uuid")
         coroutineManager.getIOScope().launch {
             synchronized(transports) {
                 if (transports[ConnectionType.BLE] != null) {
@@ -36,19 +41,15 @@ class TransportManager(
                     uuid,
                     SocketClientCallbackImpl(this@TransportManager, ConnectionType.BLE),
                     coroutineManager
-                ).apply {
-                    coroutineManager.getIOScope().launch {
-                        receiveData.collect { data ->
-                            onDataReady(data, ConnectionType.BLE)
-                        }
-                    }
-                    connect()
+                ).also {
+                    it.connect()
                 }
             }
         }
     }
 
     fun initTcpSocket(host: String, port: Int) {
+        LogUtils.d(TAG, "init tcp. host = $host, port = $port")
         coroutineManager.getIOScope().launch {
             synchronized(transports) {
                 if (transports[ConnectionType.TCP] != null) {
@@ -59,13 +60,8 @@ class TransportManager(
                         this@TransportManager,
                         ConnectionType.TCP
                     ), coroutineManager
-                ).apply {
-                    coroutineManager.getIOScope().launch {
-                        receiveData.collect { data ->
-                            onDataReady(data, ConnectionType.TCP)
-                        }
-                    }
-                    connect()
+                ).also {
+                    it.connect()
                 }
             }
         }
@@ -86,10 +82,11 @@ class TransportManager(
      * 尽量保证使用调用方要求的方式，如果不可用，fallback到一个可用的方式
      */
     fun sendData(data: ByteArray, type: ConnectionType, id: Int = -1) {
+        LogUtils.i(TAG, "send data. id = $id, except type = $type")
         synchronized(transports) {
-            transports[type]?.takeIf { it.available }
-                ?: transports.values.firstOrNull { it.available }
-        }?.sendData(data, id)
+                transports[type]?.takeIf { it.available }
+                    ?: transports.values.firstOrNull { it.available }
+            }?.sendData(data, id)
     }
 
     fun isAvailable(type: ConnectionType): Boolean {
@@ -97,6 +94,7 @@ class TransportManager(
     }
 
     fun destroy() {
+        LogUtils.d(TAG, "destroy")
         synchronized(transports) {
             for (item in transports) {
                 item.value?.disconnect()
@@ -106,31 +104,29 @@ class TransportManager(
     }
 
     private fun onDataReady(data: ByteArray, type: ConnectionType) {
+        LogUtils.i(TAG, "onDataReady type = $type")
         callback.onDataReady(data, type)
     }
 
-    private fun onAvailableChange(available: Boolean) {
-        if (available && !this.available) {
-            callback.onAvailableChange(true)
-        }
-        if (!available && this.available) {
-            callback.onAvailableChange(false)
-        }
-        this.available = available
-    }
-
     private fun onConnectionAvailableChange(available: Boolean, type: ConnectionType) {
+        LogUtils.d(TAG, "onConnectionAvailableChange available = $available, type = $type")
         if (!available) {
             synchronized(transports) {
                 transports.remove(type)?.disconnect()
             }
-        } else {
-            onAvailableChange(true)
-        }
-        if (transports.isEmpty()) {
-            onAvailableChange(false)
         }
         callback.onConnectionAvailableChange(available, type)
+        if (available) {
+            if (availableCallbackCount.incrementAndGet() == 1) {
+                LogUtils.i(TAG, "onConnectionAvailableChange onAvailable")
+                callback.onAvailableChange(true)
+            }
+        } else {
+            if (availableCallbackCount.decrementAndGet() == 0) {
+                LogUtils.i(TAG, "onConnectionAvailableChange onUnavailable")
+                callback.onAvailableChange(true)
+            }
+        }
     }
 
     private fun removeConnection(type: ConnectionType) {
@@ -140,6 +136,7 @@ class TransportManager(
     }
 
     private fun onFault(msg: String, e: Exception, params: Map<String, Any>? = null) {
+        Log.w(TAG, "onFault msg = $msg, params = $params", e)
         callback.onFault(msg, e, params)
     }
 
@@ -147,48 +144,52 @@ class TransportManager(
         private val manager: TransportManager,
         private val type: ConnectionType
     ) : SocketClientCallback {
-        private var clientAvailable = false
+
+        companion object {
+            const val TAG = "SocketClientCallbackImpl"
+        }
 
         override fun onConnectSuccess() {
-            if (!clientAvailable) {
-                manager.onConnectionAvailableChange(true, type)
-            }
-            clientAvailable = true
+            LogUtils.i(TAG, "onConnectSuccess type = $type")
+            manager.onConnectionAvailableChange(true, type)
         }
 
         override fun onConnectException(e: Exception) {
-            if (clientAvailable) {
-                manager.onConnectionAvailableChange(false, type)
-            } else {
-                manager.removeConnection(type)
-            }
-            clientAvailable = false
+            LogUtils.e(TAG, "onConnectException type = $type", e)
+            manager.removeConnection(type)
         }
 
         override fun onSendDataException(e: Exception, id: Int) {
+            LogUtils.e(TAG, "onSendDataException id = $id, type = $type", e)
             manager.onFault("onSendDataException", e, mapOf(Pair("id", id)))
         }
 
         override fun onDisconnect() {
-            if (clientAvailable) {
-                manager.onConnectionAvailableChange(false, type)
-            }
-            clientAvailable = false
+            LogUtils.i(TAG, "onDisconnect type = $type")
+            manager.onConnectionAvailableChange(false, type)
+        }
+
+        override fun onDataReady(data: ByteArray) {
+            LogUtils.i(TAG, "onDataReady type = $type")
+            manager.onDataReady(data, type)
         }
 
         override fun onDataRevException(e: Exception) {
+            LogUtils.e(TAG, "onDataRevException type = $type", e)
             manager.onFault("onDataRevException", e)
         }
 
     }
+
+    interface TransportManagerCallback {
+        fun onDataReady(data: ByteArray, type: ConnectionType)
+        fun onAvailableChange(available: Boolean)
+        fun onConnectionAvailableChange(available: Boolean, type: ConnectionType)
+        fun onFault(msg: String, e: Exception, params: Map<String, Any>? = null)
+    }
+
 }
 enum class ConnectionType {
     BLE, TCP, UDP
 }
 
-interface TransportManagerCallback {
-    fun onDataReady(data: ByteArray, type: ConnectionType)
-    fun onAvailableChange(available: Boolean)
-    fun onConnectionAvailableChange(available: Boolean, type: ConnectionType)
-    fun onFault(msg: String, e: Exception, params: Map<String, Any>? = null)
-}

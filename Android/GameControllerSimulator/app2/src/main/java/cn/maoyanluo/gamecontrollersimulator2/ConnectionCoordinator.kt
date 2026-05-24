@@ -7,7 +7,6 @@ import android.content.Context
 import cn.maoyanluo.bluetooth_library.BluetoothManagerWrapper
 import cn.maoyanluo.bluetooth_library.gatt.BluetoothGATTManager
 import cn.maoyanluo.coroutine_library.CoroutineManager
-import cn.maoyanluo.gamecontrollersimulator2.MainViewModel.Companion.TAG
 import cn.maoyanluo.gamecontrollersimulator2.bean.BaseEntity
 import cn.maoyanluo.gamecontrollersimulator2.bean.DeviceInfo
 import cn.maoyanluo.gamecontrollersimulator2.bean.FeedbackReceived
@@ -29,6 +28,10 @@ class ConnectionCoordinator(
     private val ctx: Context,
     private val coroutineManager: CoroutineManager,
 ) {
+    companion object {
+        const val TAG = "ConnectionCoordinator"
+    }
+
     private val gamepadEventGenerator = GamepadEventGenerator(coroutineManager)
     private val bluetoothManagerWrapper = BluetoothManagerWrapper(ctx)
     private var bluetoothGATTManager: BluetoothGATTManager? = null
@@ -62,6 +65,7 @@ class ConnectionCoordinator(
     val event = _event.asSharedFlow()
 
     fun setDevice(device: BluetoothDevice) {
+        LogUtils.i(TAG, "set device. device name: ${device.name}, device mac: ${device.address}, device type: ${device.type}")
         clearConnection()
         connectionController.init()
         connectionController.registerHandler(routerHandlers)
@@ -77,6 +81,7 @@ class ConnectionCoordinator(
     fun isConnectionTypeAvailable(type: ConnectionType) = connectionController.isAvailable(type)
 
     fun setConnectType(type: ConnectionType) {
+        LogUtils.i(TAG, "setConnectType type = $type")
         connectionController.selectType = type
     }
 
@@ -91,16 +96,19 @@ class ConnectionCoordinator(
     fun getGamepadEventGenerator() = gamepadEventGenerator
 
     fun clearConnection() {
+        LogUtils.i(TAG, "clearConnection")
         connectionController.destroy()
         bluetoothGATTManager?.destroy()
     }
 
     fun destroy() {
+        LogUtils.i(TAG, "destroy")
         clearConnection()
     }
 
     private val bluetoothGATTManagerCallback = object : BluetoothGATTManager.BluetoothGATTManagerCallback {
         override fun onAvailable(device: BluetoothDevice) {
+            LogUtils.i(TAG, "BluetoothGATTManagerCallback onAvailable")
             coroutineManager.getIOScope().launch {
                 _event.emit(CoordinatorEvent.GattAvailableEvent(true))
             }
@@ -116,15 +124,17 @@ class ConnectionCoordinator(
             device: BluetoothDevice
         ) {
             if (status != BluetoothGatt.GATT_SUCCESS) {
-                LogUtils.e(TAG, "onCharacteristicRead failed. status = $status svcUuid = $svcUuid, dataUuid = $dataUuid")
+                LogUtils.e(TAG, "BluetoothGATTManagerCallback onCharacteristicRead failed. status = $status, svcUuid = $svcUuid, dataUuid = $dataUuid")
                 return
             }
+            LogUtils.i(TAG, "BluetoothGATTManagerCallback onCharacteristicRead success. status = $status, svcUuid = $svcUuid, dataUuid = $dataUuid")
             if (UUIDConstant.GATT_FUN_UUID == svcUuid)
             {
                 when(dataUuid)
                 {
                     UUIDConstant.GATT_DATA_RFCOMM_UUID -> {
                         val rfcommUuid = String(data)
+                        LogUtils.i(TAG, "BluetoothGATTManagerCallback on rfcomm data ready uuid is $rfcommUuid")
                         connectionController.initRFCOMM(bluetoothManagerWrapper.getAdapter(), device, UUID.fromString(rfcommUuid))
                         coroutineManager.getIOScope().launch {
                             _event.emit((CoordinatorEvent.RFCOMMDataReadyEvent(rfcommUuid)))
@@ -132,6 +142,7 @@ class ConnectionCoordinator(
                     }
                     UUIDConstant.TCP_INFO_UUID -> {
                         val tcpInfo = String(data)
+                        LogUtils.i(TAG, "BluetoothGATTManagerCallback on tcp data ready info is $tcpInfo")
                         val tcpInfos = tcpInfo.split(":")
                         connectionController.initTcpSocket(tcpInfos[0], tcpInfos[1].toInt())
                         coroutineManager.getIOScope().launch {
@@ -146,12 +157,14 @@ class ConnectionCoordinator(
         }
 
         override fun onFault(device: BluetoothDevice) {
+            LogUtils.i(TAG, "BluetoothGATTManagerCallback onFault")
             coroutineManager.getIOScope().launch {
                 _event.emit(CoordinatorEvent.GattAvailableEvent(false))
             }
         }
 
         override fun onDestroy() {
+            LogUtils.i(TAG, "BluetoothGATTManagerCallback onDestroy")
             coroutineManager.getIOScope().launch {
                 _event.emit(CoordinatorEvent.GattAvailableEvent(false))
             }
@@ -161,6 +174,7 @@ class ConnectionCoordinator(
 
     private class ConnectionControllerCallbackImpl(private val coordinator: ConnectionCoordinator): ConnectionController.ConnectionControllerCallback {
         override fun onAvailableChange(available: Boolean) {
+            LogUtils.i(TAG, "ConnectionControllerCallbackImpl onAvailableChange available = $available")
             coordinator.coroutineManager.getIOScope().launch {
                 coordinator._event.emit(CoordinatorEvent.ConnectionAvailableEvent(available))
             }
@@ -170,12 +184,14 @@ class ConnectionCoordinator(
             available: Boolean,
             type: ConnectionType
         ) {
+            LogUtils.i(TAG, "ConnectionControllerCallbackImpl onConnectionAvailableChange available = $available, type = $type")
             coordinator.coroutineManager.getIOScope().launch {
                 coordinator._event.emit(CoordinatorEvent.ConnectionTypeAvailableEvent(available, type))
             }
         }
 
         override fun onRttResult(diff: Long, type: ConnectionType) {
+            LogUtils.i(TAG, "ConnectionControllerCallbackImpl onRttResult diff = $diff, type = $type")
             coordinator.coroutineManager.getIOScope().launch {
                 coordinator._event.emit(CoordinatorEvent.RttResultEvent(diff, type))
             }
@@ -186,6 +202,7 @@ class ConnectionCoordinator(
             e: Exception,
             params: Map<String, Any>?
         ) {
+            LogUtils.i(TAG, "ConnectionControllerCallbackImpl onFault msg = $msg, params = $params", e)
             coordinator.coroutineManager.getIOScope().launch {
                 coordinator._event.emit(CoordinatorEvent.FaultEvent(msg, e, params))
             }

@@ -26,21 +26,23 @@ class MainViewModel(private val application: Application) : AndroidViewModel(app
         private set
 
     private val coroutineManager = CoroutineManager()
-    private val coordinator = ConnectionCoordinator(application, coroutineManager)
+    private val connectionCoordinator = ConnectionCoordinator(application, coroutineManager)
     private var rfcommUuid: String = ""
     private var tcpInfo: String = ""
     private var udpInfo: String = ""
 
 
     init {
+        LogUtils.i(TAG, "init")
         coroutineManager.init()
         val job = coroutineManager.getMainScope().launch {
-            coordinator.event.collect {
+            LogUtils.i(TAG, "collect connectionCoordinator event")
+            connectionCoordinator.event.collect {
                 when (it) {
                     is CoordinatorEvent.GattAvailableEvent -> {
                         mainUiState = if (it.available) {
                             MainUiState.ConnectingPage(
-                                deviceName = coordinator.getDeviceName(),
+                                deviceName = connectionCoordinator.getDeviceName(),
                                 isGATTAvailable = true
                             )
                         } else {
@@ -53,17 +55,17 @@ class MainViewModel(private val application: Application) : AndroidViewModel(app
                             mainUiState = when(it.type) {
                                 ConnectionType.BLE -> uiState.copy(rfcommStatus = ConnectStatus(
                                     isAvailable = it.available,
-                                    isSelect = coordinator.getConnectType() == ConnectionType.BLE,
+                                    isSelect = connectionCoordinator.getConnectType() == ConnectionType.BLE,
                                     info = rfcommUuid
                                 ))
                                 ConnectionType.TCP -> uiState.copy(tcpStatus = ConnectStatus(
                                     isAvailable = it.available,
-                                    isSelect = coordinator.getConnectType() == ConnectionType.TCP,
+                                    isSelect = connectionCoordinator.getConnectType() == ConnectionType.TCP,
                                     info = tcpInfo
                                 ))
                                 ConnectionType.UDP -> uiState.copy(udpStatus = ConnectStatus(
                                     isAvailable = it.available,
-                                    isSelect = coordinator.getConnectType() == ConnectionType.UDP,
+                                    isSelect = connectionCoordinator.getConnectType() == ConnectionType.UDP,
                                     info = udpInfo
                                 ))
                             }
@@ -98,8 +100,9 @@ class MainViewModel(private val application: Application) : AndroidViewModel(app
             }
         }
         addCloseable {
+            LogUtils.i(TAG, "close")
             job.cancel()
-            coordinator.destroy()
+            connectionCoordinator.destroy()
             coroutineManager.destroy()
         }
     }
@@ -111,74 +114,74 @@ class MainViewModel(private val application: Application) : AndroidViewModel(app
                 else -> mainUiState
             }
         } else {
-            coordinator.clearConnection()
+            connectionCoordinator.clearConnection()
             MainUiState.NoPermissionPage
         }
     }
 
     fun onDeviceSelected(device: BluetoothDevice) {
-        coordinator.setDevice(device)
+        connectionCoordinator.setDevice(device)
         mainUiState = MainUiState.ConnectingPage(
-            deviceName = coordinator.getDeviceName(),
+            deviceName = connectionCoordinator.getDeviceName(),
             isGATTAvailable = false,
         )
     }
 
     fun onEnterGamepad() {
         val currentState = mainUiState
-        if (currentState is MainUiState.ConnectingPage && coordinator.isConnectionAvailable()) {
+        if (currentState is MainUiState.ConnectingPage && connectionCoordinator.isConnectionAvailable()) {
             mainUiState = MainUiState.GamepadPage
         }
-        if (!coordinator.isConnectionAvailable()) {
+        if (!connectionCoordinator.isConnectionAvailable()) {
             mainUiState = MainUiState.SelectPage
         }
     }
 
     fun onSelectConnectType(type: ConnectionType) {
-        coordinator.setConnectType(type)
+        connectionCoordinator.setConnectType(type)
         if (mainUiState is MainUiState.ConnectingPage) {
             mainUiState = (mainUiState as MainUiState.ConnectingPage).copy(
                 rfcommStatus = ConnectStatus(
-                    isAvailable = coordinator.isConnectionTypeAvailable(ConnectionType.BLE),
-                    isSelect = coordinator.getConnectType() == ConnectionType.BLE,
+                    isAvailable = connectionCoordinator.isConnectionTypeAvailable(ConnectionType.BLE),
+                    isSelect = connectionCoordinator.getConnectType() == ConnectionType.BLE,
                     info = rfcommUuid
                 ),
                 tcpStatus = ConnectStatus(
-                    isAvailable = coordinator.isConnectionTypeAvailable(ConnectionType.TCP),
-                    isSelect = coordinator.getConnectType() == ConnectionType.TCP,
+                    isAvailable = connectionCoordinator.isConnectionTypeAvailable(ConnectionType.TCP),
+                    isSelect = connectionCoordinator.getConnectType() == ConnectionType.TCP,
                     info = tcpInfo
                 ),
                 udpStatus = ConnectStatus(
-                    isAvailable = coordinator.isConnectionTypeAvailable(ConnectionType.UDP),
-                    isSelect = coordinator.getConnectType() == ConnectionType.UDP,
+                    isAvailable = connectionCoordinator.isConnectionTypeAvailable(ConnectionType.UDP),
+                    isSelect = connectionCoordinator.getConnectType() == ConnectionType.UDP,
                     info = udpInfo
                 )
             )
         }
     }
 
-    fun onRequestRtt(type: ConnectionType) = coordinator.requestRtt(type)
+    fun onRequestRtt(type: ConnectionType) = connectionCoordinator.requestRtt(type)
 
     fun onBackFromGamepad() {
         val currentState = mainUiState
         if (currentState is MainUiState.GamepadPage) {
             mainUiState = MainUiState.ConnectingPage.map(
-                coordinator.getDeviceName(),
-                coordinator.isGATTAvailable(),
-                coordinator.isConnectionAvailable(),
-                coordinator.getConnectType(),
+                connectionCoordinator.getDeviceName(),
+                connectionCoordinator.isGATTAvailable(),
+                connectionCoordinator.isConnectionAvailable(),
+                connectionCoordinator.getConnectType(),
                 rfcommUuid,
                 tcpInfo,
                 udpInfo,
-                coordinator.isConnectionTypeAvailable(ConnectionType.BLE),
-                coordinator.isConnectionTypeAvailable(ConnectionType.TCP),
-                coordinator.isConnectionTypeAvailable(ConnectionType.UDP)
+                connectionCoordinator.isConnectionTypeAvailable(ConnectionType.BLE),
+                connectionCoordinator.isConnectionTypeAvailable(ConnectionType.TCP),
+                connectionCoordinator.isConnectionTypeAvailable(ConnectionType.UDP)
             )
         }
     }
 
     fun onGamepadEvent(data: ByteArray) {
-        coordinator.sendData(
+        connectionCoordinator.sendData(
             BaseEntity(
                 type = EntityType.TYPE_SEND_GAME_EVENT,
                 id = EntityId.GAMEPAD_PAGE_EVENT,
@@ -189,13 +192,13 @@ class MainViewModel(private val application: Application) : AndroidViewModel(app
     }
 
     fun disconnect() {
-        coordinator.clearConnection()
+        connectionCoordinator.clearConnection()
         mainUiState = MainUiState.SelectPage
     }
 
-    fun getBoundDevices() = coordinator.getBoundDevices()
+    fun getBoundDevices() = connectionCoordinator.getBoundDevices()
 
-    fun getGamepadEventGenerator() = coordinator.getGamepadEventGenerator()
+    fun getGamepadEventGenerator() = connectionCoordinator.getGamepadEventGenerator()
 
 
 }
