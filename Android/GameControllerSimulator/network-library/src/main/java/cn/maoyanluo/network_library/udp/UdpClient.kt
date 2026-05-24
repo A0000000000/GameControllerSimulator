@@ -8,7 +8,7 @@ import java.net.InetAddress
 class UdpClient(
     private val targetPort: Int,
     private val targetAddress: InetAddress,
-    callback: UdpBaseCallback,
+    callback: UdpCallback,
     coroutineManager: CoroutineManager,
 ): UdpBase(callback, coroutineManager) {
 
@@ -19,7 +19,7 @@ class UdpClient(
         port: Int
     ): Boolean = (targetAddress == address && targetPort == port)
 
-    fun sendData(data: ByteArray) {
+    override fun sendData(data: ByteArray, id: Int) {
         val targetPacket = DatagramPacket(data, data.size, targetAddress, targetPort)
         sendPacket(targetPacket)
     }

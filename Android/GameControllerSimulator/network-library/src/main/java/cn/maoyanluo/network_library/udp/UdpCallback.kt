@@ -1,6 +1,6 @@
 package cn.maoyanluo.network_library.udp
 
-interface UdpBaseCallback {
+interface UdpCallback {
     fun onStart()
     fun onStop()
     fun onStartException(e: Exception)

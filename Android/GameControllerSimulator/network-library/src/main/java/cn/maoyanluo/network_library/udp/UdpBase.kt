@@ -1,6 +1,7 @@
 package cn.maoyanluo.network_library.udp
 
 import cn.maoyanluo.coroutine_library.CoroutineManager
+import cn.maoyanluo.socket_common_library.IClientTransport
 import cn.maoyanluo.socket_common_library.MAX_BUFF_SIZE
 import kotlinx.coroutines.launch
 import java.net.DatagramPacket
@@ -8,9 +9,9 @@ import java.net.DatagramSocket
 import java.net.InetAddress
 
 abstract class UdpBase(
-    private val callback: UdpBaseCallback,
+    private val callback: UdpCallback,
     private val coroutineManager: CoroutineManager,
-) {
+) : IClientTransport {
 
     private var socket: DatagramSocket? = null
 
@@ -33,7 +34,8 @@ abstract class UdpBase(
                 } catch (e: Exception) {
                     try {
                         socket?.close()
-                    } catch (_: Exception) {}
+                    } catch (_: Exception) {
+                    }
                     socket = null
                     coroutineManager.getIOScope().launch {
                         callback.onStartException(e)
@@ -91,5 +93,15 @@ abstract class UdpBase(
     protected fun sendPacket(packet: DatagramPacket) {
         socket?.send(packet)
     }
+
+    override val state: IClientTransport.SocketClientState
+        get() = IClientTransport.SocketClientState.CONNECTED
+
+    override fun connect() {
+    }
+
+    override fun disconnect() {
+    }
+
 
 }
