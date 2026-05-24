@@ -1,6 +1,6 @@
 package cn.maoyanluo.socket_common_library
 
-import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
 
 interface IClientTransport {
     enum class SocketClientState {
@@ -15,6 +15,6 @@ interface IClientTransport {
     fun connect()
     fun disconnect()
     fun sendData(data: ByteArray, id: Int = -1)
-    val receiveData: MutableSharedFlow<ByteArray>
+    val receiveData: SharedFlow<ByteArray>
 
 }

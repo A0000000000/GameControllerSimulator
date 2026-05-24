@@ -121,7 +121,7 @@ fun MainContainer(modifier: Modifier = Modifier) {
             }
             GamepadPage(
                 modifier = pageModifier,
-                coroutineManager = viewModel.coroutineManager
+                generator = viewModel.getGamepadEventGenerator()
             ) {
                 viewModel.onGamepadEvent(it)
             }

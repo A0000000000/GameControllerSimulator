@@ -88,14 +88,14 @@ fun ConnectingPage(
             ConnectionStatusCard(
                 title = "Bluetooth GATT",
                 primaryLabel = "设备名称",
-                primaryValue = uiState.device.name ?: "未知设备",
+                primaryValue = uiState.deviceName,
                 statusText = if (uiState.isGATTAvailable) "就绪" else "未就绪",
                 statusColor = if (uiState.isGATTAvailable) Color(0xFF2E7D32) else Color(0xFF8A5A00)
             )
             ConnectionStatusCard(
                 title = "Bluetooth RFCOMM",
                 primaryLabel = "设备名称",
-                primaryValue = uiState.device.name ?: "未知设备",
+                primaryValue = uiState.deviceName,
                 statusText = if (uiState.rfcommStatus.isAvailable) "就绪" else "未就绪",
                 statusColor = if (uiState.rfcommStatus.isAvailable) Color(0xFF2E7D32) else Color(0xFF8A5A00)
             ) {
@@ -237,8 +237,7 @@ private fun ConnectionStatusCard(
 
 @SuppressLint("MissingPermission")
 @Composable
-fun GamepadPage(modifier: Modifier, coroutineManager: CoroutineManager, receiver: (ByteArray) -> Unit) {
-    val generator = remember { GamepadEventGenerator(coroutineManager) }
+fun GamepadPage(modifier: Modifier, generator: GamepadEventGenerator, receiver: (ByteArray) -> Unit) {
     val activity = LocalContext.current.findActivity() as? MainActivity
     var lbPressed by remember { mutableStateOf(false) }
     var rbPressed by remember { mutableStateOf(false) }

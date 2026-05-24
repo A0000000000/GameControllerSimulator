@@ -5,6 +5,7 @@ import cn.maoyanluo.socket_common_library.utils.IntConverter
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import java.io.Closeable
 import java.io.IOException
@@ -25,7 +26,8 @@ abstract class SocketClient<TSocket: Closeable>(
     @Volatile
     protected var socket: TSocket? = null
 
-    override val receiveData = MutableSharedFlow<ByteArray>()
+    private val _receiveData = MutableSharedFlow<ByteArray>()
+    override val receiveData = _receiveData.asSharedFlow()
     private var sendDataQueue: Channel<Pair<ByteArray, Int>>? = null
     private var receiveJob: Job? = null
     private var sendJob: Job? = null
@@ -94,7 +96,7 @@ abstract class SocketClient<TSocket: Closeable>(
                         }
                         totalSize += read
                     }
-                    receiveData.emit(buff)
+                    _receiveData.emit(buff)
                 }
             } catch (e: Exception) {
                 coroutineManager.getIOScope().launch { clientCallback.onDataRevException(e) }

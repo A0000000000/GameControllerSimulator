@@ -1,32 +1,46 @@
 package cn.maoyanluo.gamecontrollersimulator2.bean
 
+import android.os.Build
 import com.google.gson.annotations.SerializedName
 
-data class DeviceInfo(
+class DeviceInfo {
     @SerializedName("os_version")
-    val osVersion: String,
+    val osVersion: String = "Android ${Build.VERSION.RELEASE}"
+
     @SerializedName("sdk")
-    val sdk: String,
+    val sdk: String = "${Build.VERSION.SDK_INT}"
+
     @SerializedName("brand")
-    val brand: String,
+    val brand: String = "${Build.BRAND}"
+
     @SerializedName("manufacturer")
-    val manufacturer: String,
+    val manufacturer: String = "${Build.MANUFACTURER}"
+
     @SerializedName("model")
-    val model: String,
+    val model: String = "${Build.MODEL}"
+
     @SerializedName("device")
-    val device: String,
+    val device: String = "${Build.DEVICE}"
+
     @SerializedName("product")
-    val product: String,
+    val product: String = "${Build.PRODUCT}"
+
     @SerializedName("board")
-    val board: String,
+    val board: String = "${Build.BOARD}"
+
     @SerializedName("hardware")
-    val hardware: String,
+    val hardware: String = "${Build.HARDWARE}"
+
     @SerializedName("codename")
-    val codename: String,
+    val codename: String = "${Build.VERSION.CODENAME}"
+
     @SerializedName("build_id")
-    val buildId: String,
+    val buildId: String = "${Build.ID}"
+
     @SerializedName("fingerprint")
-    val fingerprint: String,
+    val fingerprint: String = "${Build.FINGERPRINT}"
+
     @SerializedName("supported_abis")
-    val supportedAbis: String
-)
+    val supportedAbis: String = Build.SUPPORTED_ABIS.joinToString()
+
+}
