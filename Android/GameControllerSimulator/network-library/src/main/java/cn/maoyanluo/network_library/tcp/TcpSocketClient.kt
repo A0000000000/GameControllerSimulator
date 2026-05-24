@@ -14,7 +14,10 @@ class TcpSocketClient(
     coroutineManager: CoroutineManager
 ): SocketClient<Socket>(clientCallback, coroutineManager) {
 
-    override fun createSocket(): Socket = Socket(host, port)
+    override fun createSocket(): Socket = Socket(host, port).apply {
+        tcpNoDelay = true
+        keepAlive = true
+    }
 
     override fun getOutputStream(): OutputStream? = socket?.getOutputStream()
 
