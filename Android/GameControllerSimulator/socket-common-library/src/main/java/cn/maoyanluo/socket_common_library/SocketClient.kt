@@ -99,8 +99,10 @@ abstract class SocketClient<TSocket: Closeable>(
                     _receiveData.emit(buff)
                 }
             } catch (e: Exception) {
-                coroutineManager.getIOScope().launch { clientCallback.onDataRevException(e) }
-                disconnect()
+                if (_state != IClientTransport.SocketClientState.DISCONNECTING) {
+                    coroutineManager.getIOScope().launch { clientCallback.onDataRevException(e) }
+                    disconnect()
+                }
             }
         }
     }
