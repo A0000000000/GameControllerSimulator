@@ -133,6 +133,12 @@ class TransportManager(
         callback.onConnectionAvailableChange(available, type)
     }
 
+    private fun removeConnection(type: ConnectionType) {
+        synchronized(transports) {
+            transports.remove(type)?.disconnect()
+        }
+    }
+
     private fun onFault(msg: String, e: Exception, params: Map<String, Any>? = null) {
         callback.onFault(msg, e, params)
     }
@@ -153,6 +159,8 @@ class TransportManager(
         override fun onConnectException(e: Exception) {
             if (clientAvailable) {
                 manager.onConnectionAvailableChange(false, type)
+            } else {
+                manager.removeConnection(type)
             }
             clientAvailable = false
         }
