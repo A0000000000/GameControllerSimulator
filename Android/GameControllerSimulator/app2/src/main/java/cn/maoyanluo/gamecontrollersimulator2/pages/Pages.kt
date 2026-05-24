@@ -17,8 +17,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -38,7 +40,7 @@ import cn.maoyanluo.coroutine_library.CoroutineManager
 import cn.maoyanluo.gamecontrollersimulator2.R
 import cn.maoyanluo.gamecontrollersimulator2.MainActivity
 import cn.maoyanluo.gamecontrollersimulator2.MainUiState
-import cn.maoyanluo.gamecontrollersimulator2.connect.ConnectionManager
+import cn.maoyanluo.gamecontrollersimulator2.connect.ConnectionType
 import cn.maoyanluo.gamecontrollersimulator2.generator.GamepadAxis
 import cn.maoyanluo.gamecontrollersimulator2.generator.GamepadButton
 import cn.maoyanluo.gamecontrollersimulator2.generator.GamepadEventGenerator
@@ -62,8 +64,8 @@ fun ConnectingPage(
     modifier: Modifier,
     uiState: MainUiState.ConnectingPage,
     onOpenGamepad: () -> Unit,
-    onSelectConnectType: (type: ConnectionManager.ConnectionType) -> Unit,
-    onRequestRtt: (type: ConnectionManager.ConnectionType) -> Unit
+    onSelectConnectType: (type: ConnectionType) -> Unit,
+    onRequestRtt: (type: ConnectionType) -> Unit
 ) {
     Column(
         modifier = modifier
@@ -94,53 +96,80 @@ fun ConnectingPage(
                 title = "Bluetooth RFCOMM",
                 primaryLabel = "设备名称",
                 primaryValue = uiState.device.name ?: "未知设备",
-                statusText = if (uiState.isRFCOMMAvailable) "就绪" else "未就绪",
-                statusColor = if (uiState.isRFCOMMAvailable) Color(0xFF2E7D32) else Color(0xFF8A5A00)
+                statusText = if (uiState.rfcommStatus.isAvailable) "就绪" else "未就绪",
+                statusColor = if (uiState.rfcommStatus.isAvailable) Color(0xFF2E7D32) else Color(0xFF8A5A00)
             ) {
-                onRequestRtt(ConnectionManager.ConnectionType.BLE)
+                onRequestRtt(ConnectionType.BLE)
             }
 
             ConnectionStatusCard(
                 title = "TCP",
                 primaryLabel = "对端地址",
-                primaryValue = uiState.tcpInfo,
-                statusText = if (uiState.isTcpAvailable) "就绪" else "未就绪",
-                statusColor = if (uiState.isTcpAvailable) Color(0xFF2E7D32) else Color(0xFF8A5A00)
+                primaryValue = uiState.tcpStatus.info,
+                statusText = if (uiState.tcpStatus.isAvailable) "就绪" else "未就绪",
+                statusColor = if (uiState.tcpStatus.isAvailable) Color(0xFF2E7D32) else Color(0xFF8A5A00)
             ) {
-                onRequestRtt(ConnectionManager.ConnectionType.TCP)
+                onRequestRtt(ConnectionType.TCP)
             }
 
             ConnectionStatusCard(
                 title = "UDP",
                 primaryLabel = "对端地址",
-                primaryValue = uiState.udpInfo,
-                statusText = if (uiState.isUdpAvailable) "就绪" else "未就绪",
-                statusColor = if (uiState.isUdpAvailable) Color(0xFF2E7D32) else Color(0xFF8A5A00)
+                primaryValue = uiState.udpStatus.info,
+                statusText = if (uiState.udpStatus.isAvailable) "就绪" else "未就绪",
+                statusColor = if (uiState.udpStatus.isAvailable) Color(0xFF2E7D32) else Color(0xFF8A5A00)
             )
         }
         Spacer(modifier = Modifier.height(12.dp))
 
-        Row(modifier = Modifier) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+
             Button(
-                onClick = { onSelectConnectType(ConnectionManager.ConnectionType.BLE) },
-                enabled = uiState.isRFCOMMAvailable,
-                modifier = Modifier.fillMaxWidth().weight(1f).padding(6.dp,  0.dp),
+                onClick = { onSelectConnectType(ConnectionType.BLE) },
+                enabled = uiState.rfcommStatus.isAvailable,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor =
+                        if (uiState.rfcommStatus.isSelect)
+                            MaterialTheme.colorScheme.primary
+                        else
+                            MaterialTheme.colorScheme.surfaceVariant
+                ),
+                modifier = Modifier.weight(1f)
             ) {
-                Text(text = "BLE")
+                Text("BLE")
             }
+
             Button(
-                onClick = { onSelectConnectType(ConnectionManager.ConnectionType.TCP) },
-                enabled = uiState.isTcpAvailable,
-                modifier = Modifier.fillMaxWidth().weight(1f).padding(6.dp,  0.dp),
+                onClick = { onSelectConnectType(ConnectionType.TCP) },
+                enabled = uiState.tcpStatus.isAvailable,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor =
+                        if (uiState.tcpStatus.isSelect)
+                            MaterialTheme.colorScheme.primary
+                        else
+                            MaterialTheme.colorScheme.surfaceVariant
+                ),
+                modifier = Modifier.weight(1f)
             ) {
-                Text(text = "TCP")
+                Text("TCP")
             }
+
             Button(
-                onClick = { onSelectConnectType(ConnectionManager.ConnectionType.UDP) },
-                enabled = uiState.isUdpAvailable,
-                modifier = Modifier.fillMaxWidth().weight(1f).padding(6.dp,  0.dp),
+                onClick = { onSelectConnectType(ConnectionType.UDP) },
+                enabled = uiState.udpStatus.isAvailable,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor =
+                        if (uiState.udpStatus.isSelect)
+                            MaterialTheme.colorScheme.primary
+                        else
+                            MaterialTheme.colorScheme.surfaceVariant
+                ),
+                modifier = Modifier.weight(1f)
             ) {
-                Text(text = "UDP")
+                Text("UDP")
             }
         }
 

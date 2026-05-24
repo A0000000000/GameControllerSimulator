@@ -2,6 +2,9 @@ package cn.maoyanluo.socket_common_library
 
 import cn.maoyanluo.coroutine_library.CoroutineManager
 import cn.maoyanluo.socket_common_library.utils.IntConverter
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 import java.io.Closeable
 import java.io.IOException
@@ -11,45 +14,64 @@ import java.io.OutputStream
 abstract class SocketClient<TSocket: Closeable>(
     private val clientCallback: SocketClientCallback,
     private val coroutineManager: CoroutineManager
-) {
+) : IClientTransport {
 
     @Volatile
-    private var isConnected = false
+    private var _state = IClientTransport.SocketClientState.DISCONNECTED
+
+    override val state: IClientTransport.SocketClientState
+        get() = _state
+
+    @Volatile
     protected var socket: TSocket? = null
+
+    override val receiveData = MutableSharedFlow<ByteArray>()
+    private var sendDataQueue: Channel<Pair<ByteArray, Int>>? = null
+    private var receiveJob: Job? = null
+    private var sendJob: Job? = null
 
     protected abstract fun createSocket(): TSocket
     protected abstract fun getOutputStream(): OutputStream?
     protected abstract fun getInputStream(): InputStream?
 
-    fun connect() {
+    override fun connect() {
         coroutineManager.getIOScope().launch {
             synchronized(this@SocketClient) {
-                if (isConnected) {
+                if (_state != IClientTransport.SocketClientState.DISCONNECTED) {
                     return@launch
                 }
-                try {
-                    socket = createSocket()
-                    isConnected = true
-                    coroutineManager.getIOScope().launch { clientCallback.onConnectSuccess() }
-                    dataRevLoop()
-                } catch (e: Exception) {
+                _state = IClientTransport.SocketClientState.CONNECTING
+            }
+            try {
+                socket = createSocket()
+                sendDataQueue = Channel()
+                synchronized(this@SocketClient) {
+                    _state = IClientTransport.SocketClientState.CONNECTED
+                }
+                coroutineManager.getIOScope().launch {
+                    clientCallback.onConnectSuccess()
+                }
+                receiveJob = dataRevLoop()
+                sendJob = dataSendLoop()
+            } catch (e: Exception) {
+                synchronized(this@SocketClient) {
                     try {
                         socket?.close()
-                    } catch (ignore: Exception) { }
+                    } catch (ignore: Exception) {
+                    }
                     socket = null
-                    isConnected = false
-                    coroutineManager.getIOScope().launch { clientCallback.onConnectException(e) }
-                    return@launch
+                    _state = IClientTransport.SocketClientState.DISCONNECTED
                 }
+                coroutineManager.getIOScope().launch { clientCallback.onConnectException(e) }
+                return@launch
             }
         }
     }
 
-    private fun dataRevLoop() {
-        coroutineManager.getIOScope().launch {
-            val socketSnapshot = socket
+    private fun dataRevLoop(): Job {
+        return coroutineManager.getIOScope().launch {
             try {
-                while (isConnected && socketSnapshot === socket) {
+                while (_state == IClientTransport.SocketClientState.CONNECTED) {
                     val inputStream = getInputStream() ?: throw IOException("inputStream is null")
                     val sizeBuff = ByteArray(4)
                     var totalSize = 0
@@ -72,51 +94,79 @@ abstract class SocketClient<TSocket: Closeable>(
                         }
                         totalSize += read
                     }
-                    coroutineManager.getIOScope().launch { clientCallback.onDataReady(buff) }
+                    receiveData.emit(buff)
                 }
             } catch (e: Exception) {
                 coroutineManager.getIOScope().launch { clientCallback.onDataRevException(e) }
-                synchronized(this@SocketClient) {
-                    if (socketSnapshot === socket) {
-                        disconnect()
-                    }
-                }
+                disconnect()
             }
         }
     }
 
-    fun sendData(data: ByteArray, id: Int = -1) {
-        coroutineManager.getIOScope().launch {
-            synchronized(this@SocketClient) {
-                if (!isConnected) {
-                    return@launch
-                }
+    private fun dataSendLoop(): Job {
+        return coroutineManager.getIOScope().launch {
+            while (_state == IClientTransport.SocketClientState.CONNECTED) {
+                var id = -2
                 try {
-                    val outputStream = getOutputStream() ?: throw IOException("outputStream is null")
-                    outputStream.write(IntConverter.toBigEndian(data.size), 0, 4)
-                    outputStream.write(data, 0, data.size)
+                    val data = sendDataQueue?.receive() ?: continue
+                    id = data.second
+                    val outputStream =
+                        getOutputStream() ?: throw IOException("outputStream is null")
+                    outputStream.write(IntConverter.toBigEndian(data.first.size), 0, 4)
+                    outputStream.write(data.first, 0, data.first.size)
                     outputStream.flush()
                 } catch (e: Exception) {
                     coroutineManager.getIOScope().launch { clientCallback.onSendDataException(e, id) }
                 }
             }
         }
-
     }
-    fun disconnect() {
+
+    override fun sendData(data: ByteArray, id: Int) {
+        coroutineManager.getIOScope().launch {
+            if (_state != IClientTransport.SocketClientState.CONNECTED) {
+                return@launch
+            }
+            try {
+                sendDataQueue?.send(Pair(data, id))
+            } catch (e: Exception) {
+                clientCallback.onSendDataException(e, id)
+            }
+        }
+    }
+
+    override fun disconnect() {
         coroutineManager.getIOScope().launch {
             synchronized(this@SocketClient) {
-                if (!isConnected) {
+                if (_state != IClientTransport.SocketClientState.CONNECTED) {
                     return@launch
                 }
-                isConnected = false
-                try {
-                    socket?.close()
-                    socket = null
-                } catch (_: Exception) {
-                }
-                clientCallback.onDisconnect()
+                _state = IClientTransport.SocketClientState.DISCONNECTING
             }
+            try {
+                sendDataQueue?.close()
+                sendDataQueue = null
+            } catch (_: Exception) {
+            }
+            try {
+                socket?.close()
+                socket = null
+            } catch (_: Exception) {
+            }
+            try {
+                sendJob?.cancel()
+                sendJob = null
+            } catch (_: Exception) {
+            }
+            try {
+                receiveJob?.cancel()
+                receiveJob = null
+            } catch (_: Exception) {
+            }
+            synchronized(this@SocketClient) {
+                _state = IClientTransport.SocketClientState.DISCONNECTED
+            }
+            clientCallback.onDisconnect()
         }
     }
 
