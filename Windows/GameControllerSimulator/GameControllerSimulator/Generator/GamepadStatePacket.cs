@@ -50,51 +50,14 @@ namespace GameControllerSimulator.Generator
                 Buffer.BlockCopy(Current, 0, Last, 0, 12);
             }
 
-            public void SetButton(GamepadButton button, bool pressed)
-            {
-                ushort buttons = ReadUInt16(Current, BUTTON_OFFSET);
-
-                ushort mask = (ushort)(1 << (int)button);
-
-                if (pressed)
-                    buttons |= mask;
-                else
-                    buttons &= (ushort)~mask;
-
-                WriteUInt16(Current, BUTTON_OFFSET, buttons);
-            }
-
-            public bool GetButton(GamepadButton button)
-            {
-                ushort buttons = ReadUInt16(Current, BUTTON_OFFSET);
-
-                ushort mask = (ushort)(1 << (int)button);
-
-                return (buttons & mask) != 0;
-            }
-
-            public void SetAxis(GamepadAxis axis, short value)
-            {
-                int offset = AXIS_OFFSET + ((int)axis * 2);
-
-                WriteInt16(Current, offset, value);
-            }
-
-            public short GetAxis(GamepadAxis axis)
+            private short GetAxis(GamepadAxis axis)
             {
                 int offset = AXIS_OFFSET + ((int)axis * 2);
 
                 return ReadInt16(Current, offset);
             }
 
-            public void SetTrigger(GamepadTrigger trigger, byte value)
-            {
-                int offset = TRIGGER_OFFSET + (int)trigger;
-
-                Current[offset] = value;
-            }
-
-            public byte GetTrigger(GamepadTrigger trigger)
+            private byte GetTrigger(GamepadTrigger trigger)
             {
                 int offset = TRIGGER_OFFSET + (int)trigger;
 
