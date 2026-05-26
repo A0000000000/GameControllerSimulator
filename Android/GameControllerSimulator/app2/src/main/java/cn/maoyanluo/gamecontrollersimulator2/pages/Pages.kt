@@ -87,37 +87,37 @@ fun ConnectingPage(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             ConnectionStatusCard(
-                title = "Bluetooth GATT",
-                primaryLabel = "设备名称",
+                title = stringResource(R.string.gatt),
+                primaryLabel = stringResource(R.string.host_name),
                 primaryValue = uiData.deviceName,
-                statusText = if (uiData.isGATTAvailable) "就绪" else "未就绪",
+                statusText = stringResource(if (uiData.isGATTAvailable) R.string.ready else R.string.not_ready),
                 statusColor = if (uiData.isGATTAvailable) readyColor else pendingColor
             )
             ConnectionStatusCard(
-                title = "Bluetooth RFCOMM",
-                primaryLabel = "设备地址",
+                title = stringResource(R.string.rfcomm),
+                primaryLabel = stringResource(R.string.host_address),
                 primaryValue = uiData.rfcommStatus.info,
-                statusText = if (uiData.rfcommStatus.isAvailable) "就绪" else "未就绪",
+                statusText = stringResource(if (uiData.isGATTAvailable) R.string.ready else R.string.not_ready),
                 statusColor = if (uiData.rfcommStatus.isAvailable) readyColor else pendingColor
             ) {
                 onUiIntent(MainUiIntent.OnRequestRttIntent(ConnectionType.BLE))
             }
 
             ConnectionStatusCard(
-                title = "TCP",
-                primaryLabel = "对端地址",
+                title = stringResource(R.string.tcp),
+                primaryLabel = stringResource(R.string.host_address),
                 primaryValue = uiData.tcpStatus.info,
-                statusText = if (uiData.tcpStatus.isAvailable) "就绪" else "未就绪",
+                statusText = stringResource(if (uiData.isGATTAvailable) R.string.ready else R.string.not_ready),
                 statusColor = if (uiData.tcpStatus.isAvailable) readyColor else pendingColor
             ) {
                 onUiIntent(MainUiIntent.OnRequestRttIntent(ConnectionType.TCP))
             }
 
             ConnectionStatusCard(
-                title = "UDP",
-                primaryLabel = "对端地址",
+                title = stringResource(R.string.udp),
+                primaryLabel = stringResource(R.string.host_address),
                 primaryValue = uiData.udpStatus.info,
-                statusText = if (uiData.udpStatus.isAvailable) "就绪" else "未就绪",
+                statusText = stringResource(if (uiData.isGATTAvailable) R.string.ready else R.string.not_ready),
                 statusColor = if (uiData.udpStatus.isAvailable) readyColor else pendingColor
             )
         }
@@ -140,7 +140,7 @@ fun ConnectingPage(
                 ),
                 modifier = Modifier.weight(1f)
             ) {
-                Text("BLE")
+                Text(stringResource(R.string.fallback))
             }
 
             Button(
@@ -155,7 +155,7 @@ fun ConnectingPage(
                 ),
                 modifier = Modifier.weight(1f)
             ) {
-                Text("TCP")
+                Text(stringResource(R.string.stable_first))
             }
 
             Button(
@@ -170,7 +170,7 @@ fun ConnectingPage(
                 ),
                 modifier = Modifier.weight(1f)
             ) {
-                Text("UDP")
+                Text(stringResource(R.string.speed_first))
             }
         }
 
@@ -181,7 +181,7 @@ fun ConnectingPage(
             enabled = uiData.isAvailable,
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text(text = "->")
+            Text(text = stringResource(R.string.next))
         }
     }
 }

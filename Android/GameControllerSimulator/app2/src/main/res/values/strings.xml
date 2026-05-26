@@ -6,4 +6,16 @@
     <string name="rtt_result">类型: %s RTT: %d</string>
     <string name="device_list_flush">设备列表开始更新</string>
     <string name="device_list_flush_end">设备列表更新完成</string>
+    <string name="ready">就绪</string>
+    <string name="not_ready">未就绪</string>
+    <string name="host_name">对端名称</string>
+    <string name="host_address">对端地址</string>
+    <string name="gatt">Bluetooth GATT</string>
+    <string name="rfcomm">Bluetooth RFCOMM</string>
+    <string name="tcp">TCP</string>
+    <string name="udp">UDP</string>
+    <string name="fallback">FALLBACK</string>
+    <string name="stable_first">STABLE</string>
+    <string name="speed_first">SPEED</string>
+    <string name="next">-></string>
 </resources>
