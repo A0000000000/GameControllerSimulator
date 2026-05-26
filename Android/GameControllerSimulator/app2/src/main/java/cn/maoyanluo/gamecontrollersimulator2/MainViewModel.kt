@@ -46,7 +46,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         val job = coroutineManager.getMainScope().launch {
             LogUtils.i(TAG, "collect connectionCoordinator event")
             connectionCoordinator.event.collect {
-               onConnectionCoordinatorEvent(it)
+                onConnectionCoordinatorEvent(it)
             }
         }
         addCloseable {
@@ -142,11 +142,12 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             }
 
             is MainUiState.ConnectingPage -> {
-                mainUiState = if (connectionPageModel.isAvailable || connectionPageModel.isGATTAvailable) {
-                    MainUiState.ConnectingPage(connectionPageModel.copy())
-                } else {
-                    MainUiState.SelectPage(SelectPageModel(connectionCoordinator.getBoundDevices()))
-                }
+                mainUiState =
+                    if (connectionPageModel.isAvailable || connectionPageModel.isGATTAvailable) {
+                        MainUiState.ConnectingPage(connectionPageModel.copy())
+                    } else {
+                        MainUiState.SelectPage(SelectPageModel(connectionCoordinator.getBoundDevices()))
+                    }
             }
 
             MainUiState.GamepadPage -> {
@@ -258,6 +259,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             _mainUiEffect.emit(effect)
         }
     }
+
     fun getGamepadEventGenerator() = connectionCoordinator.getGamepadEventGenerator()
 
 

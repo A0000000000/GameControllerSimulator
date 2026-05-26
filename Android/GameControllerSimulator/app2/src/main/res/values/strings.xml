@@ -3,4 +3,7 @@
     <string name="no_permission">无权限</string>
     <string name="error_page">页面错误，请重启App重试</string>
     <string name="connection_state">连接状态</string>
+    <string name="rtt_result">类型: %s RTT: %d</string>
+    <string name="device_list_flush">设备列表开始更新</string>
+    <string name="device_list_flush_end">设备列表更新完成</string>
 </resources>

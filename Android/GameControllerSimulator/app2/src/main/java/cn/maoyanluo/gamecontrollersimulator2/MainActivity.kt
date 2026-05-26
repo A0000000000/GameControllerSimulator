@@ -22,6 +22,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -73,7 +75,7 @@ fun MainContainer(modifier: Modifier = Modifier) {
     val viewModel: MainViewModel = viewModel()
     val uiState = viewModel.mainUiState
     val uiEffect = viewModel.mainUiEffect
-    val ctx = LocalContext.current
+    val ctx by rememberUpdatedState(LocalContext.current)
     val pageModifier = if (uiState !is MainUiState.GamepadPage) {
         modifier.safeDrawingPadding()
     } else {
@@ -151,14 +153,18 @@ fun MainContainer(modifier: Modifier = Modifier) {
         uiEffect.collect {
             when (it) {
                 is MainUiEffect.RttResultEffect -> {
-                    Toast.makeText(ctx, "类型: ${it.type} RTT: ${it.diff}", Toast.LENGTH_SHORT)
+                    Toast.makeText(
+                        ctx,
+                        String.format(ctx.getString(R.string.rtt_result), it.type, it.diff),
+                        Toast.LENGTH_SHORT
+                    )
                         .show()
                 }
 
                 is MainUiEffect.DeviceFlushEffect -> {
                     Toast.makeText(
                         ctx,
-                        if (it.isEnd) "设备列表更新完成" else "设备列表开始更新",
+                        ctx.getString(if (it.isEnd) R.string.device_list_flush_end else R.string.device_list_flush),
                         Toast.LENGTH_SHORT
                     ).show()
                 }
