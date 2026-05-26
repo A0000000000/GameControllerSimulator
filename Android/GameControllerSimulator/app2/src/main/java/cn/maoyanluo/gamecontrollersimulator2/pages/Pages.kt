@@ -36,10 +36,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import cn.maoyanluo.coroutine_library.CoroutineManager
+import cn.maoyanluo.gamecontrollersimulator2.mainui.ConnectingPageModel
 import cn.maoyanluo.gamecontrollersimulator2.R
 import cn.maoyanluo.gamecontrollersimulator2.MainActivity
-import cn.maoyanluo.gamecontrollersimulator2.MainUiState
+import cn.maoyanluo.gamecontrollersimulator2.mainui.MainUiIntent
 import cn.maoyanluo.gamecontrollersimulator2.connect.ConnectionType
 import cn.maoyanluo.gamecontrollersimulator2.generator.GamepadAxis
 import cn.maoyanluo.gamecontrollersimulator2.generator.GamepadButton
@@ -62,10 +62,8 @@ private fun invertShortAxisValue(value: Int): Short {
 @Composable
 fun ConnectingPage(
     modifier: Modifier,
-    uiState: MainUiState.ConnectingPage,
-    onOpenGamepad: () -> Unit,
-    onSelectConnectType: (type: ConnectionType) -> Unit,
-    onRequestRtt: (type: ConnectionType) -> Unit
+    uiData: ConnectingPageModel,
+    onUiIntent: (intent: MainUiIntent) -> Unit
 ) {
     Column(
         modifier = modifier
@@ -88,36 +86,36 @@ fun ConnectingPage(
             ConnectionStatusCard(
                 title = "Bluetooth GATT",
                 primaryLabel = "设备名称",
-                primaryValue = uiState.deviceName,
-                statusText = if (uiState.isGATTAvailable) "就绪" else "未就绪",
-                statusColor = if (uiState.isGATTAvailable) Color(0xFF2E7D32) else Color(0xFF8A5A00)
+                primaryValue = uiData.deviceName,
+                statusText = if (uiData.isGATTAvailable) "就绪" else "未就绪",
+                statusColor = if (uiData.isGATTAvailable) Color(0xFF2E7D32) else Color(0xFF8A5A00)
             )
             ConnectionStatusCard(
                 title = "Bluetooth RFCOMM",
                 primaryLabel = "设备名称",
-                primaryValue = uiState.deviceName,
-                statusText = if (uiState.rfcommStatus.isAvailable) "就绪" else "未就绪",
-                statusColor = if (uiState.rfcommStatus.isAvailable) Color(0xFF2E7D32) else Color(0xFF8A5A00)
+                primaryValue = uiData.deviceName,
+                statusText = if (uiData.rfcommStatus.isAvailable) "就绪" else "未就绪",
+                statusColor = if (uiData.rfcommStatus.isAvailable) Color(0xFF2E7D32) else Color(0xFF8A5A00)
             ) {
-                onRequestRtt(ConnectionType.BLE)
+                onUiIntent(MainUiIntent.OnRequestRttIntent(ConnectionType.BLE))
             }
 
             ConnectionStatusCard(
                 title = "TCP",
                 primaryLabel = "对端地址",
-                primaryValue = uiState.tcpStatus.info,
-                statusText = if (uiState.tcpStatus.isAvailable) "就绪" else "未就绪",
-                statusColor = if (uiState.tcpStatus.isAvailable) Color(0xFF2E7D32) else Color(0xFF8A5A00)
+                primaryValue = uiData.tcpStatus.info,
+                statusText = if (uiData.tcpStatus.isAvailable) "就绪" else "未就绪",
+                statusColor = if (uiData.tcpStatus.isAvailable) Color(0xFF2E7D32) else Color(0xFF8A5A00)
             ) {
-                onRequestRtt(ConnectionType.TCP)
+                onUiIntent(MainUiIntent.OnRequestRttIntent(ConnectionType.TCP))
             }
 
             ConnectionStatusCard(
                 title = "UDP",
                 primaryLabel = "对端地址",
-                primaryValue = uiState.udpStatus.info,
-                statusText = if (uiState.udpStatus.isAvailable) "就绪" else "未就绪",
-                statusColor = if (uiState.udpStatus.isAvailable) Color(0xFF2E7D32) else Color(0xFF8A5A00)
+                primaryValue = uiData.udpStatus.info,
+                statusText = if (uiData.udpStatus.isAvailable) "就绪" else "未就绪",
+                statusColor = if (uiData.udpStatus.isAvailable) Color(0xFF2E7D32) else Color(0xFF8A5A00)
             )
         }
         Spacer(modifier = Modifier.height(12.dp))
@@ -128,11 +126,11 @@ fun ConnectingPage(
         ) {
 
             Button(
-                onClick = { onSelectConnectType(ConnectionType.BLE) },
-                enabled = uiState.rfcommStatus.isAvailable,
+                onClick = { onUiIntent(MainUiIntent.OnSelectConnectTypeIntent(ConnectionType.BLE)) },
+                enabled = uiData.rfcommStatus.isAvailable,
                 colors = ButtonDefaults.buttonColors(
                     containerColor =
-                        if (uiState.rfcommStatus.isSelect)
+                        if (uiData.rfcommStatus.isSelect)
                             MaterialTheme.colorScheme.primary
                         else
                             MaterialTheme.colorScheme.surfaceVariant
@@ -143,11 +141,11 @@ fun ConnectingPage(
             }
 
             Button(
-                onClick = { onSelectConnectType(ConnectionType.TCP) },
-                enabled = uiState.tcpStatus.isAvailable,
+                onClick = { onUiIntent(MainUiIntent.OnSelectConnectTypeIntent(ConnectionType.TCP)) },
+                enabled = uiData.tcpStatus.isAvailable,
                 colors = ButtonDefaults.buttonColors(
                     containerColor =
-                        if (uiState.tcpStatus.isSelect)
+                        if (uiData.tcpStatus.isSelect)
                             MaterialTheme.colorScheme.primary
                         else
                             MaterialTheme.colorScheme.surfaceVariant
@@ -158,11 +156,11 @@ fun ConnectingPage(
             }
 
             Button(
-                onClick = { onSelectConnectType(ConnectionType.UDP) },
-                enabled = uiState.udpStatus.isAvailable,
+                onClick = { onUiIntent(MainUiIntent.OnSelectConnectTypeIntent(ConnectionType.UDP)) },
+                enabled = uiData.udpStatus.isAvailable,
                 colors = ButtonDefaults.buttonColors(
                     containerColor =
-                        if (uiState.udpStatus.isSelect)
+                        if (uiData.udpStatus.isSelect)
                             MaterialTheme.colorScheme.primary
                         else
                             MaterialTheme.colorScheme.surfaceVariant
@@ -176,8 +174,8 @@ fun ConnectingPage(
         Spacer(modifier = Modifier.height(12.dp))
 
         Button(
-            onClick = onOpenGamepad,
-            enabled = uiState.isAvailable,
+            onClick = { onUiIntent(MainUiIntent.OnEnterGamepadIntent) },
+            enabled = uiData.isAvailable,
             modifier = Modifier.fillMaxWidth()
         ) {
             Text(text = "->")

@@ -5,6 +5,7 @@ import android.annotation.SuppressLint
 import android.content.pm.ActivityInfo
 import android.view.KeyEvent
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -23,10 +24,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import cn.maoyanluo.gamecontrollersimulator2.mainui.MainUiEffect
+import cn.maoyanluo.gamecontrollersimulator2.mainui.MainUiIntent
+import cn.maoyanluo.gamecontrollersimulator2.mainui.MainUiState
 import cn.maoyanluo.gamecontrollersimulator2.pages.ConnectingPage
 import cn.maoyanluo.gamecontrollersimulator2.pages.GamepadPage
 import cn.maoyanluo.gamecontrollersimulator2.ui.theme.GameControllerSimulatorTheme
@@ -65,6 +70,8 @@ class MainActivity : ComponentActivity() {
 fun MainContainer(modifier: Modifier = Modifier) {
     val viewModel: MainViewModel = viewModel()
     val uiState = viewModel.mainUiState
+    val uiEffect = viewModel.mainUiEffect
+    val ctx = LocalContext.current
     val pageModifier = if (uiState !is MainUiState.GamepadPage) {
         modifier.safeDrawingPadding()
     } else {
@@ -73,7 +80,7 @@ fun MainContainer(modifier: Modifier = Modifier) {
     val launcher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
-        viewModel.setPermission(permissions.values.all { it })
+        viewModel.onUiIntent(MainUiIntent.PermissionResultIntent(permissions.values.all { it }))
     }
     LockScreenOrientation(
         orientation = if (uiState !is MainUiState.GamepadPage) ActivityInfo.SCREEN_ORIENTATION_PORTRAIT else ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
@@ -98,32 +105,39 @@ fun MainContainer(modifier: Modifier = Modifier) {
                 })
             }
         }
-        MainUiState.SelectPage -> {
-            SelectDevicePages(pageModifier, viewModel::getBoundDevices) {
-                viewModel.onDeviceSelected(it)
+        is MainUiState.SelectPage -> {
+            SelectDevicePages(pageModifier, uiState.data.devices, onBluetoothDeviceSelected = { viewModel.onUiIntent(MainUiIntent.OnDeviceSelectedIntent(it)) }) {
+                viewModel.onUiIntent(MainUiIntent.OnDeviceListFlush)
             }
         }
         is MainUiState.ConnectingPage -> {
             BackHandler() {
-                viewModel.disconnect()
+                viewModel.onUiIntent(MainUiIntent.OnDisconnect)
             }
             ConnectingPage(
                 modifier = pageModifier,
-                uiState = uiState,
-                onOpenGamepad = viewModel::onEnterGamepad,
-                onSelectConnectType = viewModel::onSelectConnectType,
-                onRequestRtt = viewModel::onRequestRtt
+                uiData = uiState.data,
+                onUiIntent = viewModel::onUiIntent
             )
         }
         MainUiState.GamepadPage -> {
             BackHandler() {
-                viewModel.onBackFromGamepad()
+                viewModel.onUiIntent(MainUiIntent.OnBackFromGamepad)
             }
             GamepadPage(
                 modifier = pageModifier,
                 generator = viewModel.getGamepadEventGenerator()
             ) {
-                viewModel.onGamepadEvent(it)
+                viewModel.onUiIntent(MainUiIntent.OnGamepadEvent(it))
+            }
+        }
+    }
+    LaunchedEffect(Unit) {
+        uiEffect.collect {
+            when (it) {
+                is MainUiEffect.RttResultEffect -> {
+                    Toast.makeText(ctx, "type is ${it.type}, diff = ${it.diff}", Toast.LENGTH_SHORT).show()
+                }
             }
         }
     }

@@ -13,7 +13,6 @@ import kotlinx.coroutines.launch
 import java.util.EnumMap
 import java.util.UUID
 import java.util.concurrent.atomic.AtomicInteger
-import kotlin.concurrent.atomics.AtomicInt
 
 
 class TransportManager(
@@ -100,6 +99,7 @@ class TransportManager(
                 item.value?.disconnect()
             }
             transports.clear()
+            availableCallbackCount.set(0)
         }
     }
 
@@ -124,7 +124,7 @@ class TransportManager(
         } else {
             if (availableCallbackCount.decrementAndGet() == 0) {
                 LogUtils.i(TAG, "onConnectionAvailableChange onUnavailable")
-                callback.onAvailableChange(true)
+                callback.onAvailableChange(false)
             }
         }
     }
