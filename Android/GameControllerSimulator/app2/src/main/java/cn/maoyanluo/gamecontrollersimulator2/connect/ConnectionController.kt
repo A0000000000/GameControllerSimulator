@@ -32,6 +32,10 @@ class ConnectionController(
             LogUtils.i(TAG, "TransportManagerCallback onAvailableChange available = $available")
             if (!available) {
                 sessionManager.onAllConnectionDisconnect()
+            } else {
+                transportManager.getAnyAvailableConnectionType()?.let {
+                    selectType = it
+                }
             }
         }
 

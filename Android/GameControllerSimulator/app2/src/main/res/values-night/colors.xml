@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="connection_card_background">#FF1F2937</color>
+    <color name="connection_text_primary">#FFF9FAFB</color>
+    <color name="connection_text_secondary">#FFD1D5DB</color>
+    <color name="connection_status_ready">#FF81C784</color>
+    <color name="connection_status_pending">#FFFFC266</color>
+</resources>

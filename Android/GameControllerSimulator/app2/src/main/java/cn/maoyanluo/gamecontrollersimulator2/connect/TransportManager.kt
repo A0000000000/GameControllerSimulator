@@ -140,6 +140,8 @@ class TransportManager(
         callback.onFault(msg, e, params)
     }
 
+    fun getAnyAvailableConnectionType() = transports.entries.firstOrNull { it.value.available }?.key
+
     private class SocketClientCallbackImpl(
         private val manager: TransportManager,
         private val type: ConnectionType

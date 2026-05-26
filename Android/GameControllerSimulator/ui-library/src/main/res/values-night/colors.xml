@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="device_list_card_background">#FF1F2937</color>
+    <color name="device_list_text_primary">#FFF9FAFB</color>
+    <color name="device_list_text_secondary">#FFD1D5DB</color>
+</resources>

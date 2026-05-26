@@ -136,7 +136,7 @@ fun MainContainer(modifier: Modifier = Modifier) {
         uiEffect.collect {
             when (it) {
                 is MainUiEffect.RttResultEffect -> {
-                    Toast.makeText(ctx, "类型: ${it.type}, RTT: ${it.diff}", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(ctx, "类型: ${it.type} RTT: ${it.diff}", Toast.LENGTH_SHORT).show()
                 }
 
                 is MainUiEffect.DeviceFlushEffect -> {

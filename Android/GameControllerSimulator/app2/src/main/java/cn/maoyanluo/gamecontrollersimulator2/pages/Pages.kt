@@ -33,6 +33,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -65,6 +66,8 @@ fun ConnectingPage(
     uiData: ConnectingPageModel,
     onUiIntent: (intent: MainUiIntent) -> Unit
 ) {
+    val readyColor = colorResource(R.color.connection_status_ready)
+    val pendingColor = colorResource(R.color.connection_status_pending)
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -88,14 +91,14 @@ fun ConnectingPage(
                 primaryLabel = "设备名称",
                 primaryValue = uiData.deviceName,
                 statusText = if (uiData.isGATTAvailable) "就绪" else "未就绪",
-                statusColor = if (uiData.isGATTAvailable) Color(0xFF2E7D32) else Color(0xFF8A5A00)
+                statusColor = if (uiData.isGATTAvailable) readyColor else pendingColor
             )
             ConnectionStatusCard(
                 title = "Bluetooth RFCOMM",
                 primaryLabel = "设备名称",
                 primaryValue = uiData.deviceName,
                 statusText = if (uiData.rfcommStatus.isAvailable) "就绪" else "未就绪",
-                statusColor = if (uiData.rfcommStatus.isAvailable) Color(0xFF2E7D32) else Color(0xFF8A5A00)
+                statusColor = if (uiData.rfcommStatus.isAvailable) readyColor else pendingColor
             ) {
                 onUiIntent(MainUiIntent.OnRequestRttIntent(ConnectionType.BLE))
             }
@@ -105,7 +108,7 @@ fun ConnectingPage(
                 primaryLabel = "对端地址",
                 primaryValue = uiData.tcpStatus.info,
                 statusText = if (uiData.tcpStatus.isAvailable) "就绪" else "未就绪",
-                statusColor = if (uiData.tcpStatus.isAvailable) Color(0xFF2E7D32) else Color(0xFF8A5A00)
+                statusColor = if (uiData.tcpStatus.isAvailable) readyColor else pendingColor
             ) {
                 onUiIntent(MainUiIntent.OnRequestRttIntent(ConnectionType.TCP))
             }
@@ -115,7 +118,7 @@ fun ConnectingPage(
                 primaryLabel = "对端地址",
                 primaryValue = uiData.udpStatus.info,
                 statusText = if (uiData.udpStatus.isAvailable) "就绪" else "未就绪",
-                statusColor = if (uiData.udpStatus.isAvailable) Color(0xFF2E7D32) else Color(0xFF8A5A00)
+                statusColor = if (uiData.udpStatus.isAvailable) readyColor else pendingColor
             )
         }
         Spacer(modifier = Modifier.height(12.dp))
@@ -192,6 +195,9 @@ private fun ConnectionStatusCard(
     statusColor: Color,
     onClick: (() -> Unit)? = null
 ) {
+    val cardBackgroundColor = colorResource(R.color.connection_card_background)
+    val primaryTextColor = colorResource(R.color.connection_text_primary)
+    val secondaryTextColor = colorResource(R.color.connection_text_secondary)
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -199,7 +205,7 @@ private fun ConnectionStatusCard(
                 onClick?.invoke()
             },
         shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFFF3F4F6))
+        colors = CardDefaults.cardColors(containerColor = cardBackgroundColor)
     ) {
         Column(
             modifier = Modifier
@@ -212,7 +218,7 @@ private fun ConnectionStatusCard(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(text = title, fontSize = 20.sp)
+                Text(text = title, color = primaryTextColor, fontSize = 20.sp)
                 Surface(
                     color = statusColor.copy(alpha = 0.14f),
                     shape = RoundedCornerShape(999.dp)
@@ -226,8 +232,8 @@ private fun ConnectionStatusCard(
             }
 
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                Text(text = primaryLabel, color = Color(0xFF6B7280))
-                Text(text = primaryValue, fontSize = 18.sp)
+                Text(text = primaryLabel, color = secondaryTextColor)
+                Text(text = primaryValue, color = primaryTextColor, fontSize = 18.sp)
             }
         }
     }

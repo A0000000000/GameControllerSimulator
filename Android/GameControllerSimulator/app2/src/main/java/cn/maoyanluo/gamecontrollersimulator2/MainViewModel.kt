@@ -159,7 +159,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun onUiIntent(uiIntent: MainUiIntent) {
-        coroutineManager.getMainScope().launch {
+        coroutineManager.getIOScope().launch {
             val currentPage = mainUiState
             var nextPage: MainUiState? = null
             when (uiIntent) {
