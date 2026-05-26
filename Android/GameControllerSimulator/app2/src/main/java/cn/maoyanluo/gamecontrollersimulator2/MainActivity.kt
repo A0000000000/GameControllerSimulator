@@ -39,6 +39,8 @@ import cn.maoyanluo.ui_library.LockScreenOrientation
 import cn.maoyanluo.ui_library.pages.SelectDevicePages
 
 class MainActivity : ComponentActivity() {
+
+    // Todo 这个优化一下，不要绑定到MainActivity
     var hardwareKeyEventHandler: ((KeyEvent) -> Boolean)? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
