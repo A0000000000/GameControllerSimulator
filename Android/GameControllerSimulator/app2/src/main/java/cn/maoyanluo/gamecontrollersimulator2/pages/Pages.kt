@@ -95,8 +95,8 @@ fun ConnectingPage(
             )
             ConnectionStatusCard(
                 title = "Bluetooth RFCOMM",
-                primaryLabel = "设备名称",
-                primaryValue = uiData.deviceName,
+                primaryLabel = "设备地址",
+                primaryValue = uiData.rfcommStatus.info,
                 statusText = if (uiData.rfcommStatus.isAvailable) "就绪" else "未就绪",
                 statusColor = if (uiData.rfcommStatus.isAvailable) readyColor else pendingColor
             ) {

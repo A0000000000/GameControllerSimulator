@@ -1,7 +1,6 @@
 package cn.maoyanluo.gamecontrollersimulator2.mainui
 
 import android.bluetooth.BluetoothDevice
-import cn.maoyanluo.gamecontrollersimulator2.connect.ConnectionType
 
 
 sealed interface MainUiState {

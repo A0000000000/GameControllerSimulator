@@ -22,6 +22,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
@@ -73,7 +74,7 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun MainContainer(modifier: Modifier = Modifier) {
     val viewModel: MainViewModel = viewModel()
-    val uiState = viewModel.mainUiState
+    val uiState by viewModel.mainUiState.collectAsState()
     val uiEffect = viewModel.mainUiEffect
     val ctx by rememberUpdatedState(LocalContext.current)
     val pageModifier = if (uiState !is MainUiState.GamepadPage) {
@@ -89,7 +90,7 @@ fun MainContainer(modifier: Modifier = Modifier) {
     LockScreenOrientation(
         orientation = if (uiState !is MainUiState.GamepadPage) ActivityInfo.SCREEN_ORIENTATION_PORTRAIT else ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
     )
-    when (uiState) {
+    when (val state = uiState) {
         MainUiState.NoPermissionPage -> {
             fun requestPermission() {
                 launcher.launch(
@@ -116,7 +117,7 @@ fun MainContainer(modifier: Modifier = Modifier) {
         is MainUiState.SelectPage -> {
             SelectDevicePages(
                 pageModifier,
-                uiState.data.devices,
+                state.data.devices,
                 onBluetoothDeviceSelected = {
                     viewModel.onUiIntent(
                         MainUiIntent.OnDeviceSelectedIntent(it)
@@ -127,18 +128,18 @@ fun MainContainer(modifier: Modifier = Modifier) {
         }
 
         is MainUiState.ConnectingPage -> {
-            BackHandler() {
+            BackHandler {
                 viewModel.onUiIntent(MainUiIntent.OnDisconnect)
             }
             ConnectingPage(
                 modifier = pageModifier,
-                uiData = uiState.data,
+                uiData = state.data,
                 onUiIntent = viewModel::onUiIntent
             )
         }
 
         MainUiState.GamepadPage -> {
-            BackHandler() {
+            BackHandler {
                 viewModel.onUiIntent(MainUiIntent.OnBackFromGamepad)
             }
             GamepadPage(
