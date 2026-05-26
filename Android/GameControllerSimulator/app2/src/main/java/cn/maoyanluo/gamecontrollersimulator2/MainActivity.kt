@@ -102,16 +102,28 @@ fun MainContainer(modifier: Modifier = Modifier) {
                 requestPermission()
             }
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text(text = stringResource(R.string.no_permission), fontSize = 50.sp, modifier = Modifier.clickable {
-                    requestPermission()
-                })
+                Text(
+                    text = stringResource(R.string.no_permission),
+                    fontSize = 50.sp,
+                    modifier = Modifier.clickable {
+                        requestPermission()
+                    })
             }
         }
+
         is MainUiState.SelectPage -> {
-            SelectDevicePages(pageModifier, uiState.data.devices, onBluetoothDeviceSelected = { viewModel.onUiIntent(MainUiIntent.OnDeviceSelectedIntent(it)) }) {
+            SelectDevicePages(
+                pageModifier,
+                uiState.data.devices,
+                onBluetoothDeviceSelected = {
+                    viewModel.onUiIntent(
+                        MainUiIntent.OnDeviceSelectedIntent(it)
+                    )
+                }) {
                 viewModel.onUiIntent(MainUiIntent.OnDeviceListFlush)
             }
         }
+
         is MainUiState.ConnectingPage -> {
             BackHandler() {
                 viewModel.onUiIntent(MainUiIntent.OnDisconnect)
@@ -122,6 +134,7 @@ fun MainContainer(modifier: Modifier = Modifier) {
                 onUiIntent = viewModel::onUiIntent
             )
         }
+
         MainUiState.GamepadPage -> {
             BackHandler() {
                 viewModel.onUiIntent(MainUiIntent.OnBackFromGamepad)
@@ -138,11 +151,16 @@ fun MainContainer(modifier: Modifier = Modifier) {
         uiEffect.collect {
             when (it) {
                 is MainUiEffect.RttResultEffect -> {
-                    Toast.makeText(ctx, "类型: ${it.type} RTT: ${it.diff}", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(ctx, "类型: ${it.type} RTT: ${it.diff}", Toast.LENGTH_SHORT)
+                        .show()
                 }
 
                 is MainUiEffect.DeviceFlushEffect -> {
-                    Toast.makeText(ctx, if (it.isEnd) "设备列表更新完成" else "设备列表开始更新", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        ctx,
+                        if (it.isEnd) "设备列表更新完成" else "设备列表开始更新",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
             }
         }
