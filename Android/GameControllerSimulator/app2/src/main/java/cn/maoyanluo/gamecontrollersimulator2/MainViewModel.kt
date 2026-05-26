@@ -123,9 +123,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             }
 
             is CoordinatorEvent.RttResultEvent -> {
-                coroutineManager.getIOScope().launch {
-                    _mainUiEffect.emit(MainUiEffect.RttResultEffect(event.diff, event.type))
-                }
+                emitEffect(MainUiEffect.RttResultEffect(event.diff, event.type))
                 LogUtils.d(TAG, "onRttResult. diff = ${event.diff}, type = ${event.type}")
             }
 
@@ -161,91 +159,105 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun onUiIntent(uiIntent: MainUiIntent) {
-        val currentPage = mainUiState
-        var nextPage: MainUiState? = null
-        when (uiIntent) {
-            is MainUiIntent.PermissionResultIntent -> {
-                if (uiIntent.grant) {
-                    if (currentPage is MainUiState.NoPermissionPage) {
-                        nextPage = MainUiState.SelectPage(SelectPageModel(connectionCoordinator.getBoundDevices()))
-                    }
-                } else {
-                    connectionCoordinator.destroy()
-                    connectionPageModel = ConnectingPageModel()
-                    nextPage = MainUiState.NoPermissionPage
-                }
-            }
-
-            is MainUiIntent.OnDeviceSelectedIntent -> {
-                connectionCoordinator.setDevice(uiIntent.device)
-                connectionPageModel = connectionPageModel.copy(deviceName = connectionCoordinator.getDeviceName())
-                nextPage = MainUiState.ConnectingPage(connectionPageModel.copy())
-            }
-
-            MainUiIntent.OnDeviceListFlush -> {
-                if (currentPage is MainUiState.SelectPage) {
-                    nextPage = MainUiState.SelectPage(SelectPageModel(connectionCoordinator.getBoundDevices()))
-                }
-            }
-
-            MainUiIntent.OnEnterGamepadIntent -> {
-                if (currentPage is MainUiState.ConnectingPage && connectionCoordinator.isConnectionAvailable()) {
-                    nextPage = MainUiState.GamepadPage
-                }
-                if (!connectionCoordinator.isConnectionAvailable()) {
-                    nextPage = MainUiState.SelectPage(SelectPageModel(connectionCoordinator.getBoundDevices()))
-                }
-            }
-
-            is MainUiIntent.OnSelectConnectTypeIntent -> {
-                connectionCoordinator.setConnectType(uiIntent.type)
-                connectionPageModel = connectionPageModel.copy(
-                    rfcommStatus = connectionPageModel.rfcommStatus.copy(isSelect = connectionCoordinator.getConnectType() == ConnectionType.BLE),
-                    tcpStatus = connectionPageModel.tcpStatus.copy(isSelect = connectionCoordinator.getConnectType() == ConnectionType.TCP),
-                    udpStatus = connectionPageModel.udpStatus.copy(isSelect = connectionCoordinator.getConnectType() == ConnectionType.UDP),
-                )
-                if (mainUiState is MainUiState.ConnectingPage) {
-                    mainUiState = MainUiState.ConnectingPage(connectionPageModel.copy())
-                }
-            }
-
-            is MainUiIntent.OnRequestRttIntent -> {
-                connectionCoordinator.requestRtt(uiIntent.type)
-            }
-
-            MainUiIntent.OnBackFromGamepad -> {
-                nextPage = if (connectionCoordinator.isConnectionAvailable()) {
-                    MainUiState.ConnectingPage(connectionPageModel.copy())
-                } else {
-                    connectionPageModel = ConnectingPageModel()
-                    MainUiState.SelectPage(SelectPageModel(connectionCoordinator.getBoundDevices()))
-                }
-            }
-
-            is MainUiIntent.OnGamepadEvent -> {
-                connectionCoordinator.sendData(
-                    BaseEntity(
-                        type = EntityType.TYPE_SEND_GAME_EVENT,
-                        id = EntityId.GAMEPAD_PAGE_EVENT,
-                        timestamp = System.currentTimeMillis(),
-                        data = Base64.encodeToString(uiIntent.data, Base64.NO_WRAP)
-                    )
-                )
-            }
-
-            MainUiIntent.OnDisconnect -> {
-                connectionCoordinator.clearConnection()
-                connectionPageModel = ConnectingPageModel()
-                nextPage = MainUiState.SelectPage(SelectPageModel(connectionCoordinator.getBoundDevices()))
-            }
-        }
         coroutineManager.getMainScope().launch {
-            nextPage?.let {
-                mainUiState = it
+            val currentPage = mainUiState
+            var nextPage: MainUiState? = null
+            when (uiIntent) {
+                is MainUiIntent.PermissionResultIntent -> {
+                    if (uiIntent.grant) {
+                        if (currentPage is MainUiState.NoPermissionPage) {
+                            nextPage =
+                                MainUiState.SelectPage(SelectPageModel(connectionCoordinator.getBoundDevices()))
+                        }
+                    } else {
+                        connectionCoordinator.destroy()
+                        connectionPageModel = ConnectingPageModel()
+                        nextPage = MainUiState.NoPermissionPage
+                    }
+                }
+
+                is MainUiIntent.OnDeviceSelectedIntent -> {
+                    connectionCoordinator.setDevice(uiIntent.device)
+                    connectionPageModel =
+                        connectionPageModel.copy(deviceName = connectionCoordinator.getDeviceName())
+                    nextPage = MainUiState.ConnectingPage(connectionPageModel.copy())
+                }
+
+                MainUiIntent.OnDeviceListFlush -> {
+                    if (currentPage is MainUiState.SelectPage) {
+                        emitEffect(MainUiEffect.DeviceFlushEffect(false))
+                        nextPage =
+                            MainUiState.SelectPage(SelectPageModel(connectionCoordinator.getBoundDevices()))
+                        emitEffect(MainUiEffect.DeviceFlushEffect(true))
+                    }
+                }
+
+                MainUiIntent.OnEnterGamepadIntent -> {
+                    if (currentPage is MainUiState.ConnectingPage && connectionCoordinator.isConnectionAvailable()) {
+                        nextPage = MainUiState.GamepadPage
+                    }
+                    if (!connectionCoordinator.isConnectionAvailable()) {
+                        nextPage =
+                            MainUiState.SelectPage(SelectPageModel(connectionCoordinator.getBoundDevices()))
+                    }
+                }
+
+                is MainUiIntent.OnSelectConnectTypeIntent -> {
+                    connectionCoordinator.setConnectType(uiIntent.type)
+                    connectionPageModel = connectionPageModel.copy(
+                        rfcommStatus = connectionPageModel.rfcommStatus.copy(isSelect = connectionCoordinator.getConnectType() == ConnectionType.BLE),
+                        tcpStatus = connectionPageModel.tcpStatus.copy(isSelect = connectionCoordinator.getConnectType() == ConnectionType.TCP),
+                        udpStatus = connectionPageModel.udpStatus.copy(isSelect = connectionCoordinator.getConnectType() == ConnectionType.UDP),
+                    )
+                    if (mainUiState is MainUiState.ConnectingPage) {
+                        mainUiState = MainUiState.ConnectingPage(connectionPageModel.copy())
+                    }
+                }
+
+                is MainUiIntent.OnRequestRttIntent -> {
+                    connectionCoordinator.requestRtt(uiIntent.type)
+                }
+
+                MainUiIntent.OnBackFromGamepad -> {
+                    nextPage = if (connectionCoordinator.isConnectionAvailable()) {
+                        MainUiState.ConnectingPage(connectionPageModel.copy())
+                    } else {
+                        connectionPageModel = ConnectingPageModel()
+                        MainUiState.SelectPage(SelectPageModel(connectionCoordinator.getBoundDevices()))
+                    }
+                }
+
+                is MainUiIntent.OnGamepadEvent -> {
+                    connectionCoordinator.sendData(
+                        BaseEntity(
+                            type = EntityType.TYPE_SEND_GAME_EVENT,
+                            id = EntityId.GAMEPAD_PAGE_EVENT,
+                            timestamp = System.currentTimeMillis(),
+                            data = Base64.encodeToString(uiIntent.data, Base64.NO_WRAP)
+                        )
+                    )
+                }
+
+                MainUiIntent.OnDisconnect -> {
+                    connectionCoordinator.clearConnection()
+                    connectionPageModel = ConnectingPageModel()
+                    nextPage =
+                        MainUiState.SelectPage(SelectPageModel(connectionCoordinator.getBoundDevices()))
+                }
+            }
+            withContext(Dispatchers.Main) {
+                nextPage?.let {
+                    mainUiState = it
+                }
             }
         }
     }
 
+    private fun emitEffect(effect: MainUiEffect) {
+        coroutineManager.getIOScope().launch {
+            _mainUiEffect.emit(effect)
+        }
+    }
     fun getGamepadEventGenerator() = connectionCoordinator.getGamepadEventGenerator()
 
 

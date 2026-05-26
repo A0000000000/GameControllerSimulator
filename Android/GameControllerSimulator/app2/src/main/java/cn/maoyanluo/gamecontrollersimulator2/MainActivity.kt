@@ -136,7 +136,11 @@ fun MainContainer(modifier: Modifier = Modifier) {
         uiEffect.collect {
             when (it) {
                 is MainUiEffect.RttResultEffect -> {
-                    Toast.makeText(ctx, "type is ${it.type}, diff = ${it.diff}", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(ctx, "类型: ${it.type}, RTT: ${it.diff}", Toast.LENGTH_SHORT).show()
+                }
+
+                is MainUiEffect.DeviceFlushEffect -> {
+                    Toast.makeText(ctx, if (it.isEnd) "设备列表更新完成" else "设备列表开始更新", Toast.LENGTH_SHORT).show()
                 }
             }
         }
