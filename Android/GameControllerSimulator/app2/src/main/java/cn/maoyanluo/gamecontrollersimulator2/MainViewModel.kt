@@ -267,9 +267,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             }
             withContext(Dispatchers.Main) {
                 nextPage?.let { np ->
-                    asyncMain {
-                        _mainUiState.emit(np)
-                    }
+                    _mainUiState.emit(np)
                 }
             }
         }
