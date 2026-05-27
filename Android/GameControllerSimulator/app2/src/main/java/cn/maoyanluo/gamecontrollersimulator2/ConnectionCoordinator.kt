@@ -128,8 +128,7 @@ class ConnectionCoordinator(
                 return
             }
             LogUtils.i(TAG, "BluetoothGATTManagerCallback onCharacteristicRead success. status = $status, svcUuid = $svcUuid, dataUuid = $dataUuid")
-            if (UUIDConstant.GATT_FUN_UUID == svcUuid)
-            {
+            if (UUIDConstant.GATT_FUN_UUID == svcUuid) {
                 when(dataUuid)
                 {
                     UUIDConstant.GATT_DATA_RFCOMM_UUID -> {

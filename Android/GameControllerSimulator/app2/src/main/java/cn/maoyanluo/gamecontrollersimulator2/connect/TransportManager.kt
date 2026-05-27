@@ -14,7 +14,9 @@ import java.util.EnumMap
 import java.util.UUID
 import java.util.concurrent.atomic.AtomicInteger
 
-
+/**
+ * 连接管理器
+ */
 class TransportManager(
     private val coroutineManager: CoroutineManager,
     private val callback: TransportManagerCallback
@@ -115,7 +117,6 @@ class TransportManager(
                 transports.remove(type)?.disconnect()
             }
         }
-        callback.onConnectionAvailableChange(available, type)
         if (available) {
             if (availableCallbackCount.incrementAndGet() == 1) {
                 LogUtils.i(TAG, "onConnectionAvailableChange onAvailable")
@@ -127,6 +128,7 @@ class TransportManager(
                 callback.onAvailableChange(false)
             }
         }
+        callback.onConnectionAvailableChange(available, type)
     }
 
     private fun removeConnection(type: ConnectionType) {

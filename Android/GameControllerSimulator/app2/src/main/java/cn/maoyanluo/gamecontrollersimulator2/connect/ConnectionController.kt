@@ -5,11 +5,15 @@ import android.bluetooth.BluetoothDevice
 import cn.maoyanluo.coroutine_library.CoroutineManager
 import cn.maoyanluo.gamecontrollersimulator2.bean.BaseEntity
 import cn.maoyanluo.gamecontrollersimulator2.connect.SessionManager.ConnectionManagerState
+import cn.maoyanluo.gamecontrollersimulator2.constant.EntityId
 import cn.maoyanluo.log_library.LogUtils
 import java.util.UUID
 
+/**
+ * 带有Session的连接控制器
+ */
 class ConnectionController(
-    private val coroutineManager: CoroutineManager,
+    coroutineManager: CoroutineManager,
     private val callback: ConnectionControllerCallback
 ) {
 
@@ -125,9 +129,14 @@ class ConnectionController(
         transportManager.sendData(protocolRouter.encode(entity), selectType, id)
     }
 
-    fun registerHandler(handlers: List<RouterHandler>) {
+    /**
+     * @return 注册失败的Handler
+     */
+    fun registerHandler(handlers: List<RouterHandler>): List<RouterHandler> {
         LogUtils.i(TAG, "registerHandler count = ${handlers.size}")
-        protocolRouter.registerHandler(handlers)
+        protocolRouter.registerHandler(handlers.filter { it.id != EntityId.CONNECTION_MANAGER_INTERNAL_ID })
+        LogUtils.i(TAG, "success count = ${handlers.filter { it.id != EntityId.CONNECTION_MANAGER_INTERNAL_ID }.size}, failed count = ${handlers.filter { it.id == EntityId.CONNECTION_MANAGER_INTERNAL_ID }.size}")
+        return handlers.filter { it.id == EntityId.CONNECTION_MANAGER_INTERNAL_ID }
     }
 
     fun requestRtt(type: ConnectionType) {
