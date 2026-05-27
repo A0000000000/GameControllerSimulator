@@ -32,11 +32,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     private var _mainUiState: MutableStateFlow<MainUiState> =
         MutableStateFlow(MainUiState.NoPermissionPage)
-
     val mainUiState = _mainUiState.asStateFlow()
-
-//    var mainUiState by mutableStateOf<MainUiState>(MainUiState.NoPermissionPage)
-//        private set
 
     private val _mainUiEffect = MutableSharedFlow<MainUiEffect>()
     val mainUiEffect = _mainUiEffect.asSharedFlow()
