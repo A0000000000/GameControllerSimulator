@@ -115,7 +115,7 @@ class SessionManager(
             RouterHandler(
                 id = EntityId.CONNECTION_MANAGER_INTERNAL_ID,
                 type = EntityType.TYPE_REQUEST_CLIENT_ID_RESULT,
-                handler = { data, type ->
+                handler = { data, _ ->
                     LogUtils.i(TAG, "onDataReady TYPE_REQUEST_CLIENT_ID_RESULT")
                     setClientId(data.data?.toString() ?: "")
                 }
@@ -123,7 +123,7 @@ class SessionManager(
             RouterHandler(
                 id = EntityId.CONNECTION_MANAGER_INTERNAL_ID,
                 type = EntityType.TYPE_UNREGISTER_CLIENT_ID_RESULT,
-                handler = { data, type ->
+                handler = { _, _ ->
                     LogUtils.i(TAG, "onDataReady TYPE_UNREGISTER_CLIENT_ID_RESULT")
                     state = ConnectionManagerState.DESTROY_ING
                     onAllConnectionDisconnect()
