@@ -1,7 +1,5 @@
 package cn.maoyanluo.socket_common_library
 
-import kotlinx.coroutines.flow.SharedFlow
-
 interface IClientTransport {
     enum class SocketClientState {
         CONNECTING, CONNECTED, DISCONNECTING, DISCONNECTED
