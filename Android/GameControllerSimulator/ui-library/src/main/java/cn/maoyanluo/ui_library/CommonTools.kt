@@ -4,13 +4,16 @@ import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
 import android.content.pm.ActivityInfo
+import android.view.KeyEvent
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 
-
+interface KeyEventHandler {
+    var hardwareKeyEventHandler: ((KeyEvent) -> Boolean)?
+}
 @Composable
 fun LockScreenOrientation(orientation: Int) {
     val context = LocalContext.current
@@ -45,6 +48,15 @@ fun Context.findActivity(): Activity? {
     var ctx = this
     while (ctx is ContextWrapper) {
         if (ctx is Activity) return ctx
+        ctx = ctx.baseContext
+    }
+    return null
+}
+
+fun Context.findKeyEventHandler(): KeyEventHandler? {
+    var ctx = this
+    while (ctx is ContextWrapper) {
+        if (ctx is KeyEventHandler) return ctx
         ctx = ctx.baseContext
     }
     return null

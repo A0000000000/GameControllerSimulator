@@ -38,21 +38,18 @@ import cn.maoyanluo.gamecontrollersimulator2.mainui.MainUiState
 import cn.maoyanluo.gamecontrollersimulator2.pages.ConnectingPage
 import cn.maoyanluo.gamecontrollersimulator2.pages.GamepadPage
 import cn.maoyanluo.gamecontrollersimulator2.ui.theme.GameControllerSimulatorTheme
+import cn.maoyanluo.ui_library.KeyEventHandler
 import cn.maoyanluo.ui_library.LockScreenOrientation
 import cn.maoyanluo.ui_library.pages.SelectDevicePages
 
-class MainActivity : ComponentActivity() {
-
-    // Todo 这个优化一下，不要绑定到MainActivity
-    var hardwareKeyEventHandler: ((KeyEvent) -> Boolean)? = null
-
+class MainActivity : ComponentActivity(), KeyEventHandler {
+    override var hardwareKeyEventHandler: ((KeyEvent) -> Boolean)? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             GameControllerSimulatorTheme {
-                Scaffold(
-                    modifier = Modifier.fillMaxSize(),
+                Scaffold(modifier = Modifier.fillMaxSize(),
                     contentWindowInsets = WindowInsets(0, 0, 0, 0)
                 ) { innerPadding ->
                     MainContainer(Modifier.padding(innerPadding))
@@ -62,13 +59,8 @@ class MainActivity : ComponentActivity() {
     }
 
     @SuppressLint("RestrictedApi")
-    override fun dispatchKeyEvent(event: KeyEvent): Boolean {
-        val handler = hardwareKeyEventHandler
-        if (handler != null && handler.invoke(event)) {
-            return true
-        }
-        return super.dispatchKeyEvent(event)
-    }
+    override fun dispatchKeyEvent(event: KeyEvent): Boolean = hardwareKeyEventHandler?.invoke(event) == true || super.dispatchKeyEvent(event)
+
 }
 
 @Composable

@@ -3,11 +3,11 @@ package cn.maoyanluo.gamecontrollersimulator2.pages
 import android.annotation.SuppressLint
 import android.view.KeyEvent
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -25,9 +25,9 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -37,19 +37,18 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import cn.maoyanluo.gamecontrollersimulator2.mainui.ConnectingPageModel
 import cn.maoyanluo.gamecontrollersimulator2.R
-import cn.maoyanluo.gamecontrollersimulator2.MainActivity
-import cn.maoyanluo.gamecontrollersimulator2.mainui.MainUiIntent
 import cn.maoyanluo.gamecontrollersimulator2.connect.ConnectionType
 import cn.maoyanluo.gamecontrollersimulator2.generator.GamepadAxis
 import cn.maoyanluo.gamecontrollersimulator2.generator.GamepadButton
 import cn.maoyanluo.gamecontrollersimulator2.generator.GamepadEventGenerator
 import cn.maoyanluo.gamecontrollersimulator2.generator.GamepadTrigger
+import cn.maoyanluo.gamecontrollersimulator2.mainui.ConnectingPageModel
+import cn.maoyanluo.gamecontrollersimulator2.mainui.MainUiIntent
 import cn.maoyanluo.ui_library.CircleTextButton
 import cn.maoyanluo.ui_library.Joystick
 import cn.maoyanluo.ui_library.SquareTextButton
-import cn.maoyanluo.ui_library.findActivity
+import cn.maoyanluo.ui_library.findKeyEventHandler
 
 private fun invertShortAxisValue(value: Int): Short {
     return if (value == Short.MIN_VALUE.toInt()) {
@@ -242,7 +241,7 @@ private fun ConnectionStatusCard(
 @SuppressLint("MissingPermission")
 @Composable
 fun GamepadPage(modifier: Modifier, generator: GamepadEventGenerator, receiver: (ByteArray) -> Unit) {
-    val activity = LocalContext.current.findActivity() as? MainActivity
+    val handler = LocalContext.current.findKeyEventHandler()
     var lbPressed by remember { mutableStateOf(false) }
     var rbPressed by remember { mutableStateOf(false) }
     DisposableEffect(Unit) {
@@ -286,10 +285,10 @@ fun GamepadPage(modifier: Modifier, generator: GamepadEventGenerator, receiver: 
                 else -> false
             }
         }
-        activity?.hardwareKeyEventHandler = keyEventHandler
+        handler?.hardwareKeyEventHandler = keyEventHandler
         onDispose {
-            if (activity?.hardwareKeyEventHandler === keyEventHandler) {
-                activity.hardwareKeyEventHandler = null
+            if (handler?.hardwareKeyEventHandler === keyEventHandler) {
+                handler.hardwareKeyEventHandler = null
             }
             lbPressed = false
             rbPressed = false
