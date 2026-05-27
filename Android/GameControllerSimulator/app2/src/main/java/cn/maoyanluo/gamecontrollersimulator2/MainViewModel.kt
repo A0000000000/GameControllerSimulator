@@ -16,7 +16,6 @@ import cn.maoyanluo.gamecontrollersimulator2.mainui.MainUiState
 import cn.maoyanluo.gamecontrollersimulator2.mainui.SelectPageModel
 import cn.maoyanluo.log_library.LogUtils
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -43,7 +42,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     init {
         LogUtils.i(TAG, "init")
         coroutineManager.init()
-        val job = asyncMain {
+        val job = coroutineManager.getMainScope().launch {
             LogUtils.i(TAG, "collect connectionCoordinator event")
             connectionCoordinator.event.collect {
                 onConnectionCoordinatorEvent(it)
@@ -57,7 +56,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    private fun onConnectionCoordinatorEvent(event: CoordinatorEvent) {
+    private suspend fun onConnectionCoordinatorEvent(event: CoordinatorEvent) {
         LogUtils.i(TAG, "event is ${event::class.simpleName}, event data is $event")
         when (event) {
             is CoordinatorEvent.GattAvailableEvent -> {
@@ -123,9 +122,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             }
 
             is CoordinatorEvent.RttResultEvent -> {
-                asyncMain {
-                    _mainUiEffect.emit(MainUiEffect.RttResultEffect(event.diff, event.type))
-                }
+                _mainUiEffect.emit(MainUiEffect.RttResultEffect(event.diff, event.type))
                 LogUtils.d(TAG, "onRttResult. diff = ${event.diff}, type = ${event.type}")
             }
 
@@ -144,36 +141,31 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             }
 
             is MainUiState.ConnectingPage -> {
-                asyncMain {
-                    _mainUiState.emit(
-                        if (connectionPageModel.isAvailable || connectionPageModel.isGATTAvailable) {
-                            MainUiState.ConnectingPage(connectionPageModel.copy())
-                        } else {
-                            MainUiState.SelectPage(SelectPageModel(connectionCoordinator.getBoundDevices()))
-                        }
-                    )
-                }
-
+                _mainUiState.emit(
+                    if (connectionPageModel.isAvailable || connectionPageModel.isGATTAvailable) {
+                        MainUiState.ConnectingPage(connectionPageModel.copy())
+                    } else {
+                        MainUiState.SelectPage(SelectPageModel(connectionCoordinator.getBoundDevices()))
+                    }
+                )
             }
 
             MainUiState.GamepadPage -> {
                 if (!connectionPageModel.isAvailable) {
-                    asyncMain {
-                        _mainUiState.emit(
-                            MainUiState.SelectPage(
-                                SelectPageModel(
-                                    connectionCoordinator.getBoundDevices()
-                                )
+                    _mainUiState.emit(
+                        MainUiState.SelectPage(
+                            SelectPageModel(
+                                connectionCoordinator.getBoundDevices()
                             )
                         )
-                    }
+                    )
                 }
             }
         }
     }
 
     fun onUiIntent(uiIntent: MainUiIntent) {
-        asyncIO {
+        coroutineManager.getIOScope().launch {
             val currentPage = mainUiState.value
             var nextPage: MainUiState? = null
             when (uiIntent) {
@@ -199,12 +191,12 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
                 MainUiIntent.OnDeviceListFlush -> {
                     if (currentPage is MainUiState.SelectPage) {
-                        asyncMain {
+                        withContext(Dispatchers.Main) {
                             _mainUiEffect.emit(MainUiEffect.DeviceFlushEffect(false))
                         }
                         nextPage =
                             MainUiState.SelectPage(SelectPageModel(connectionCoordinator.getBoundDevices()))
-                        asyncMain {
+                        withContext(Dispatchers.Main) {
                             _mainUiEffect.emit(MainUiEffect.DeviceFlushEffect(true))
                         }
                     }
@@ -228,7 +220,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                         udpStatus = connectionPageModel.udpStatus.copy(isSelect = connectionCoordinator.getConnectType() == ConnectionType.UDP),
                     )
                     if (mainUiState.value is MainUiState.ConnectingPage) {
-                        asyncMain {
+                        withContext(Dispatchers.Main) {
                             _mainUiState.emit(MainUiState.ConnectingPage(connectionPageModel.copy()))
                         }
                     }
@@ -270,24 +262,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     _mainUiState.emit(np)
                 }
             }
-        }
-    }
-
-    private fun asyncMain(task: suspend () -> Unit): Job {
-        return coroutineManager.getMainScope().launch {
-            task()
-        }
-    }
-
-    private fun asyncIO(task: suspend () -> Unit): Job {
-        return coroutineManager.getIOScope().launch {
-            task()
-        }
-    }
-
-    private fun asyncDefault(task: suspend () -> Unit): Job {
-        return coroutineManager.getDefaultScope().launch {
-            task()
         }
     }
 
