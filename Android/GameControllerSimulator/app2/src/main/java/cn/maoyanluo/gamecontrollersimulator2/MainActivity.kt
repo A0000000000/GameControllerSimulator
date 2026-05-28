@@ -3,8 +3,8 @@ package cn.maoyanluo.gamecontrollersimulator2
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.pm.ActivityInfo
-import android.view.KeyEvent
 import android.os.Bundle
+import android.view.KeyEvent
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
@@ -14,11 +14,8 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -49,11 +46,7 @@ class MainActivity : ComponentActivity(), KeyEventHandler {
         enableEdgeToEdge()
         setContent {
             GameControllerSimulatorTheme {
-                Scaffold(modifier = Modifier.fillMaxSize(),
-                    contentWindowInsets = WindowInsets(0, 0, 0, 0)
-                ) { innerPadding ->
-                    MainContainer(Modifier.padding(innerPadding))
-                }
+                MainContainer(Modifier.fillMaxSize())
             }
         }
     }
