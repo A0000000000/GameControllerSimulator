@@ -62,10 +62,10 @@ fun MainContainer(modifier: Modifier = Modifier) {
     val uiState by viewModel.mainUiState.collectAsState()
     val uiEffect = viewModel.mainUiEffect
     val ctx by rememberUpdatedState(LocalContext.current)
-    val pageModifier = if (uiState !is MainUiState.GamepadPage) {
-        modifier.safeDrawingPadding()
+    val pageModifier = if (uiState is MainUiState.GamepadPage) {
+        modifier.fillMaxSize()
     } else {
-        Modifier.fillMaxSize()
+        modifier.safeDrawingPadding()
     }
     val launcher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()

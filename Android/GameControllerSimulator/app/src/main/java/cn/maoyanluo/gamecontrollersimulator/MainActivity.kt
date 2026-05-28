@@ -56,7 +56,7 @@ fun MainContainer(modifier: Modifier = Modifier) {
     val pageModifier = if (viewModel.selectDevice == null) {
         modifier.safeDrawingPadding()
     } else {
-        Modifier.fillMaxSize()
+        modifier.fillMaxSize()
     }
     val launcher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
