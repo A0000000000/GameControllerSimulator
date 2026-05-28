@@ -89,7 +89,7 @@ fun MainContainer(modifier: Modifier = Modifier) {
             LaunchedEffect(Unit) {
                 requestPermission()
             }
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Box(modifier = pageModifier, contentAlignment = Alignment.Center) {
                 Text(
                     text = stringResource(R.string.no_permission),
                     fontSize = 50.sp,
@@ -101,8 +101,8 @@ fun MainContainer(modifier: Modifier = Modifier) {
 
         is MainUiState.SelectPage -> {
             SelectDevicePages(
-                pageModifier,
-                state.data.devices,
+                modifier = pageModifier,
+                data = state.data.devices,
                 onBluetoothDeviceSelected = {
                     viewModel.onUiIntent(
                         MainUiIntent.OnDeviceSelectedIntent(it)

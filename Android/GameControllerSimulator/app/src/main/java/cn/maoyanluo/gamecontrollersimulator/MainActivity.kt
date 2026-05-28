@@ -88,7 +88,7 @@ fun MainContainer(modifier: Modifier = Modifier) {
             GameControllerPage(pageModifier)
         }
     } else {
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        Box(modifier = pageModifier, contentAlignment = Alignment.Center) {
             Text(text = stringResource(R.string.no_permission), fontSize = 50.sp, modifier = Modifier.clickable {
                 requestPermission()
             })
