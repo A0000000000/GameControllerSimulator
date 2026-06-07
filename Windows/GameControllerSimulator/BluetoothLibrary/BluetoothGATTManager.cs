@@ -1,7 +1,7 @@
-﻿using LogLibrary;
+﻿using AsyncTaskLibrary;
+using LogLibrary;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Text;
 using System.Text.Json;
@@ -34,7 +34,7 @@ namespace BluetoothLibrary
         public void StartService()
         {
             LogUtils.I(TAG, "StartService");
-            Post(async () =>
+            AsyncTaskUtils.Post(async () =>
             {
                 LogUtils.I(TAG, "StartServicePost");
                 lock (_lock)
@@ -60,7 +60,10 @@ namespace BluetoothLibrary
                     LogUtils.E(TAG, "StartServicePost Failed.", ex);
                     callback?.OnException(ex);
                 }
-            });
+            }, (Exception ex) =>
+            {
+                callback?.OnException(ex);
+            }, TAG);
         }
 
         private async Task StartServiceAsync()
@@ -133,7 +136,7 @@ namespace BluetoothLibrary
         public void StopService()
         {
             LogUtils.I(TAG, "StopService");
-            Post(() =>
+            AsyncTaskUtils.Post(() =>
             {
                 LogUtils.I(TAG, "StopServicePost");
                 lock (_lock)
@@ -149,42 +152,15 @@ namespace BluetoothLibrary
                 serviceProvider?.StopAdvertising();
                 serviceProvider = null;
                 callback?.OnStopService();
-            });
+            }, (Exception ex) =>
+            {
+                callback?.OnException(ex);
+            }, TAG);
         }
 
         public void Dispose()
         {
             StopService();
-        }
-
-        private void Post(Action task)
-        {
-            Task.Run(() =>
-            {
-                try
-                {
-                    task();
-                }
-                catch (Exception ex)
-                {
-                    callback?.OnException(ex);
-                }
-            });
-        }
-
-        private void Post(Func<Task> task)
-        {
-            Task.Run(async () =>
-            {
-                try
-                {
-                    await task();
-                }
-                catch (Exception ex)
-                {
-                    callback?.OnException(ex);
-                }
-            });
         }
 
     }

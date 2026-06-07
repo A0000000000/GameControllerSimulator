@@ -1,17 +1,14 @@
 ﻿using SocketCommonLibrary;
-using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace NetworkLibrary
 {
     public class TcpSocketServer : SocketServer<TcpListener, TcpClient>
     {
+        public override ConnectionType ConnectionType => ConnectionType.TCP;
         private int port;
         public TcpSocketServer(int port, SocketServerCallback<TcpListener, TcpClient> callback) : base(callback)
         {
@@ -44,6 +41,7 @@ namespace NetworkLibrary
 
     public class TcpSocketClient : SocketClient<TcpClient>
     {
+        public override ConnectionType ConnectionType => ConnectionType.TCP;
         public TcpSocketClient(TcpClient socket, SocketClientCallback<TcpClient> callback) : base(socket, callback)
         {
         }

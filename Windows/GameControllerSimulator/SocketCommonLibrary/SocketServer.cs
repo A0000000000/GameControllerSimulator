@@ -1,22 +1,16 @@
+using AsyncTaskLibrary;
 using LogLibrary;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Net.Sockets;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-// To learn more about WinUI, the WinUI project structure,
-// and more about our project templates, see: http://aka.ms/winui-project-info.
-
 namespace SocketCommonLibrary
 {
-    public abstract class SocketServer<TServerSocker, TSocket> where TServerSocker : class, IDisposable where TSocket : class, IDisposable
+    public abstract class SocketServer<TServerSocker, TSocket> : IServerTransport where TServerSocker : class, IDisposable where TSocket : class, IDisposable
     {
         public static string TAG = "SocketServer";
-
+        public abstract ConnectionType ConnectionType { get; }
         private readonly object _lock = new();
         private TServerSocker _serverSocker;
         private CancellationTokenSource cts;
@@ -35,11 +29,10 @@ namespace SocketCommonLibrary
         protected abstract SocketClient<TSocket> CreateAcceptClient(TSocket socket, SocketClientCallback<TSocket> clientCallback);
         protected abstract void Close(TServerSocker serverSocker);
 
-
         public void StartListener()
         {
             LogUtils.I(TAG, "SocketServer StartListener");
-            Post(() =>
+            AsyncTaskUtils.Post(() =>
             {
                 LogUtils.I(TAG, "SocketServer StartListenerPost");
                 lock (_lock)
@@ -55,7 +48,7 @@ namespace SocketCommonLibrary
                         LogUtils.I(TAG, "SocketServer StartListenerPost CreateServerSocket");
                         _serverSocker = CreateServerSocket();
                         callback?.OnStartServerSuccess();
-                        acceptLoopTask = Task.Run(() => StartForeverLoop());
+                        acceptLoopTask = AsyncTaskUtils.Post(StartForeverLoop);
                     }
                     catch (Exception ex)
                     {
@@ -63,10 +56,14 @@ namespace SocketCommonLibrary
                         _serverSocker = null;
                         cts.Dispose();
                         cts = null;
-                        Post(() => callback?.OnStartServerFailed(ex));
+                        callback?.OnStartServerFailed(ex);
                     }
                 }
-            });
+            }, (Exception ex) =>
+            {
+                LogUtils.I(TAG, "SocketServer Post Failed", ex);
+                callback?.OnTaskException(ex);
+            }, TAG);
         }
 
         private async Task StartForeverLoop()
@@ -81,28 +78,26 @@ namespace SocketCommonLibrary
                         TSocket socket = await Task.Run(async () => await AcceptSocket(_serverSocker), cts.Token);
                         LogUtils.I(TAG, "SocketServer StartForeverLoop CreateAcceptClient");
                         SocketClient<TSocket> client = CreateAcceptClient(socket, callback?.CreateNewClientCallback());
-                        Post(() => callback?.OnNewClientConnect(client));
+                        _ = AsyncTaskUtils.Post(() => callback?.OnClientConnect(client));
                     }
                     catch (Exception ex)
                     {
                         LogUtils.W(TAG, "SocketServer StartForeverLoop AcceptSocket failed.", ex);
-                        Post(() => callback?.OnNewClientException(ex));
+                        _  = AsyncTaskUtils.Post(() => callback?.OnNewClientException(ex));
                     }
                 }
             }
             catch (Exception ex)
             {
                 LogUtils.E(TAG, "SocketServer StartForeverLoop failed.", ex);
-                Post(() => callback?.OnForeverLoopException(ex));
+                callback?.OnForeverLoopException(ex);
             }
         }
-
-
 
         public void StopListener()
         {
             LogUtils.I(TAG, "SocketServer StopListener");
-            Post(() =>
+            AsyncTaskUtils.Post(() =>
             {
                 Task taskToWait = null;
                 lock (_lock)
@@ -129,36 +124,20 @@ namespace SocketCommonLibrary
                     cts = null;
                     acceptLoopTask = null;
                 }
-                Post(() => callback?.OnStopServer());
-            });
-        }
-
-
-
-        private void Post(Action action)
-        {
-            LogUtils.I(TAG, "SocketServer Post");
-            if (action == null) return;
-            _ = Task.Run(() =>
+                callback?.OnStopServer();
+            }, (Exception ex) =>
             {
-                try
-                {
-                    action();
-                }
-                catch (Exception ex)
-                {
-                    LogUtils.I(TAG, "SocketServer Post Failed", ex);
-                    Post(() => callback?.OnTaskException(ex));
-                }
-            });
+                LogUtils.I(TAG, "SocketServer Post Failed", ex);
+                callback?.OnTaskException(ex);
+            }, TAG);
         }
 
     }
 
-    public abstract class SocketClient<TSocket> where TSocket: class, IDisposable
+    public abstract class SocketClient<TSocket>: IServerTransport.IClientTransport  where TSocket: class, IDisposable
     {
         public static string TAG = "SocketClient";
-
+        public abstract ConnectionType ConnectionType { get; }
         private readonly object _lock = new();
         private TSocket socket;
         private SocketClientCallback<TSocket> callback;
@@ -176,13 +155,13 @@ namespace SocketCommonLibrary
             this.callback = callback;
             stream = GetStream(socket);
             IsAvailable = true;
-            Task.Run(async () => ReceiveLoop());
+            AsyncTaskUtils.Post(ReceiveLoop);
         }
 
         public void SendData(byte[] data, int id = -1)
         {
             LogUtils.I(TAG, $"SocketClient SendData id = [{id}]");
-            Post(() =>
+            AsyncTaskUtils.Post(() =>
             {
                 try
                 {
@@ -197,14 +176,18 @@ namespace SocketCommonLibrary
                 catch (Exception ex)
                 {
                     LogUtils.D(TAG, $"SocketClient SendData Failed id = [{id}]", ex);
-                    Post(() => callback?.OnSendDataException(this, ex, id));
+                    callback?.OnSendDataException(this, ex, id);
                 }
-            });
+            }, (Exception ex) => 
+            {
+                LogUtils.W(TAG, "SocketClient Post Failed", ex);
+                callback?.OnTaskException(ex);
+            }, TAG);
         }
         public void Disconnect()
         {
             LogUtils.I(TAG, "SocketClient Disconnect");
-            Post(() =>
+            AsyncTaskUtils.Post(() =>
             {
                 LogUtils.I(TAG, "SocketClient DisconnectPost");
                 lock (_lock)
@@ -221,8 +204,12 @@ namespace SocketCommonLibrary
                     Close(socket);
                 }
                 catch { }
-                Post(() => callback?.OnDisconnect(this));
-            });
+                callback?.OnDisconnect(this);
+            }, (Exception ex) =>
+            {
+                LogUtils.W(TAG, "SocketClient Post Failed", ex);
+                callback?.OnTaskException(ex);
+            }, TAG);
         }
 
         private async Task ReceiveLoop()
@@ -245,13 +232,13 @@ namespace SocketCommonLibrary
                     {
                         break;
                     }
-                    Post(() => callback?.OnDataReady(this, data));
+                    _ = AsyncTaskUtils.Post(() => callback?.OnDataReady(this, data));
                 }
             }
             catch (Exception ex)
             {
                 LogUtils.E(TAG, "SocketClient ReceiveLoop Failed", ex);
-                Post(() => callback?.OnDataRevException(this, ex));
+                callback?.OnDataRevException(this, ex);
             }
             finally
             {
@@ -271,23 +258,6 @@ namespace SocketCommonLibrary
             return offset;
         }
 
-        private void Post(Action action)
-        {
-            LogUtils.I(TAG, "SocketClient Post");
-            if (action == null) return;
-            _ = Task.Run(() =>
-            {
-                try
-                {
-                    action();
-                }
-                catch (Exception ex)
-                {
-                    LogUtils.W(TAG, "SocketClient Post Failed", ex);
-                    Post(() => callback?.OnTaskException(ex));
-                }
-            });
-        }
     }
 
 }

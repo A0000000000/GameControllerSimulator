@@ -1,10 +1,7 @@
 ﻿using InTheHand.Net.Sockets;
 using SocketCommonLibrary;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace BluetoothLibrary
@@ -14,6 +11,8 @@ namespace BluetoothLibrary
 
         public Guid guid { get; private set; }
         public string serviceName { get; private set; }
+
+        public override ConnectionType ConnectionType => ConnectionType.BLE;
 
         public BluetoothSocketServer(Guid guid, string serviceName, SocketServerCallback<BluetoothListener, BluetoothClient> callback): base(callback)
         {
@@ -51,6 +50,8 @@ namespace BluetoothLibrary
 
     public class BluetoothSocketClient: SocketClient<BluetoothClient>
     {
+        public override ConnectionType ConnectionType => ConnectionType.BLE;
+
         public BluetoothSocketClient(BluetoothClient socket, SocketClientCallback<BluetoothClient> callback): base(socket, callback)
         { }
 

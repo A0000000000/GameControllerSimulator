@@ -4,6 +4,7 @@
     <Platform Name="x64" />
     <Platform Name="x86" />
   </Configurations>
+  <Project Path="AsyncTaskLibrary/AsyncTaskLibrary.csproj" Id="c53e7193-1535-483c-9c44-335055338391" />
   <Project Path="BluetoothLibrary/BluetoothLibrary.csproj" Id="35c61e5a-7005-4fbc-8153-42e3bba1f355" />
   <Project Path="CommonLibrary/CommonLibrary.csproj" Id="275ff1d6-a504-4928-90a2-e33580378cae" />
   <Project Path="GameControllerSimulator/GameControllerSimulator.csproj">

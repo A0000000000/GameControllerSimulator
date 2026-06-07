@@ -1,9 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Sockets;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SocketCommonLibrary
 {
@@ -18,7 +13,7 @@ namespace SocketCommonLibrary
         void OnForeverLoopException(Exception ex);
 
         SocketClientCallback<TSocket> CreateNewClientCallback();
-        void OnNewClientConnect(SocketClient<TSocket> client);
+        void OnClientConnect(SocketClient<TSocket> client);
         void OnNewClientException(Exception ex);
 
         void OnTaskException(Exception ex);

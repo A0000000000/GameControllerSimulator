@@ -16,6 +16,7 @@ using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Navigation;
 using NetworkLibrary;
+using SocketCommonLibrary;
 using System;
 using System.Buffers;
 using System.Collections.Generic;
@@ -31,7 +32,6 @@ using Windows.Devices.Bluetooth.GenericAttributeProfile;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.Storage.Streams;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -59,6 +59,7 @@ namespace GameControllerSimulator
             new GamepadStatePacket(),
             new GamepadStatePacket()
         };
+        private string?[] guids = Enumerable.Repeat<string?>(null, CONTROLLER_COUNT).ToArray();
 
         public MainWindow()
         {
@@ -66,8 +67,6 @@ namespace GameControllerSimulator
             this.Activated += OnActivated;
             this.Closed += OnClosed;
         }
-
-        
 
         private async void OnActivated(object sender, WindowActivatedEventArgs args)
         {
@@ -283,28 +282,42 @@ namespace GameControllerSimulator
         #endregion
 
         #region 连接管理处理
-        private ConnectionManager? connectionManager;
+        private ConnectionController? connectionController = null;
         private Guid rfcommGuid = GUIDConstant.DEFAULT_RFCOMM_GUID;
         private string address = NetworkUtils.GetLocalIPv4();
         private int tcpPort;
         private int udpPort;
 
+        private int GetIndexByGuid(string guid)
+        {
+            for (int i = 0; i < guids.Length; i++)
+            {
+                if (guids[i] == guid)
+                {
+                    return i;
+                }
+            }
+            return -1;
+        }
+
         private async Task InitConnectionManager()
         {
             LogUtils.I(TAG, "InitConnectionManager");
-            connectionManager = new ConnectionManager(CONTROLLER_COUNT, new ConnectionManagerCallback(this));
-            connectionManager?.InitRFCOMM(rfcommGuid, APP_NAME);
-            connectionManager?.InitTcp(tcpPort);
+            connectionController = new ConnectionController(new ConnectionControllerCallbackImpl(this));
+            connectionController?.Init();
+            connectionController?.InitRFCOMM(rfcommGuid, APP_NAME);
+            connectionController?.InitTcp(tcpPort);
+            connectionController?.RegisterProtocolHandlers(GetProtocolHandlers());
         }
 
-        private void OnConnectionAvaiableChange(bool available, ConnectionManager.ConnectionType type)
+        private void OnConnectionAvaiableChange(bool available, ConnectionType type)
         {
             LogUtils.I(TAG, $"OnConnectionAvaiableChange avaiable = [{available}] type = [{type}]");
             _dispatcher.TryEnqueue(() =>
             {
                 switch (type) 
                 {
-                    case ConnectionManager.ConnectionType.BLE:
+                    case ConnectionType.BLE:
                         if (available)
                         {
                             BluetoothRFCOMM.Text = $"Bluetooth RFCOMM Status: Running at {rfcommGuid.ToString()}";
@@ -314,7 +327,7 @@ namespace GameControllerSimulator
                             BluetoothRFCOMM.Text = "Bluetooth RFCOMM Status: Stopped";
                         }
                         break;
-                    case ConnectionManager.ConnectionType.TCP:
+                    case ConnectionType.TCP:
                         if (available)
                         {
                             TcpInfo.Text = $"TCP Status: Running at {address}:{tcpPort}";
@@ -324,7 +337,7 @@ namespace GameControllerSimulator
                             TcpInfo.Text = "TCP Status: Stopped";
                         }
                         break;
-                    case ConnectionManager.ConnectionType.UDP:
+                    case ConnectionType.UDP:
                         if (available)
                         {
                             UdpInfo.Text = $"UDP Status: Running at {address}:{udpPort}";
@@ -338,17 +351,12 @@ namespace GameControllerSimulator
             });
         }
 
-        private void OnManagerAvaiableChange(bool available)
-        {
-            LogUtils.I(TAG, $"OnManagerAvaiableChange avaiable = [{available}]");
-        }
-
         private async Task DestroyConnectionManager()
         {
             LogUtils.I(TAG, "DestroyConnectionManager");
             if (await BluetoothUtils.IsBluetoothAvailableAsync())
             {
-                connectionManager?.Destroy();
+                connectionController?.Destroy();
             }
             else
             {
@@ -356,56 +364,56 @@ namespace GameControllerSimulator
             }
         }
 
-        class ConnectionManagerCallback : IConnectionManagerCallback
+        private class ConnectionControllerCallbackImpl: IConnectionControllerCallback
         {
-            public static string TAG = "ConnectionManagerCallback";
-
+            public static readonly string TAG = "ConnectionControllerCallbackImpl";
             private MainWindow window;
-            public ConnectionManagerCallback(MainWindow window)
+            public ConnectionControllerCallbackImpl(MainWindow window)
             {
-                LogUtils.I(TAG, "Create ConnectionManagerCallback");
+                LogUtils.I(TAG, "Create ConnectionControllerCallbackImpl");
                 this.window = window;
             }
-
-            public Type GetTypeClass(int type)
+            void IConnectionControllerCallback.OnFault(string tag, string msg, ConnectionType type, Exception? ex)
             {
-                return EntityType.TYPE_MAPPING.ContainsKey(type) ? EntityType.TYPE_MAPPING[type] : typeof(JsonElement);
+                window.OnFaulted($"{tag}-{msg}-{type}", ex);
             }
 
-            public void OnClientDisconnected(int index)
+            void IConnectionControllerCallback.OnSessionAvailable(string guid)
             {
-                LogUtils.I(TAG, $"ConnectionManagerCallback OnClientDisconnected index = [{index}]");
-                window.OnClientDisconnected(index);
+                for (int i = 0; i < window.guids.Length; i++)
+                {
+                    if (window.guids[i] == null)
+                    {
+                        window.guids[i] = guid;
+                        LogUtils.I(TAG, $"OnSessionAvailable set guid. index = [{i}] guid = [{guid}]");
+                        window.OnNewClientConnection(i);
+                        break;
+                    }
+                }
             }
 
-            public void OnConnectionAvaiableChange(bool available, ConnectionManager.ConnectionType type)
+            void IConnectionControllerCallback.OnSessionUnAvailable(string guid)
             {
-                LogUtils.I(TAG, "ConnectionManagerCallback OnManagerAvaiable");
-                window.OnConnectionAvaiableChange(available, type);
+                for (int i = 0; i < window.guids.Length; i++)
+                {
+                    if (window.guids[i] == guid)
+                    {
+                        window.guids[i] = null;
+                        LogUtils.I(TAG, $"OnSessionUnAvailable unset guid. index = [{i}] guid = [{guid}]");
+                        window.OnClientDisconnected(i);
+                        break;
+                    }
+                }
             }
 
-            public void OnDataReady(int index, IBaseEntity data)
+            void IConnectionControllerCallback.OnStartServer(ConnectionType type)
             {
-                LogUtils.I(TAG, $"ConnectionManagerCallback OnClientDisconnected index = [{index}], data = [{JsonSerializer.Serialize(data)}]");
-                window.OnDataReady(index, data);
+                window.OnConnectionAvaiableChange(true, type);
             }
 
-            public void OnFaulted(string msg, Exception ex)
+            void IConnectionControllerCallback.OnStopServer(ConnectionType type)
             {
-                LogUtils.W(TAG, $"ConnectionManagerCallback OnFaulted msg = [{msg}]", ex);
-                window.OnFaulted(msg, ex);
-            }
-
-            public void OnManagerAvaiableChange(bool available)
-            {
-                LogUtils.I(TAG, "ConnectionManagerCallback OnManagerAvaiable");
-                window.OnManagerAvaiableChange(available);
-            }
-
-            public void OnNewClientConnection(int index)
-            {
-                LogUtils.I(TAG, $"ConnectionManagerCallback OnNewClientConnection index = [{index}]");
-                window.OnNewClientConnection(index);
+                window.OnConnectionAvaiableChange(false, type);
             }
         }
 
@@ -456,48 +464,69 @@ namespace GameControllerSimulator
 
         #region 数据处理
         private object gameEventLock = new object();
-
-        private void OnDataReady(int index, IBaseEntity data)
+        private List<ProtocolHandler> GetProtocolHandlers()
         {
-            LogUtils.I(TAG, $"OnDataReady index = [{index}], data = [{JsonSerializer.Serialize(data)}]");
-            if (index < 0 || index >= deviceUIManagers.Length)
-            {
-                LogUtils.W(TAG, $"OnDataReady not find index. index = [{index}]");
-                return;
-            }
-            switch (data.Type)
-            {
-                case EntityType.TYPE_QUERY_CLIENT_INFO_RESULT:
-                    DeviceInfo? deviceInfo = data.Data as DeviceInfo;
-                    deviceUIManagers[index].SetDeviceName(deviceInfo?.Model ?? "N/A");
-                    deviceUIManagers[index].SetOsName(deviceInfo?.OsVersion ?? "N/A");
-                    gameControllers[index]?.Connect();
-                    break;
-                case EntityType.TYPE_SEND_GAME_EVENT:
-                    lock (gameEventLock)
+            return [
+                new ProtocolHandler()
+                {
+                    Id = EntityId.GAMEPAD_PAGE_EVENT,
+                    Type = EntityType.TYPE_QUERY_CLIENT_INFO_RESULT,
+                    Handler = (entity, client) =>
                     {
-                        string? eventsBase64 = data.Data as string;
-                        if (eventsBase64 != null)
+                        string guid = connectionController?.GetGuidByClient(client) ?? "";
+                        if (guid == "")
                         {
-                            byte[] events = Convert.FromBase64String(eventsBase64);
-                            deviceUIManagers[index].SetCurrentEvent(Convert.ToHexString(events));
-                            gamepadStatePackets[index].CopyEventToCurrent(events);
-                            List<GamepadStateChange> changes = gamepadStatePackets[index].GetChanges();
-                            gameControllers[index]?.UpdateState(changes);
-                            gamepadStatePackets[index].CopyCurrentToLast();
+                            return;
+                        }
+                        int index = GetIndexByGuid(guid);
+                        if (index == -1)
+                        {
+                            return;
+                        }
+                        DeviceInfo? deviceInfo = entity.Data as DeviceInfo;
+                        deviceUIManagers[index].SetDeviceName(deviceInfo?.Model ?? "N/A");
+                        deviceUIManagers[index].SetOsName(deviceInfo?.OsVersion ?? "N/A");
+                        gameControllers[index]?.Connect();
+                    }
+                },
+                new ProtocolHandler()
+                {
+                    Id = EntityId.GAMEPAD_PAGE_EVENT,
+                    Type = EntityType.TYPE_SEND_GAME_EVENT,
+                    Handler = (entity, client) =>
+                    {
+                        string guid = connectionController?.GetGuidByClient(client) ?? "";
+                        if (guid == "")
+                        {
+                            return;
+                        }
+                        int index = GetIndexByGuid(guid);
+                        if (index == -1)
+                        {
+                            return;
+                        }
+                        lock (gameEventLock)
+                        {
+                            string? eventsBase64 = entity.Data as string;
+                            if (eventsBase64 != null)
+                            {
+                                byte[] events = Convert.FromBase64String(eventsBase64);
+                                deviceUIManagers[index].SetCurrentEvent($"{client.ConnectionType}" + Convert.ToHexString(events));
+                                gamepadStatePackets[index].CopyEventToCurrent(events);
+                                List<GamepadStateChange> changes = gamepadStatePackets[index].GetChanges();
+                                gameControllers[index]?.UpdateState(changes);
+                                gamepadStatePackets[index].CopyCurrentToLast();
+                            }
                         }
                     }
-                    break;
-                default:
-                    deviceUIManagers[index].SetCurrentEvent($"Unknown Event Type: {data.Type}");
-                    break;
-            }
+                },
 
+            ];
         }
 
-        private void OnFaulted(string msg, Exception ex)
+        private void OnFaulted(string msg, Exception? ex)
         {
-            Debug.WriteLine($"OnFaulted msg: {msg}, ex: {ex.Message}");
+            Debug.WriteLine($"OnFaulted msg: {msg}, ex: {ex?.Message}");
         }
 
         private void OnNewClientConnection(int index)
@@ -509,7 +538,7 @@ namespace GameControllerSimulator
             }
             deviceUIManagers[index].SetStatus("Connected");
             CreateGameController(index);
-            connectionManager?.SendData(index, new BaseEntity<object>
+            connectionController?.SendData(guids[index], new BaseEntity<object>
             {
                 Type = EntityType.TYPE_QUERY_CLIENT_INFO,
                 Id = EntityId.GAMEPAD_PAGE_EVENT,
@@ -528,6 +557,7 @@ namespace GameControllerSimulator
             deviceUIManagers[index].Reset();
             gameControllers[index]?.Dispose();
             gameControllers[index] = null;
+            guids[index] = null;
         }
 
         #endregion
