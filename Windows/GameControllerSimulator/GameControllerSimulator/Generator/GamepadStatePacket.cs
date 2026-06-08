@@ -27,6 +27,12 @@ namespace GameControllerSimulator.Generator
                 InitializeState(Last);
             }
 
+            public void Reset()
+            {
+                InitializeState(Current);
+                InitializeState(Last);
+            }
+
             private void InitializeState(byte[] data)
             {
                 WriteUInt16(data, BUTTON_OFFSET, 0);

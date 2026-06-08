@@ -171,6 +171,7 @@ namespace GameControllerSimulator.Connection
             }
             public void OnDataReady(SocketClient<TSocket> client, byte[] data)
             {
+                LogUtils.I(TAG, $"OnDataReady type is {type}");
                 manager.OnDataReady(client, data, type);
             }
 

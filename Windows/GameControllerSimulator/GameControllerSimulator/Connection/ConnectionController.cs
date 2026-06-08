@@ -6,6 +6,15 @@ using System.Collections.Generic;
 
 namespace GameControllerSimulator.Connection
 {
+
+    public class ConnectionProtocolHandler
+    {
+        public int Id { get; set; }
+        public int Type { get; set; }
+        public Action<IBaseEntity, string>? Handler { get; set; }
+
+    }
+
     public class ConnectionController : ITransportManagerCallback, ISessionManagerCallback
     {
         public static readonly string TAG = "ConnectionController";
@@ -44,7 +53,7 @@ namespace GameControllerSimulator.Connection
                 LogUtils.E(TAG, $"Guid is null, cannot send data: {entity}");
                 return;
             }
-            IServerTransport.IClientTransport? client = sessionManager.GetClientByGuid(guid);
+            IServerTransport.IClientTransport? client = sessionManager.GetCurrentClientByGuid(guid);
             if (client == null)
             {
                 LogUtils.E(TAG, $"No client found for guid: {guid}");
@@ -52,14 +61,23 @@ namespace GameControllerSimulator.Connection
             client?.SendData(ProtocolRouter.Encode(entity));
         }
 
-        public string GetGuidByClient(IServerTransport.IClientTransport client)
+        public void RegisterProtocolHandlers(List<ConnectionProtocolHandler> handlers)
         {
-            return sessionManager.GetGuidByClient(client);
+            protocolRouter.RegisterHandler(handlers.ConvertAll(item => new ProtocolHandler
+            {
+                Id = item.Id,
+                Type = item.Type,
+                Handler = (entity, client) =>
+                {
+                    string guid = sessionManager.GetGuidByClient(client);
+                    item.Handler?.Invoke(entity, guid);
+                }
+            }));
         }
 
-        public void RegisterProtocolHandlers(List<ProtocolHandler> handlers)
+        public void RejectSession(string guid)
         {
-            protocolRouter.RegisterHandler(handlers);
+            sessionManager.RemoveSession(guid);
         }
 
         public void Destroy()
@@ -88,7 +106,7 @@ namespace GameControllerSimulator.Connection
 
         void ITransportManagerCallback.OnDataReady(IServerTransport.IClientTransport client, byte[] data, ConnectionType type)
         {
-            sessionManager.ChangeCurrentType(client, type);
+            sessionManager.ChangeCurrentType(client);
             protocolRouter.DispatchData(client, data);
         }
 

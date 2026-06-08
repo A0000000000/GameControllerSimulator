@@ -1,37 +1,22 @@
 using BluetoothLibrary;
-using CommonLibrary.Generator;
 using GameControllerSimulator.Bean;
-using GameControllerSimulator.Connection;
 using GameControllerSimulator.Constant;
-using GameControllerSimulator.Generator;
-using GameControllerSimulator.Generator.GamepadProtocol;
+using GameControllerSimulator.Controller;
 using GameControllerSimulator.UIManager;
 using LogLibrary;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Controls.Primitives;
-using Microsoft.UI.Xaml.Data;
-using Microsoft.UI.Xaml.Input;
-using Microsoft.UI.Xaml.Media;
-using Microsoft.UI.Xaml.Navigation;
 using NetworkLibrary;
 using SocketCommonLibrary;
 using System;
-using System.Buffers;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
 using System.Text;
-using System.Text.Json;
 using System.Threading.Tasks;
 using ViGEmBusLibrary;
 using Windows.Devices.Bluetooth.GenericAttributeProfile;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
-using Windows.Storage.Streams;
+
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -52,15 +37,7 @@ namespace GameControllerSimulator
         private DispatcherQueue _dispatcher = DispatcherQueue.GetForCurrentThread();
         private bool _isInitialized = false;
         private DeviceUIManager[] deviceUIManagers = new DeviceUIManager[CONTROLLER_COUNT];
-        private GamepadStatePacket[] gamepadStatePackets = new GamepadStatePacket[CONTROLLER_COUNT]
-        {
-            new GamepadStatePacket(),
-            new GamepadStatePacket(),
-            new GamepadStatePacket(),
-            new GamepadStatePacket()
-        };
-        private string?[] guids = Enumerable.Repeat<string?>(null, CONTROLLER_COUNT).ToArray();
-
+        
         public MainWindow()
         {
             InitializeComponent();
@@ -99,16 +76,14 @@ namespace GameControllerSimulator
             LogUtils.I(TAG, "init window");
             await CheckBaseComponent();
             await InitControllerUI();
-            await InitGameControllerManager();
             await InitGATTService();
-            await InitConnectionManager();
+            await InitMainController();
         }
         private async Task Destroy()
         {
             LogUtils.I(TAG, "destroy window");
-            await DestroyConnectionManager();
+            await DestroyMainController();
             await DestroyGATTService();
-            await DestroyGameControllerManager();
         }
 
         private async Task CheckBaseComponent()
@@ -148,6 +123,11 @@ namespace GameControllerSimulator
             }
         }
 
+        private void OnFaulted(string msg, Exception? ex)
+        {
+            Debug.WriteLine($"OnFaulted msg: {msg}, ex: {ex?.Message}");
+        }
+
 
         #region 控制器UI管理
 
@@ -161,9 +141,11 @@ namespace GameControllerSimulator
 
         #endregion
 
-
         #region GATT管理
-
+        private Guid rfcommGuid = GUIDConstant.DEFAULT_RFCOMM_GUID;
+        private string address = NetworkUtils.GetLocalIPv4();
+        private int tcpPort;
+        private int udpPort;
         private List<GATTProperties> GATTProperties = new List<GATTProperties>();
         private BluetoothGATTManager? bluetoothGATTManager;
         private async Task InitGATTService()
@@ -281,41 +263,31 @@ namespace GameControllerSimulator
 
         #endregion
 
-        #region 连接管理处理
-        private ConnectionController? connectionController = null;
-        private Guid rfcommGuid = GUIDConstant.DEFAULT_RFCOMM_GUID;
-        private string address = NetworkUtils.GetLocalIPv4();
-        private int tcpPort;
-        private int udpPort;
+        #region MainController管理
 
-        private int GetIndexByGuid(string guid)
+        private MainController? mainController;
+
+        private async Task InitMainController()
         {
-            for (int i = 0; i < guids.Length; i++)
-            {
-                if (guids[i] == guid)
-                {
-                    return i;
-                }
-            }
-            return -1;
+            mainController = new MainController(CONTROLLER_COUNT, new MainControllerCallback(this));
+            mainController.Init();
+            mainController.InitRFCOMM(rfcommGuid, APP_NAME);
+            mainController.InitTCP(tcpPort);
+            mainController.InitUDP(udpPort);
         }
 
-        private async Task InitConnectionManager()
+        private async Task DestroyMainController()
         {
-            LogUtils.I(TAG, "InitConnectionManager");
-            connectionController = new ConnectionController(new ConnectionControllerCallbackImpl(this));
-            connectionController?.Init();
-            connectionController?.InitRFCOMM(rfcommGuid, APP_NAME);
-            connectionController?.InitTcp(tcpPort);
-            connectionController?.RegisterProtocolHandlers(GetProtocolHandlers());
+            mainController?.Dispose();
+            mainController = null;
         }
-
+        
         private void OnConnectionAvaiableChange(bool available, ConnectionType type)
         {
             LogUtils.I(TAG, $"OnConnectionAvaiableChange avaiable = [{available}] type = [{type}]");
             _dispatcher.TryEnqueue(() =>
             {
-                switch (type) 
+                switch (type)
                 {
                     case ConnectionType.BLE:
                         if (available)
@@ -351,217 +323,63 @@ namespace GameControllerSimulator
             });
         }
 
-        private async Task DestroyConnectionManager()
+        private void OnDeviceInfoReceived(int index, DeviceInfo? deviceInfo)
         {
-            LogUtils.I(TAG, "DestroyConnectionManager");
-            if (await BluetoothUtils.IsBluetoothAvailableAsync())
+            deviceUIManagers[index].SetDeviceName(deviceInfo?.Model ?? "N/A");
+            deviceUIManagers[index].SetOsName(deviceInfo?.OsVersion ?? "N/A");
+        }
+
+        private void OnGameEventReceive(int index, byte[] events)
+        {
+            deviceUIManagers[index].SetCurrentEvent(Convert.ToHexString(events));
+        }
+
+        private void OnSessionAvailableChange(int index, bool available)
+        {
+            if (available) 
             {
-                connectionController?.Destroy();
+                deviceUIManagers[index].SetStatus("Connected");
             }
             else
             {
-                LogUtils.I(TAG, "not support bluetooth");
+                deviceUIManagers[index].Reset();
             }
         }
 
-        private class ConnectionControllerCallbackImpl: IConnectionControllerCallback
+        class MainControllerCallback: IMainControllerCallback
         {
-            public static readonly string TAG = "ConnectionControllerCallbackImpl";
             private MainWindow window;
-            public ConnectionControllerCallbackImpl(MainWindow window)
-            {
-                LogUtils.I(TAG, "Create ConnectionControllerCallbackImpl");
-                this.window = window;
-            }
-            void IConnectionControllerCallback.OnFault(string tag, string msg, ConnectionType type, Exception? ex)
-            {
-                window.OnFaulted($"{tag}-{msg}-{type}", ex);
+            public MainControllerCallback(MainWindow window)
+            { 
+                this.window = window; 
             }
 
-            void IConnectionControllerCallback.OnSessionAvailable(string guid)
+            public void OnConnectionAvaiableChange(bool available, ConnectionType type)
             {
-                for (int i = 0; i < window.guids.Length; i++)
-                {
-                    if (window.guids[i] == null)
-                    {
-                        window.guids[i] = guid;
-                        LogUtils.I(TAG, $"OnSessionAvailable set guid. index = [{i}] guid = [{guid}]");
-                        window.OnNewClientConnection(i);
-                        break;
-                    }
-                }
+                window.OnConnectionAvaiableChange(available, type);
             }
 
-            void IConnectionControllerCallback.OnSessionUnAvailable(string guid)
+            public void OnDeviceInfoReceived(int index, DeviceInfo? deviceInfo)
             {
-                for (int i = 0; i < window.guids.Length; i++)
-                {
-                    if (window.guids[i] == guid)
-                    {
-                        window.guids[i] = null;
-                        LogUtils.I(TAG, $"OnSessionUnAvailable unset guid. index = [{i}] guid = [{guid}]");
-                        window.OnClientDisconnected(i);
-                        break;
-                    }
-                }
+                window.OnDeviceInfoReceived(index, deviceInfo);
             }
 
-            void IConnectionControllerCallback.OnStartServer(ConnectionType type)
+            public void OnFaulted(string tag, string msg, ConnectionType type, Exception? ex)
             {
-                window.OnConnectionAvaiableChange(true, type);
+                window.OnFaulted($"[{tag}]-[{msg}]-[{type}]", ex);
             }
 
-            void IConnectionControllerCallback.OnStopServer(ConnectionType type)
+            public void OnGameEventReceive(int index, byte[] events)
             {
-                window.OnConnectionAvaiableChange(false, type);
+                window.OnGameEventReceive(index, events);
             }
-        }
 
-        #endregion
-
-        #region 手柄管理器
-        private ViGEmBusManager? viGEmBusManager;
-        private ViGEmBusGameController?[] gameControllers = new ViGEmBusGameController[CONTROLLER_COUNT];
-
-        private async Task InitGameControllerManager()
-        {
-            LogUtils.I(TAG, "InitGameControllerManager");
-            DriverStatus.Text = "Driver Status: Installed";
-            viGEmBusManager = new ViGEmBusManager();
-        }
-
-        private void CreateGameController(int index)
-        {
-            LogUtils.I(TAG, $"CreateGameController index = [{index}]");
-            if (viGEmBusManager == null || index < 0 || index >= gameControllers.Length)
+            public void OnSessionAvailableChange(int index, bool available)
             {
-                LogUtils.I(TAG, $"CreateGameController failed index = [{index}], viGEmBusManager = [{(viGEmBusManager == null ? "null" : "not null")}]");
-                return;
-            }
-            gameControllers[index] = viGEmBusManager.CreateXboxController(index);
-        }
-
-        private async Task DestroyGameControllerManager()
-        {
-            LogUtils.I(TAG, "DestroyGameControllerManager");
-            if (ViGEmBusUtils.IsDriverInstalled())
-            {
-                viGEmBusManager?.Dispose();
-                viGEmBusManager = null;
-                for (int i = 0; i < gameControllers.Length; i++)
-                {
-                    LogUtils.I(TAG, $"DestroyGameController index = [{i}]");
-                    gameControllers[i]?.Dispose();
-                    gameControllers[i] = null;
-                }
-            }
-            else
-            {
-                LogUtils.W(TAG, "DestroyGameControllerManager. driver not install");
+                window.OnSessionAvailableChange(index, available);
             }
         }
         #endregion
-
-        #region 数据处理
-        private object gameEventLock = new object();
-        private List<ProtocolHandler> GetProtocolHandlers()
-        {
-            return [
-                new ProtocolHandler()
-                {
-                    Id = EntityId.GAMEPAD_PAGE_EVENT,
-                    Type = EntityType.TYPE_QUERY_CLIENT_INFO_RESULT,
-                    Handler = (entity, client) =>
-                    {
-                        string guid = connectionController?.GetGuidByClient(client) ?? "";
-                        if (guid == "")
-                        {
-                            return;
-                        }
-                        int index = GetIndexByGuid(guid);
-                        if (index == -1)
-                        {
-                            return;
-                        }
-                        DeviceInfo? deviceInfo = entity.Data as DeviceInfo;
-                        deviceUIManagers[index].SetDeviceName(deviceInfo?.Model ?? "N/A");
-                        deviceUIManagers[index].SetOsName(deviceInfo?.OsVersion ?? "N/A");
-                        gameControllers[index]?.Connect();
-                    }
-                },
-                new ProtocolHandler()
-                {
-                    Id = EntityId.GAMEPAD_PAGE_EVENT,
-                    Type = EntityType.TYPE_SEND_GAME_EVENT,
-                    Handler = (entity, client) =>
-                    {
-                        string guid = connectionController?.GetGuidByClient(client) ?? "";
-                        if (guid == "")
-                        {
-                            return;
-                        }
-                        int index = GetIndexByGuid(guid);
-                        if (index == -1)
-                        {
-                            return;
-                        }
-                        lock (gameEventLock)
-                        {
-                            string? eventsBase64 = entity.Data as string;
-                            if (eventsBase64 != null)
-                            {
-                                byte[] events = Convert.FromBase64String(eventsBase64);
-                                deviceUIManagers[index].SetCurrentEvent($"{client.ConnectionType}" + Convert.ToHexString(events));
-                                gamepadStatePackets[index].CopyEventToCurrent(events);
-                                List<GamepadStateChange> changes = gamepadStatePackets[index].GetChanges();
-                                gameControllers[index]?.UpdateState(changes);
-                                gamepadStatePackets[index].CopyCurrentToLast();
-                            }
-                        }
-                    }
-                },
-
-            ];
-        }
-
-        private void OnFaulted(string msg, Exception? ex)
-        {
-            Debug.WriteLine($"OnFaulted msg: {msg}, ex: {ex?.Message}");
-        }
-
-        private void OnNewClientConnection(int index)
-        {
-            LogUtils.I(TAG, $"OnNewClientConnection index = [{index}]");
-            if (index < 0 || index > deviceUIManagers.Length)
-            {
-                return;
-            }
-            deviceUIManagers[index].SetStatus("Connected");
-            CreateGameController(index);
-            connectionController?.SendData(guids[index], new BaseEntity<object>
-            {
-                Type = EntityType.TYPE_QUERY_CLIENT_INFO,
-                Id = EntityId.GAMEPAD_PAGE_EVENT,
-                Timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
-                Data = null
-            });
-        }
-
-        private void OnClientDisconnected(int index)
-        {
-            LogUtils.I(TAG, $"OnClientDisconnected index = [{index}]");
-            if (index < 0 || index > deviceUIManagers.Length)
-            {
-                return;
-            }
-            deviceUIManagers[index].Reset();
-            gameControllers[index]?.Dispose();
-            gameControllers[index] = null;
-            guids[index] = null;
-        }
-
-        #endregion
-
 
     }
 }

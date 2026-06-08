@@ -22,6 +22,10 @@ namespace ViGEmBusLibrary
             this.index = index;
         }
 
+        public int Index
+        {
+            get => index;
+        }
 
         public void Connect()
         {

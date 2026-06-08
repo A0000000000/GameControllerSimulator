@@ -1,6 +1,7 @@
 ﻿using AsyncTaskLibrary;
 using GameControllerSimulator.Bean;
 using GameControllerSimulator.Constant;
+using LogLibrary;
 using SocketCommonLibrary;
 using System;
 using System.Collections.Generic;
@@ -8,11 +9,19 @@ using System.Linq;
 
 namespace GameControllerSimulator.Connection
 {
+    class ControllerSession
+    {
+        public string Guid { get; init; } = "";
+        public Dictionary<ConnectionType, IServerTransport.IClientTransport> Connections { get; } = new();
+        public ConnectionType CurrentType { get; set; }
+    }
+
+
     public class SessionManager
     {
-        private Dictionary<string, List<IServerTransport.IClientTransport>> sessions = new();
-        private Dictionary<IServerTransport.IClientTransport, string> sessionMapping = new();
-        private Dictionary<string, ConnectionType> currentType = new();
+        public static readonly string TAG = "SessionManager";
+        private Dictionary<string, ControllerSession> sessions = new();
+        private Dictionary<IServerTransport.IClientTransport, string> sessionMappings = new();
         private ISessionManagerCallback callback;
 
         public SessionManager(ISessionManagerCallback callback)
@@ -22,39 +31,156 @@ namespace GameControllerSimulator.Connection
 
         public string RegisterClient(IServerTransport.IClientTransport clientTransport)
         {
-            Guid guid = Guid.NewGuid();
-            sessions[guid.ToString()] = [clientTransport];
-            sessionMapping[clientTransport] = guid.ToString();
-            currentType[guid.ToString()] = clientTransport.ConnectionType;
-            AsyncTaskUtils.Post(() =>
+            lock (sessions)
             {
-                callback.OnSessionAvailable(guid.ToString());
-            });
-            return guid.ToString();
+                if (sessionMappings.ContainsKey(clientTransport))
+                {
+                    LogUtils.W(TAG, "Client already registered, return existing guid");
+                    return sessionMappings[clientTransport];
+                }
+                Guid guid = Guid.NewGuid();
+                sessions[guid.ToString()] = new ControllerSession()
+                {
+                    Guid = guid.ToString(),
+                    CurrentType = clientTransport.ConnectionType
+                };
+                sessions[guid.ToString()].Connections.Add(clientTransport.ConnectionType, clientTransport);
+                sessionMappings.Add(clientTransport, guid.ToString());
+                AsyncTaskUtils.Post(() =>
+                {
+                    callback.OnSessionAvailable(guid.ToString());
+                });
+                return guid.ToString();
+            }
         }
 
         public bool AddNewClient(IServerTransport.IClientTransport clientTransport, string guid)
         {
-            if (sessions.ContainsKey(guid))
+            lock (sessions)
             {
-                sessions[guid].Add(clientTransport);
-                sessionMapping[clientTransport] = guid;
-                return true;
+                if (sessions.ContainsKey(guid))
+                {
+                    if (sessionMappings.ContainsKey(clientTransport))
+                    {
+                        LogUtils.W(TAG, "Client already registered, cannot add new client");
+                        return false;
+                    }
+                    else
+                    {
+                        if (sessions[guid].Connections.ContainsKey(clientTransport.ConnectionType))
+                        {
+                            if (sessionMappings.ContainsKey(sessions[guid].Connections[clientTransport.ConnectionType]))
+                            {
+                                sessionMappings.Remove(sessions[guid].Connections[clientTransport.ConnectionType]);
+                            }
+                            sessions[guid].Connections[clientTransport.ConnectionType] = clientTransport;
+                            sessionMappings.Add(clientTransport, guid);
+                            LogUtils.W(TAG, $"Session with guid {guid} already has connection with type {clientTransport.ConnectionType}, replace new client");
+                        }
+                        else
+                        {
+                            sessions[guid].Connections.Add(clientTransport.ConnectionType, clientTransport);
+                            sessionMappings.Add(clientTransport, guid);
+                        }
+                        return true;
+                    }
+                }
+                else
+                {
+                    LogUtils.W(TAG, $"Session with guid {guid} not found, cannot add new client");
+                }
+                return false;
             }
-            return false;
         }
 
         public string RemoveClient(IServerTransport.IClientTransport clientTransport)
         {
-            if (sessionMapping.ContainsKey(clientTransport))
+            lock(sessions)
             {
-                string guid = sessionMapping[clientTransport];
-                sessions[guid].Remove(clientTransport);
-                sessionMapping.Remove(clientTransport);
-                if (sessions[guid].Count == 0)
+                if (sessionMappings.ContainsKey(clientTransport))
                 {
+                    string guid = sessionMappings[clientTransport];
+                    if (sessions.ContainsKey(guid))
+                    {
+                        if (sessions[guid].Connections.TryGetValue(clientTransport.ConnectionType, out var current) && current == clientTransport)
+                        {
+                            sessions[guid].Connections.Remove(clientTransport.ConnectionType);
+                        }
+                        if (sessions[guid].Connections.Count == 0)
+                        {
+                            sessions.Remove(guid);
+                            AsyncTaskUtils.Post(() =>
+                            {
+                                callback.OnSessionUnAvailable(guid);
+                            });
+                        }
+                        else
+                        {
+                            if (clientTransport.ConnectionType == sessions[guid].CurrentType)
+                            {
+                                var transport = sessions[guid].Connections.Values.FirstOrDefault();
+                                if (transport != null)
+                                {
+                                    sessions[guid].CurrentType = transport.ConnectionType;
+                                }
+                            }
+                        }
+                    }
+                    sessionMappings.Remove(clientTransport);
+                    return guid;
+                }
+                else
+                {
+                    LogUtils.W(TAG, "Client not registered, cannot remove client");
+                }
+                return "";
+            }
+        }
+
+        public IServerTransport.IClientTransport? GetCurrentClientByGuid(string guid)
+        {
+            lock (sessions)
+            {
+                if (sessions.ContainsKey(guid))
+                {
+                    if (sessions[guid].Connections.ContainsKey(sessions[guid].CurrentType))
+                    {
+                        return sessions[guid].Connections[sessions[guid].CurrentType];
+                    }
+                    else
+                    {
+                        return sessions[guid].Connections.Values.FirstOrDefault();
+                    }
+                }
+                return null;
+            }
+        }
+
+        public List<IServerTransport.IClientTransport> GetClientsByGuid(string guid)
+        {
+            lock (sessions)
+            {
+                if (sessions.ContainsKey(guid))
+                {
+                    return sessions[guid].Connections.Values.ToList();
+                }
+                return new List<IServerTransport.IClientTransport>();
+            }
+        }
+
+        public void RemoveSession(string guid)
+        {
+            List<IServerTransport.IClientTransport> clientsToRemove = new();
+            lock (sessions)
+            {
+                if (sessions.ContainsKey(guid))
+                {
+                    foreach (var client in sessions[guid].Connections.Values)
+                    {
+                        sessionMappings.Remove(client);
+                        clientsToRemove.Add(client);
+                    }
                     sessions.Remove(guid);
-                    currentType.Remove(guid);
                     AsyncTaskUtils.Post(() =>
                     {
                         callback.OnSessionUnAvailable(guid);
@@ -62,62 +188,48 @@ namespace GameControllerSimulator.Connection
                 }
                 else
                 {
-                    if (sessions[guid].Find(c => c.ConnectionType == currentType[guid]) == null)
-                    {
-                        currentType[guid] = sessions[guid][0].ConnectionType;
-                    }
-                }
-                return guid;
-            }
-            return "";
-        }
-
-        public IServerTransport.IClientTransport? GetClientByGuid(string guid)
-        {
-            if (sessions.ContainsKey(guid) && sessions[guid].Count > 0)
-            {
-                if (currentType.ContainsKey(guid))
-                {
-                    ConnectionType type = currentType[guid];
-                    IServerTransport.IClientTransport? client = sessions[guid].FirstOrDefault(c => c.ConnectionType == type);
-                    if (client != null)
-                    {
-                        return client;
-                    }
-                    else
-                    {
-                        return sessions[guid][0];
-                    }
-                }
-                else
-                {
-                    return sessions[guid][0];
+                    LogUtils.W(TAG, $"Session with guid {guid} not found, cannot remove session");
                 }
             }
-            return null;
+            foreach (var item in clientsToRemove)
+            {
+                item.Disconnect();
+            }
         }
 
-        public void ChangeCurrentType(IServerTransport.IClientTransport transport, ConnectionType type)
+        public void ChangeCurrentType(IServerTransport.IClientTransport transport)
         {
-            if (sessionMapping.ContainsKey(transport) && currentType.ContainsKey(sessionMapping[transport]))
+            lock (sessions)
             {
-                currentType[sessionMapping[transport]] = type;
+                if (!sessionMappings.ContainsKey(transport))
+                {
+                    LogUtils.W(TAG, "Client not registered, cannot change current type");
+                    return;
+                }
+                string guid = sessionMappings[transport];
+                sessions[guid].CurrentType = transport.ConnectionType;
             }
         }
 
         public string GetGuidByClient(IServerTransport.IClientTransport client)
         {
-            if (sessionMapping.ContainsKey(client))
+            lock (sessions)
             {
-                return sessionMapping[client];
+                if (sessionMappings.ContainsKey(client))
+                {
+                    return sessionMappings[client];
+                }
+                return "";
             }
-            return "";
         }
 
         public void Destroy()
         {
-            sessions.Clear();
-            sessionMapping.Clear();
+            lock (sessions)
+            {
+                sessions.Clear();
+                sessionMappings.Clear();
+            }
         }
 
         public List<ProtocolHandler> GetSessionProtocolHandlers()
