@@ -89,9 +89,9 @@ namespace GameControllerSimulator.Connection
 
         #region 回调
 
-        void ITransportManagerCallback.OnFault(string tag, string msg, ConnectionType type, Exception? ex)
+        void ITransportManagerCallback.OnFault(string msg, Exception? ex)
         {
-            callback.OnFault(tag, msg, type, ex);
+            callback.OnFault(msg, ex);
         }
 
         void ITransportManagerCallback.OnStartServer(ConnectionType type)
@@ -131,7 +131,7 @@ namespace GameControllerSimulator.Connection
 
     public interface IConnectionControllerCallback
     {
-        void OnFault(string tag, string msg, ConnectionType type, Exception? ex);
+        void OnFault(string msg, Exception? ex);
         void OnStartServer(ConnectionType type);
         void OnStopServer(ConnectionType type);
         void OnSessionAvailable(string guid);

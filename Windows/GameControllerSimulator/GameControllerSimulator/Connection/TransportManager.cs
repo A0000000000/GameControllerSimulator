@@ -69,7 +69,7 @@ namespace GameControllerSimulator.Connection
         private void OnFault(string tag, string msg, ConnectionType type, Exception? ex = null)
         {
             LogUtils.E(TAG, $"[{tag}]-[{msg}]-[{type}]", ex);
-            callback.OnFault(tag, msg, type, ex);
+            callback.OnFault($"[{tag}]-[{msg}]-[{type}]", ex);
         }
 
         private void OnClientConnect<TSocket>(SocketClient<TSocket> client, ConnectionType type) where TSocket : class, IDisposable
@@ -201,7 +201,7 @@ namespace GameControllerSimulator.Connection
 
     public interface ITransportManagerCallback
     {
-        void OnFault(string tag, string msg, ConnectionType type, Exception? ex);
+        void OnFault(string msg, Exception? ex);
         void OnStartServer(ConnectionType type);
         void OnStopServer(ConnectionType type);
         void OnDataReady(IServerTransport.IClientTransport client, byte[] data, ConnectionType type);

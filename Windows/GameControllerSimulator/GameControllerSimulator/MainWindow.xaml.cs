@@ -125,7 +125,7 @@ namespace GameControllerSimulator
 
         private void OnFaulted(string msg, Exception? ex)
         {
-            Debug.WriteLine($"OnFaulted msg: {msg}, ex: {ex?.Message}");
+            LogUtils.W(TAG, $"OnFaulted msg: {msg}", ex);
         }
 
 
@@ -269,6 +269,7 @@ namespace GameControllerSimulator
 
         private async Task InitMainController()
         {
+            LogUtils.I(TAG, "InitMainController");
             mainController = new MainController(CONTROLLER_COUNT, new MainControllerCallback(this));
             mainController.Init();
             mainController.InitRFCOMM(rfcommGuid, APP_NAME);
@@ -278,6 +279,7 @@ namespace GameControllerSimulator
 
         private async Task DestroyMainController()
         {
+            LogUtils.I(TAG, "DestroyMainController");
             mainController?.Dispose();
             mainController = null;
         }
@@ -325,17 +327,20 @@ namespace GameControllerSimulator
 
         private void OnDeviceInfoReceived(int index, DeviceInfo? deviceInfo)
         {
+            LogUtils.I(TAG, $"OnDeviceInfoReceived index = {index}, deviceInfo = {deviceInfo}");
             deviceUIManagers[index].SetDeviceName(deviceInfo?.Model ?? "N/A");
             deviceUIManagers[index].SetOsName(deviceInfo?.OsVersion ?? "N/A");
         }
 
         private void OnGameEventReceive(int index, byte[] events)
         {
+            LogUtils.I(TAG, $"OnGameEventReceive index = {index}, deviceInfo = {Convert.ToHexString(events)}");
             deviceUIManagers[index].SetCurrentEvent(Convert.ToHexString(events));
         }
 
         private void OnSessionAvailableChange(int index, bool available)
         {
+            LogUtils.I(TAG, $"OnGameEventReceive index = {index}, available = {available}");
             if (available) 
             {
                 deviceUIManagers[index].SetStatus("Connected");
@@ -364,9 +369,9 @@ namespace GameControllerSimulator
                 window.OnDeviceInfoReceived(index, deviceInfo);
             }
 
-            public void OnFaulted(string tag, string msg, ConnectionType type, Exception? ex)
+            public void OnFaulted(string msg, Exception? ex)
             {
-                window.OnFaulted($"[{tag}]-[{msg}]-[{type}]", ex);
+                window.OnFaulted(msg, ex);
             }
 
             public void OnGameEventReceive(int index, byte[] events)
