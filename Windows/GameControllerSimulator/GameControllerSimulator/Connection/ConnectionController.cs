@@ -112,6 +112,7 @@ namespace GameControllerSimulator.Connection
 
         void ITransportManagerCallback.OnDataReady(IServerTransport.IClientTransport client, byte[] data, ConnectionType type)
         {
+            LogUtils.D(TAG, $"OnDataReady type is {type}");
             sessionManager.ChangeCurrentType(client);
             protocolRouter.DispatchData(client, data);
         }

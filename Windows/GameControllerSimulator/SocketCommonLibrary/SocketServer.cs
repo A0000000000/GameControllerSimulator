@@ -160,7 +160,7 @@ namespace SocketCommonLibrary
 
         public void SendData(byte[] data, int id = -1)
         {
-            LogUtils.I(TAG, $"SocketClient SendData id = [{id}]");
+            LogUtils.I(TAG, $"SocketClient SendData id = [{id}], type = [{ConnectionType}]");
             AsyncTaskUtils.Post(() =>
             {
                 try

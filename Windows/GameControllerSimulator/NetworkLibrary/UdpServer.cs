@@ -1,4 +1,5 @@
 ﻿using AsyncTaskLibrary;
+using LogLibrary;
 using SocketCommonLibrary;
 using System;
 using System.Collections.Generic;
@@ -126,6 +127,7 @@ namespace NetworkLibrary
 
     public class UdpClientWrapper : IServerTransport.IClientTransport
     {
+        public static readonly string TAG = "UdpClientWrapper";
         public ConnectionType ConnectionType => ConnectionType.UDP;
 
         private UdpServer udpServer;
@@ -154,6 +156,7 @@ namespace NetworkLibrary
 
         public void SendData(byte[] data, int id = -1)
         {
+            LogUtils.I(TAG, $"UdpClientWrapper SendData id = [{id}], type = [{ConnectionType}]");
             if (IsAvailable)
             {
                 udpServer.SendData(remote, data, id);
