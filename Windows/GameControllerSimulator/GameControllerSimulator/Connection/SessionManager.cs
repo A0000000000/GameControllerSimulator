@@ -100,11 +100,19 @@ namespace GameControllerSimulator.Connection
                 if (sessionMappings.ContainsKey(clientTransport))
                 {
                     string guid = sessionMappings[clientTransport];
+                    IServerTransport.IClientTransport? clientToRemove = null;
                     if (sessions.ContainsKey(guid))
                     {
                         if (sessions[guid].Connections.TryGetValue(clientTransport.ConnectionType, out var current) && current == clientTransport)
                         {
                             sessions[guid].Connections.Remove(clientTransport.ConnectionType);
+                        }
+                        if (sessions[guid].Connections.Count == 1 && sessions[guid].Connections.ContainsKey(ConnectionType.UDP))
+                        {
+                            // 只剩下UDP, 视为Session不可用
+                            clientToRemove = sessions[guid].Connections[ConnectionType.UDP];
+                            sessionMappings.Remove(sessions[guid].Connections[ConnectionType.UDP]);
+                            sessions[guid].Connections.Remove(ConnectionType.UDP);
                         }
                         if (sessions[guid].Connections.Count == 0)
                         {
@@ -127,6 +135,7 @@ namespace GameControllerSimulator.Connection
                         }
                     }
                     sessionMappings.Remove(clientTransport);
+                    AsyncTaskUtils.Post(() => clientToRemove?.Disconnect());
                     return guid;
                 }
                 else
@@ -241,6 +250,12 @@ namespace GameControllerSimulator.Connection
                     Type = EntityType.TYPE_REQUEST_CLIENT_ID,
                     Handler = (entity, client) =>
                     {
+                        if (client.ConnectionType == ConnectionType.UDP)
+                        {
+                            // UDP 不允许注册
+                            client.Disconnect();
+                            return;
+                        }
                         string guid = RegisterClient(client);
                         client.SendData(ProtocolRouter.Encode(new BaseEntity<string>()
                         {

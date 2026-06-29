@@ -61,9 +61,8 @@ namespace GameControllerSimulator.Controller
         public void InitUDP(int port)
         {
             LogUtils.I(TAG, $"InitUDP port = {port}");
-
+            connectionController.InitUdp(port);
         }
-
 
         int? IProtocolHandlersFactoryCallback.GetIndex(string guid)
         {
@@ -90,7 +89,7 @@ namespace GameControllerSimulator.Controller
         {
             LogUtils.I(TAG, $"OnFeedbackReceived index = {index}");
             // Todo 发送给客户端feedback数据
-            //connectionController.SendData(controllerSlotManager.GetGuid(index), entity)
+            ////connectionController.SendData(controllerSlotManager.GetGuid(index), entity)
         }
 
         void IProtocolHandlersFactoryCallback.OnGameEventReceive(int index, byte[] events)

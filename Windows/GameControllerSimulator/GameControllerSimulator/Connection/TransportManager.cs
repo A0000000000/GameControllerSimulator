@@ -5,6 +5,7 @@ using NetworkLibrary;
 using SocketCommonLibrary;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Sockets;
 
 namespace GameControllerSimulator.Connection
@@ -46,21 +47,33 @@ namespace GameControllerSimulator.Connection
             }
         }
 
+        public void InitUdp(int port)
+        {
+            lock (this)
+            {
+                UdpServer udpServer = new UdpServer(port, new UdpServerCallbakImpl(this));
+                udpServer.StartListener();
+                transports[ConnectionType.UDP] = udpServer;
+            }
+        }
+
         public void Destroy()
         {
             lock (this)
             {
                 foreach (KeyValuePair<ConnectionType, HashSet<IServerTransport.IClientTransport>> items in clientTransports)
                 {
-                    foreach (IServerTransport.IClientTransport item in items.Value)
+                    List<IServerTransport.IClientTransport> clientList = items.Value.ToList();
+                    foreach (IServerTransport.IClientTransport item in clientList)
                     {
                         item.Disconnect();
                     }
                     items.Value.Clear();
                 }
-                foreach (KeyValuePair<ConnectionType, IServerTransport> item in transports)
+                List<IServerTransport> serverList = transports.Values.ToList();
+                foreach (IServerTransport item in serverList)
                 {
-                    item.Value.StopListener();
+                    item.StopListener();
                 }
                 transports.Clear();
             }
@@ -72,7 +85,7 @@ namespace GameControllerSimulator.Connection
             callback.OnFault($"[{tag}]-[{msg}]-[{type}]", ex);
         }
 
-        private void OnClientConnect<TSocket>(SocketClient<TSocket> client, ConnectionType type) where TSocket : class, IDisposable
+        private void OnClientConnect(IServerTransport.IClientTransport client, ConnectionType type)
         {
             clientTransports[type].Add(client);
         }
@@ -87,12 +100,12 @@ namespace GameControllerSimulator.Connection
             callback.OnStopServer(type);
         }
 
-        private void OnDataReady<TSocket>(SocketClient<TSocket> client, byte[] data, ConnectionType type) where TSocket : class, IDisposable
+        private void OnDataReady(IServerTransport.IClientTransport client, byte[] data, ConnectionType type)
         {
             callback.OnDataReady(client, data, type);
         }
 
-        private void OnDisconnect<TSocket>(SocketClient<TSocket> client, ConnectionType type) where TSocket : class, IDisposable
+        private void OnDisconnect(IServerTransport.IClientTransport client, ConnectionType type)
         {
             clientTransports[type].Remove(client);
             callback.OnDisconnect(client, type);
@@ -195,6 +208,47 @@ namespace GameControllerSimulator.Connection
                 manager.OnFault(TAG, "OnTaskException", type, ex);
             }
         }
+
+        private class UdpServerCallbakImpl : UdpServerCallback
+        {
+            public static readonly string TAG = "UdpServerCallbakImpl";
+            private TransportManager manager;
+            public UdpServerCallbakImpl(TransportManager manager)
+            {
+                this.manager = manager;
+            }
+
+            public void OnClientConnected(IServerTransport.IClientTransport client)
+            {
+                manager.OnClientConnect(client, ConnectionType.UDP);
+            }
+
+            public void OnClientDisConnected(IServerTransport.IClientTransport client)
+            {
+                manager.OnDisconnect(client, ConnectionType.UDP);
+            }
+
+            public void OnDataReady(UdpClientWrapper client, byte[] data)
+            {
+                manager.OnDataReady(client, data, ConnectionType.UDP);
+            }
+
+            public void OnException(Exception ex)
+            {
+                manager.OnFault(TAG, "OnException", ConnectionType.UDP, ex);
+            }
+
+            public void OnStartServer()
+            {
+                manager.OnStartServer(ConnectionType.UDP);
+            }
+
+            public void OnStopServer()
+            {
+                manager.OnStopServer(ConnectionType.UDP);
+            }
+        }
+
         #endregion
 
     }

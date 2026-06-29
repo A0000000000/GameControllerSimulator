@@ -3,6 +3,7 @@ using LogLibrary;
 using SocketCommonLibrary;
 using System;
 using System.Collections.Generic;
+using System.Net;
 
 namespace GameControllerSimulator.Connection
 {
@@ -44,6 +45,11 @@ namespace GameControllerSimulator.Connection
         public void InitTcp(int port)
         {
             transportManager.InitTcp(port);
+        }
+
+        public void InitUdp(int port)
+        {
+            transportManager.InitUdp(port);
         }
 
         public void SendData(string? guid, IBaseEntity entity)

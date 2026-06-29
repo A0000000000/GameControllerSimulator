@@ -11,7 +11,6 @@ using NetworkLibrary;
 using SocketCommonLibrary;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Text;
 using System.Threading.Tasks;
 using ViGEmBusLibrary;
@@ -37,7 +36,8 @@ namespace GameControllerSimulator
         private DispatcherQueue _dispatcher = DispatcherQueue.GetForCurrentThread();
         private bool _isInitialized = false;
         private DeviceUIManager[] deviceUIManagers = new DeviceUIManager[CONTROLLER_COUNT];
-        
+        private bool _isClosing = false;
+
         public MainWindow()
         {
             InitializeComponent();
@@ -62,6 +62,8 @@ namespace GameControllerSimulator
 
         private async void OnClosed(object sender, WindowEventArgs args)
         {
+            _isClosing = true;
+            this.Closed -= OnClosed;
             try
             {
                 await Destroy();
@@ -71,6 +73,7 @@ namespace GameControllerSimulator
                 LogUtils.E(TAG, "OnClosed Failed", ex);
             }
         }
+
         private async Task Init()
         {
             LogUtils.I(TAG, "init window");
@@ -79,6 +82,7 @@ namespace GameControllerSimulator
             await InitGATTService();
             await InitMainController();
         }
+
         private async Task Destroy()
         {
             LogUtils.I(TAG, "destroy window");
@@ -90,7 +94,7 @@ namespace GameControllerSimulator
         {
             if (!ViGEmBusUtils.IsDriverInstalled())
             {
-                DriverStatus.Text = "Driver Status: Uninstalled";
+                EnqueueUi(() => DriverStatus.Text = "Driver Status: Uninstalled");
                 ViGEmBusUtils.InstallDriver();
             }
             if (!ViGEmBusUtils.IsDriverInstalled())
@@ -106,6 +110,10 @@ namespace GameControllerSimulator
                 await messageDialog.ShowAsync();
                 this.Close();
                 return;
+            }
+            else
+            {
+                EnqueueUi(() => DriverStatus.Text = "Driver Status: Installed");
             }
             if (!await BluetoothUtils.IsBluetoothAvailableAsync())
             {
@@ -123,6 +131,31 @@ namespace GameControllerSimulator
             }
         }
 
+        private void EnqueueUi(Action action)
+        {
+            if (_isClosing)
+            {
+                return;
+            }
+
+            _dispatcher.TryEnqueue(() =>
+            {
+                if (_isClosing)
+                {
+                    return;
+                }
+
+                try
+                {
+                    action();
+                }
+                catch (Exception ex)
+                {
+                    LogUtils.W(TAG, "Ignore UI update after window closing", ex);
+                }
+            });
+        }
+
         private void OnFaulted(string msg, Exception? ex)
         {
             LogUtils.W(TAG, $"OnFaulted msg: {msg}", ex);
@@ -133,10 +166,10 @@ namespace GameControllerSimulator
 
         private async Task InitControllerUI()
         {
-            deviceUIManagers[0] = new DeviceUIManager(_dispatcher, ControllerStatus1, ControllerDeviceName1, ControllerOsName1, ControllerCurrentEvent1);
-            deviceUIManagers[1] = new DeviceUIManager(_dispatcher, ControllerStatus2, ControllerDeviceName2, ControllerOsName2, ControllerCurrentEvent2);
-            deviceUIManagers[2] = new DeviceUIManager(_dispatcher, ControllerStatus3, ControllerDeviceName3, ControllerOsName3, ControllerCurrentEvent3);
-            deviceUIManagers[3] = new DeviceUIManager(_dispatcher, ControllerStatus4, ControllerDeviceName4, ControllerOsName4, ControllerCurrentEvent4);
+            deviceUIManagers[0] = new DeviceUIManager(EnqueueUi, ControllerStatus1, ControllerDeviceName1, ControllerOsName1, ControllerCurrentEvent1);
+            deviceUIManagers[1] = new DeviceUIManager(EnqueueUi, ControllerStatus2, ControllerDeviceName2, ControllerOsName2, ControllerCurrentEvent2);
+            deviceUIManagers[2] = new DeviceUIManager(EnqueueUi, ControllerStatus3, ControllerDeviceName3, ControllerOsName3, ControllerCurrentEvent3);
+            deviceUIManagers[3] = new DeviceUIManager(EnqueueUi, ControllerStatus4, ControllerDeviceName4, ControllerOsName4, ControllerCurrentEvent4);
         }
 
         #endregion
@@ -183,7 +216,6 @@ namespace GameControllerSimulator
                 bluetoothGATTManager = new BluetoothGATTManager(GATTProperties, GUIDConstant.GATT_FUN_GUID, new GATTCallback(this));
                 LogUtils.I(TAG, "start gatt service.");
                 bluetoothGATTManager?.StartService();
-
             }
             else
             {
@@ -210,7 +242,7 @@ namespace GameControllerSimulator
         private void OnGATTStatusChanged(GattServiceProviderAdvertisementStatus status)
         {
             LogUtils.I(TAG, $"OnGATTStatusChanged status = [{status}].");
-            _dispatcher.TryEnqueue(() =>
+            EnqueueUi(() =>
             {
                 switch(status)
                 {
@@ -287,7 +319,7 @@ namespace GameControllerSimulator
         private void OnConnectionAvaiableChange(bool available, ConnectionType type)
         {
             LogUtils.I(TAG, $"OnConnectionAvaiableChange avaiable = [{available}] type = [{type}]");
-            _dispatcher.TryEnqueue(() =>
+            EnqueueUi(() =>
             {
                 switch (type)
                 {
