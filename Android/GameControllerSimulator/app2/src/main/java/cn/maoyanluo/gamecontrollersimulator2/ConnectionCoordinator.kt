@@ -114,6 +114,7 @@ class ConnectionCoordinator(
             }
             bluetoothGATTManager?.readCharacteristic(UUIDConstant.GATT_FUN_UUID, UUIDConstant.GATT_DATA_RFCOMM_UUID)
             bluetoothGATTManager?.readCharacteristic(UUIDConstant.GATT_FUN_UUID, UUIDConstant.TCP_INFO_UUID)
+            bluetoothGATTManager?.readCharacteristic(UUIDConstant.GATT_FUN_UUID, UUIDConstant.UDP_INFO_UUID)
         }
 
         override fun onCharacteristicRead(
@@ -149,7 +150,13 @@ class ConnectionCoordinator(
                         }
                     }
                     UUIDConstant.UDP_INFO_UUID -> {
-
+                        val udpInfo = String(data)
+                        LogUtils.i(TAG, "BluetoothGATTManagerCallback on tcp data ready info is $udpInfo")
+                        val udpInfos = udpInfo.split(":")
+                        connectionController.initUdpPacket(udpInfos[0], udpInfos[1].toInt())
+                        coroutineManager.getIOScope().launch {
+                            _event.emit(CoordinatorEvent.UDPDataReadyEvent(udpInfo))
+                        }
                     }
                 }
             }

@@ -47,9 +47,24 @@ class SessionManager(
                 registerNewType(type, clientId)
             }
             ConnectionManagerState.DESTROY -> {
-                LogUtils.i(TAG, "first onConnectionSuccess, prepare request client id. type = $type")
-                state = ConnectionManagerState.REQUEST_ID
-                requestClientId(type)
+                if (type != ConnectionType.UDP) {
+                    LogUtils.i(
+                        TAG,
+                        "first onConnectionSuccess, prepare request client id. type = $type"
+                    )
+                    state = ConnectionManagerState.REQUEST_ID
+                    requestClientId(type)
+                } else {
+                    LogUtils.i(TAG, "onConnectionSuccess type is udp, can not request id. pending register. type = $type")
+                    synchronized(this) {
+                        if (pendingRegisterClient == null) {
+                            pendingRegisterClient = Channel()
+                        }
+                        coroutineManager.getIOScope().launch {
+                            pendingRegisterClient?.send(type)
+                        }
+                    }
+                }
             }
             else -> {
                 LogUtils.i(TAG, "onConnectionSuccess request client id running. pending register. type = $type")

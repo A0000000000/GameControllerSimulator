@@ -7,9 +7,13 @@ import cn.maoyanluo.bluetooth_library.socket.BluetoothSocketClient
 import cn.maoyanluo.coroutine_library.CoroutineManager
 import cn.maoyanluo.log_library.LogUtils
 import cn.maoyanluo.network_library.tcp.TcpSocketClient
+import cn.maoyanluo.network_library.udp.UdpCallback
+import cn.maoyanluo.network_library.udp.UdpClient
 import cn.maoyanluo.socket_common_library.IClientTransport
 import cn.maoyanluo.socket_common_library.SocketClientCallback
 import kotlinx.coroutines.launch
+import java.net.Inet4Address
+import java.net.InetAddress
 import java.util.EnumMap
 import java.util.UUID
 import java.util.concurrent.atomic.AtomicInteger
@@ -74,7 +78,36 @@ class TransportManager(
                 if (transports[ConnectionType.UDP] != null) {
                     return@launch
                 }
-                // Todo 实现UDP传输
+                transports[ConnectionType.UDP] = UdpClient(Inet4Address.getByName(host), port, object : UdpCallback {
+                    override fun onStart() {
+                        onConnectionAvailableChange(true, ConnectionType.UDP)
+                    }
+
+                    override fun onStop() {
+                        onConnectionAvailableChange(false, ConnectionType.UDP)
+                    }
+
+                    override fun onStartException(e: Exception) {
+                        removeConnection(ConnectionType.UDP)
+                    }
+
+                    override fun onDataReceiveException(e: Exception) {
+                        onFault("onDataReceiveException", e)
+                    }
+
+                    override fun onDataReceive(
+                        data: ByteArray,
+                        dataSender: (ByteArray, Int) -> Unit
+                    ) {
+                        onDataReady(data, ConnectionType.UDP)
+                    }
+
+                    override fun onDataSendException(e: Exception, id: Int) {
+                        onFault("onDataSendException", e)
+                    }
+                }, coroutineManager).also {
+                    it.connect()
+                }
             }
         }
     }
@@ -123,7 +156,13 @@ class TransportManager(
                 callback.onAvailableChange(true)
             }
         } else {
-            if (availableCallbackCount.decrementAndGet() == 0) {
+            var count = availableCallbackCount.decrementAndGet()
+            if (count == 1 && transports.containsKey(ConnectionType.UDP)) {
+                count = availableCallbackCount.decrementAndGet()
+                transports.remove(ConnectionType.UDP)
+                callback.onConnectionAvailableChange(false, ConnectionType.UDP)
+            }
+            if (count == 0) {
                 LogUtils.i(TAG, "onConnectionAvailableChange onUnavailable")
                 callback.onAvailableChange(false)
             }

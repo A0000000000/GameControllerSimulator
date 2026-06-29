@@ -6,8 +6,8 @@ import java.net.DatagramSocket
 import java.net.InetAddress
 
 class UdpClient(
-    private val targetPort: Int,
     private val targetAddress: InetAddress,
+    private val targetPort: Int,
     callback: UdpCallback,
     coroutineManager: CoroutineManager,
 ): UdpBase(callback, coroutineManager) {

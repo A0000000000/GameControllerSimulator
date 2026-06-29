@@ -91,9 +91,11 @@ abstract class UdpBase(
         get() = IClientTransport.SocketClientState.CONNECTED
 
     override fun connect() {
+        startReceiveData()
     }
 
     override fun disconnect() {
+        stopReceiveData()
     }
 
 

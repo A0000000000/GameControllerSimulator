@@ -96,7 +96,7 @@ fun ConnectingPage(
                 title = stringResource(R.string.rfcomm),
                 primaryLabel = stringResource(R.string.host_address),
                 primaryValue = uiData.rfcommStatus.info,
-                statusText = stringResource(if (uiData.isGATTAvailable) R.string.ready else R.string.not_ready),
+                statusText = stringResource(if (uiData.rfcommStatus.isAvailable) R.string.ready else R.string.not_ready),
                 statusColor = if (uiData.rfcommStatus.isAvailable) readyColor else pendingColor
             ) {
                 onUiIntent(MainUiIntent.OnRequestRttIntent(ConnectionType.BLE))
@@ -106,7 +106,7 @@ fun ConnectingPage(
                 title = stringResource(R.string.tcp),
                 primaryLabel = stringResource(R.string.host_address),
                 primaryValue = uiData.tcpStatus.info,
-                statusText = stringResource(if (uiData.isGATTAvailable) R.string.ready else R.string.not_ready),
+                statusText = stringResource(if (uiData.tcpStatus.isAvailable) R.string.ready else R.string.not_ready),
                 statusColor = if (uiData.tcpStatus.isAvailable) readyColor else pendingColor
             ) {
                 onUiIntent(MainUiIntent.OnRequestRttIntent(ConnectionType.TCP))
@@ -116,9 +116,11 @@ fun ConnectingPage(
                 title = stringResource(R.string.udp),
                 primaryLabel = stringResource(R.string.host_address),
                 primaryValue = uiData.udpStatus.info,
-                statusText = stringResource(if (uiData.isGATTAvailable) R.string.ready else R.string.not_ready),
+                statusText = stringResource(if (uiData.udpStatus.isAvailable) R.string.ready else R.string.not_ready),
                 statusColor = if (uiData.udpStatus.isAvailable) readyColor else pendingColor
-            )
+            ) {
+                onUiIntent(MainUiIntent.OnRequestRttIntent(ConnectionType.UDP))
+            }
         }
         Spacer(modifier = Modifier.height(12.dp))
 
