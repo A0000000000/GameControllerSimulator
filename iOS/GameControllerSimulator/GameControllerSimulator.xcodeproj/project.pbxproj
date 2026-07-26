@@ -1,0 +1,911 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		4ED9B0542FF29FE700DA88AC /* NetworkKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4ED9B04C2FF29FE700DA88AC /* NetworkKit.framework */; };
+		4ED9B0552FF29FE700DA88AC /* NetworkKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 4ED9B04C2FF29FE700DA88AC /* NetworkKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		4ED9B0672FF2A08B00DA88AC /* BluetoothKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4ED9B05F2FF2A08B00DA88AC /* BluetoothKit.framework */; };
+		4ED9B0682FF2A08B00DA88AC /* BluetoothKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 4ED9B05F2FF2A08B00DA88AC /* BluetoothKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		4ED9B0792FF2A0AE00DA88AC /* CommonKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4ED9B0712FF2A0AE00DA88AC /* CommonKit.framework */; };
+		4ED9B07A2FF2A0AE00DA88AC /* CommonKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 4ED9B0712FF2A0AE00DA88AC /* CommonKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		4ED9B07F2FF2A0C400DA88AC /* CommonKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4ED9B0712FF2A0AE00DA88AC /* CommonKit.framework */; };
+		4ED9B0842FF2A0CB00DA88AC /* CommonKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4ED9B0712FF2A0AE00DA88AC /* CommonKit.framework */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		4ED9B0522FF29FE700DA88AC /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 4ED9B0312FF29ED400DA88AC /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 4ED9B04B2FF29FE700DA88AC;
+			remoteInfo = NetworkKit;
+		};
+		4ED9B0652FF2A08B00DA88AC /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 4ED9B0312FF29ED400DA88AC /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 4ED9B05E2FF2A08B00DA88AC;
+			remoteInfo = BluetoothKit;
+		};
+		4ED9B0772FF2A0AE00DA88AC /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 4ED9B0312FF29ED400DA88AC /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 4ED9B0702FF2A0AE00DA88AC;
+			remoteInfo = CommonKit;
+		};
+		4ED9B0812FF2A0C400DA88AC /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 4ED9B0312FF29ED400DA88AC /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 4ED9B0702FF2A0AE00DA88AC;
+			remoteInfo = CommonKit;
+		};
+		4ED9B0862FF2A0CB00DA88AC /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 4ED9B0312FF29ED400DA88AC /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 4ED9B0702FF2A0AE00DA88AC;
+			remoteInfo = CommonKit;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		4ED9B0592FF29FE700DA88AC /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				4ED9B07A2FF2A0AE00DA88AC /* CommonKit.framework in Embed Frameworks */,
+				4ED9B0682FF2A08B00DA88AC /* BluetoothKit.framework in Embed Frameworks */,
+				4ED9B0552FF29FE700DA88AC /* NetworkKit.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		4ED9B0392FF29ED400DA88AC /* GameControllerSimulator.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GameControllerSimulator.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		4ED9B04C2FF29FE700DA88AC /* NetworkKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = NetworkKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		4ED9B05F2FF2A08B00DA88AC /* BluetoothKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = BluetoothKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		4ED9B0712FF2A0AE00DA88AC /* CommonKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CommonKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		4ED9B08A2FF2B7AB00DA88AC /* Exceptions for "GameControllerSimulator" folder in "GameControllerSimulator" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 4ED9B0382FF29ED400DA88AC /* GameControllerSimulator */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		4ED9B03B2FF29ED400DA88AC /* GameControllerSimulator */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				4ED9B08A2FF2B7AB00DA88AC /* Exceptions for "GameControllerSimulator" folder in "GameControllerSimulator" target */,
+			);
+			path = GameControllerSimulator;
+			sourceTree = "<group>";
+		};
+		4ED9B04D2FF29FE700DA88AC /* NetworkKit */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = NetworkKit;
+			sourceTree = "<group>";
+		};
+		4ED9B0602FF2A08B00DA88AC /* BluetoothKit */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = BluetoothKit;
+			sourceTree = "<group>";
+		};
+		4ED9B0722FF2A0AE00DA88AC /* CommonKit */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = CommonKit;
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		4ED9B0362FF29ED400DA88AC /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4ED9B0792FF2A0AE00DA88AC /* CommonKit.framework in Frameworks */,
+				4ED9B0672FF2A08B00DA88AC /* BluetoothKit.framework in Frameworks */,
+				4ED9B0542FF29FE700DA88AC /* NetworkKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4ED9B0492FF29FE700DA88AC /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4ED9B07F2FF2A0C400DA88AC /* CommonKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4ED9B05C2FF2A08B00DA88AC /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4ED9B0842FF2A0CB00DA88AC /* CommonKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4ED9B06E2FF2A0AE00DA88AC /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		4ED9B0302FF29ED400DA88AC = {
+			isa = PBXGroup;
+			children = (
+				4ED9B03B2FF29ED400DA88AC /* GameControllerSimulator */,
+				4ED9B04D2FF29FE700DA88AC /* NetworkKit */,
+				4ED9B0602FF2A08B00DA88AC /* BluetoothKit */,
+				4ED9B0722FF2A0AE00DA88AC /* CommonKit */,
+				4ED9B07E2FF2A0C400DA88AC /* Frameworks */,
+				4ED9B03A2FF29ED400DA88AC /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		4ED9B03A2FF29ED400DA88AC /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				4ED9B0392FF29ED400DA88AC /* GameControllerSimulator.app */,
+				4ED9B04C2FF29FE700DA88AC /* NetworkKit.framework */,
+				4ED9B05F2FF2A08B00DA88AC /* BluetoothKit.framework */,
+				4ED9B0712FF2A0AE00DA88AC /* CommonKit.framework */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		4ED9B07E2FF2A0C400DA88AC /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		4ED9B0472FF29FE700DA88AC /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4ED9B05A2FF2A08B00DA88AC /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4ED9B06C2FF2A0AE00DA88AC /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
+/* Begin PBXNativeTarget section */
+		4ED9B0382FF29ED400DA88AC /* GameControllerSimulator */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 4ED9B0442FF29ED500DA88AC /* Build configuration list for PBXNativeTarget "GameControllerSimulator" */;
+			buildPhases = (
+				4ED9B0352FF29ED400DA88AC /* Sources */,
+				4ED9B0362FF29ED400DA88AC /* Frameworks */,
+				4ED9B0372FF29ED400DA88AC /* Resources */,
+				4ED9B0592FF29FE700DA88AC /* Embed Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				4ED9B0532FF29FE700DA88AC /* PBXTargetDependency */,
+				4ED9B0662FF2A08B00DA88AC /* PBXTargetDependency */,
+				4ED9B0782FF2A0AE00DA88AC /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				4ED9B03B2FF29ED400DA88AC /* GameControllerSimulator */,
+			);
+			name = GameControllerSimulator;
+			packageProductDependencies = (
+			);
+			productName = GameControllerSimulator;
+			productReference = 4ED9B0392FF29ED400DA88AC /* GameControllerSimulator.app */;
+			productType = "com.apple.product-type.application";
+		};
+		4ED9B04B2FF29FE700DA88AC /* NetworkKit */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 4ED9B0562FF29FE700DA88AC /* Build configuration list for PBXNativeTarget "NetworkKit" */;
+			buildPhases = (
+				4ED9B0472FF29FE700DA88AC /* Headers */,
+				4ED9B0482FF29FE700DA88AC /* Sources */,
+				4ED9B0492FF29FE700DA88AC /* Frameworks */,
+				4ED9B04A2FF29FE700DA88AC /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				4ED9B0822FF2A0C400DA88AC /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				4ED9B04D2FF29FE700DA88AC /* NetworkKit */,
+			);
+			name = NetworkKit;
+			packageProductDependencies = (
+			);
+			productName = NetworkKit;
+			productReference = 4ED9B04C2FF29FE700DA88AC /* NetworkKit.framework */;
+			productType = "com.apple.product-type.framework";
+		};
+		4ED9B05E2FF2A08B00DA88AC /* BluetoothKit */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 4ED9B0692FF2A08B00DA88AC /* Build configuration list for PBXNativeTarget "BluetoothKit" */;
+			buildPhases = (
+				4ED9B05A2FF2A08B00DA88AC /* Headers */,
+				4ED9B05B2FF2A08B00DA88AC /* Sources */,
+				4ED9B05C2FF2A08B00DA88AC /* Frameworks */,
+				4ED9B05D2FF2A08B00DA88AC /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				4ED9B0872FF2A0CB00DA88AC /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				4ED9B0602FF2A08B00DA88AC /* BluetoothKit */,
+			);
+			name = BluetoothKit;
+			packageProductDependencies = (
+			);
+			productName = BluetoothKit;
+			productReference = 4ED9B05F2FF2A08B00DA88AC /* BluetoothKit.framework */;
+			productType = "com.apple.product-type.framework";
+		};
+		4ED9B0702FF2A0AE00DA88AC /* CommonKit */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 4ED9B07B2FF2A0AE00DA88AC /* Build configuration list for PBXNativeTarget "CommonKit" */;
+			buildPhases = (
+				4ED9B06C2FF2A0AE00DA88AC /* Headers */,
+				4ED9B06D2FF2A0AE00DA88AC /* Sources */,
+				4ED9B06E2FF2A0AE00DA88AC /* Frameworks */,
+				4ED9B06F2FF2A0AE00DA88AC /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				4ED9B0722FF2A0AE00DA88AC /* CommonKit */,
+			);
+			name = CommonKit;
+			packageProductDependencies = (
+			);
+			productName = CommonKit;
+			productReference = 4ED9B0712FF2A0AE00DA88AC /* CommonKit.framework */;
+			productType = "com.apple.product-type.framework";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		4ED9B0312FF29ED400DA88AC /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 2660;
+				LastUpgradeCheck = 2660;
+				TargetAttributes = {
+					4ED9B0382FF29ED400DA88AC = {
+						CreatedOnToolsVersion = 26.6;
+					};
+					4ED9B04B2FF29FE700DA88AC = {
+						CreatedOnToolsVersion = 26.6;
+					};
+					4ED9B05E2FF2A08B00DA88AC = {
+						CreatedOnToolsVersion = 26.6;
+					};
+					4ED9B0702FF2A0AE00DA88AC = {
+						CreatedOnToolsVersion = 26.6;
+					};
+				};
+			};
+			buildConfigurationList = 4ED9B0342FF29ED400DA88AC /* Build configuration list for PBXProject "GameControllerSimulator" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 4ED9B0302FF29ED400DA88AC;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 4ED9B03A2FF29ED400DA88AC /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				4ED9B0382FF29ED400DA88AC /* GameControllerSimulator */,
+				4ED9B04B2FF29FE700DA88AC /* NetworkKit */,
+				4ED9B05E2FF2A08B00DA88AC /* BluetoothKit */,
+				4ED9B0702FF2A0AE00DA88AC /* CommonKit */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		4ED9B0372FF29ED400DA88AC /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4ED9B04A2FF29FE700DA88AC /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4ED9B05D2FF2A08B00DA88AC /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4ED9B06F2FF2A0AE00DA88AC /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		4ED9B0352FF29ED400DA88AC /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4ED9B0482FF29FE700DA88AC /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4ED9B05B2FF2A08B00DA88AC /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4ED9B06D2FF2A0AE00DA88AC /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		4ED9B0532FF29FE700DA88AC /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 4ED9B04B2FF29FE700DA88AC /* NetworkKit */;
+			targetProxy = 4ED9B0522FF29FE700DA88AC /* PBXContainerItemProxy */;
+		};
+		4ED9B0662FF2A08B00DA88AC /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 4ED9B05E2FF2A08B00DA88AC /* BluetoothKit */;
+			targetProxy = 4ED9B0652FF2A08B00DA88AC /* PBXContainerItemProxy */;
+		};
+		4ED9B0782FF2A0AE00DA88AC /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 4ED9B0702FF2A0AE00DA88AC /* CommonKit */;
+			targetProxy = 4ED9B0772FF2A0AE00DA88AC /* PBXContainerItemProxy */;
+		};
+		4ED9B0822FF2A0C400DA88AC /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 4ED9B0702FF2A0AE00DA88AC /* CommonKit */;
+			targetProxy = 4ED9B0812FF2A0C400DA88AC /* PBXContainerItemProxy */;
+		};
+		4ED9B0872FF2A0CB00DA88AC /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 4ED9B0702FF2A0AE00DA88AC /* CommonKit */;
+			targetProxy = 4ED9B0862FF2A0CB00DA88AC /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		4ED9B0422FF29ED500DA88AC /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = H4W6CW3M6D;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.5;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		4ED9B0432FF29ED500DA88AC /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = H4W6CW3M6D;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.5;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		4ED9B0452FF29ED500DA88AC /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = H4W6CW3M6D;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = GameControllerSimulator/Info.plist;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = cn.maoyanluo.GameControllerSimulator;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		4ED9B0462FF29ED500DA88AC /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = H4W6CW3M6D;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = GameControllerSimulator/Info.plist;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = cn.maoyanluo.GameControllerSimulator;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		4ED9B0572FF29FE700DA88AC /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUILD_LIBRARY_FOR_DISTRIBUTION = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = H4W6CW3M6D;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				ENABLE_MODULE_VERIFIER = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				MODULE_VERIFIER_SUPPORTED_LANGUAGES = "objective-c objective-c++";
+				MODULE_VERIFIER_SUPPORTED_LANGUAGE_STANDARDS = "gnu17 gnu++20";
+				PRODUCT_BUNDLE_IDENTIFIER = cn.maoyanluo.NetworkKit;
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_INSTALL_MODULE = YES;
+				SWIFT_INSTALL_OBJC_HEADER = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Debug;
+		};
+		4ED9B0582FF29FE700DA88AC /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUILD_LIBRARY_FOR_DISTRIBUTION = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = H4W6CW3M6D;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				ENABLE_MODULE_VERIFIER = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				MODULE_VERIFIER_SUPPORTED_LANGUAGES = "objective-c objective-c++";
+				MODULE_VERIFIER_SUPPORTED_LANGUAGE_STANDARDS = "gnu17 gnu++20";
+				PRODUCT_BUNDLE_IDENTIFIER = cn.maoyanluo.NetworkKit;
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_INSTALL_MODULE = YES;
+				SWIFT_INSTALL_OBJC_HEADER = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Release;
+		};
+		4ED9B06A2FF2A08B00DA88AC /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUILD_LIBRARY_FOR_DISTRIBUTION = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = H4W6CW3M6D;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				ENABLE_MODULE_VERIFIER = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				MODULE_VERIFIER_SUPPORTED_LANGUAGES = "objective-c objective-c++";
+				MODULE_VERIFIER_SUPPORTED_LANGUAGE_STANDARDS = "gnu17 gnu++20";
+				PRODUCT_BUNDLE_IDENTIFIER = cn.maoyanluo.BluetoothKit;
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_INSTALL_MODULE = YES;
+				SWIFT_INSTALL_OBJC_HEADER = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Debug;
+		};
+		4ED9B06B2FF2A08B00DA88AC /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUILD_LIBRARY_FOR_DISTRIBUTION = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = H4W6CW3M6D;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				ENABLE_MODULE_VERIFIER = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				MODULE_VERIFIER_SUPPORTED_LANGUAGES = "objective-c objective-c++";
+				MODULE_VERIFIER_SUPPORTED_LANGUAGE_STANDARDS = "gnu17 gnu++20";
+				PRODUCT_BUNDLE_IDENTIFIER = cn.maoyanluo.BluetoothKit;
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_INSTALL_MODULE = YES;
+				SWIFT_INSTALL_OBJC_HEADER = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Release;
+		};
+		4ED9B07C2FF2A0AE00DA88AC /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUILD_LIBRARY_FOR_DISTRIBUTION = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = H4W6CW3M6D;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				ENABLE_MODULE_VERIFIER = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				MODULE_VERIFIER_SUPPORTED_LANGUAGES = "objective-c objective-c++";
+				MODULE_VERIFIER_SUPPORTED_LANGUAGE_STANDARDS = "gnu17 gnu++20";
+				PRODUCT_BUNDLE_IDENTIFIER = cn.maoyanluo.CommonKit;
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_INSTALL_MODULE = YES;
+				SWIFT_INSTALL_OBJC_HEADER = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Debug;
+		};
+		4ED9B07D2FF2A0AE00DA88AC /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUILD_LIBRARY_FOR_DISTRIBUTION = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = H4W6CW3M6D;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				ENABLE_MODULE_VERIFIER = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				MODULE_VERIFIER_SUPPORTED_LANGUAGES = "objective-c objective-c++";
+				MODULE_VERIFIER_SUPPORTED_LANGUAGE_STANDARDS = "gnu17 gnu++20";
+				PRODUCT_BUNDLE_IDENTIFIER = cn.maoyanluo.CommonKit;
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_INSTALL_MODULE = YES;
+				SWIFT_INSTALL_OBJC_HEADER = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		4ED9B0342FF29ED400DA88AC /* Build configuration list for PBXProject "GameControllerSimulator" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4ED9B0422FF29ED500DA88AC /* Debug */,
+				4ED9B0432FF29ED500DA88AC /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		4ED9B0442FF29ED500DA88AC /* Build configuration list for PBXNativeTarget "GameControllerSimulator" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4ED9B0452FF29ED500DA88AC /* Debug */,
+				4ED9B0462FF29ED500DA88AC /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		4ED9B0562FF29FE700DA88AC /* Build configuration list for PBXNativeTarget "NetworkKit" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4ED9B0572FF29FE700DA88AC /* Debug */,
+				4ED9B0582FF29FE700DA88AC /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		4ED9B0692FF2A08B00DA88AC /* Build configuration list for PBXNativeTarget "BluetoothKit" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4ED9B06A2FF2A08B00DA88AC /* Debug */,
+				4ED9B06B2FF2A08B00DA88AC /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		4ED9B07B2FF2A0AE00DA88AC /* Build configuration list for PBXNativeTarget "CommonKit" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4ED9B07C2FF2A0AE00DA88AC /* Debug */,
+				4ED9B07D2FF2A0AE00DA88AC /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 4ED9B0312FF29ED400DA88AC /* Project object */;
+}
