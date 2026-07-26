@@ -7,6 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		4ED8665A30162DBB00A5752A /* LogKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4ED8665230162DBB00A5752A /* LogKit.framework */; };
+		4ED8665B30162DBB00A5752A /* LogKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 4ED8665230162DBB00A5752A /* LogKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		4ED8665F30162DCA00A5752A /* LogKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4ED8665230162DBB00A5752A /* LogKit.framework */; };
+		4ED8666430162DD500A5752A /* LogKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4ED8665230162DBB00A5752A /* LogKit.framework */; };
+		4ED8666930162DDE00A5752A /* LogKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4ED8665230162DBB00A5752A /* LogKit.framework */; };
 		4ED9B0542FF29FE700DA88AC /* NetworkKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4ED9B04C2FF29FE700DA88AC /* NetworkKit.framework */; };
 		4ED9B0552FF29FE700DA88AC /* NetworkKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 4ED9B04C2FF29FE700DA88AC /* NetworkKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		4ED9B0672FF2A08B00DA88AC /* BluetoothKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4ED9B05F2FF2A08B00DA88AC /* BluetoothKit.framework */; };
@@ -18,6 +23,34 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		4ED8665830162DBB00A5752A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 4ED9B0312FF29ED400DA88AC /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 4ED8665130162DBB00A5752A;
+			remoteInfo = LogKit;
+		};
+		4ED8666130162DCA00A5752A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 4ED9B0312FF29ED400DA88AC /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 4ED8665130162DBB00A5752A;
+			remoteInfo = LogKit;
+		};
+		4ED8666630162DD500A5752A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 4ED9B0312FF29ED400DA88AC /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 4ED8665130162DBB00A5752A;
+			remoteInfo = LogKit;
+		};
+		4ED8666B30162DDE00A5752A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 4ED9B0312FF29ED400DA88AC /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 4ED8665130162DBB00A5752A;
+			remoteInfo = LogKit;
+		};
 		4ED9B0522FF29FE700DA88AC /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 4ED9B0312FF29ED400DA88AC /* Project object */;
@@ -64,6 +97,7 @@
 			files = (
 				4ED9B07A2FF2A0AE00DA88AC /* CommonKit.framework in Embed Frameworks */,
 				4ED9B0682FF2A08B00DA88AC /* BluetoothKit.framework in Embed Frameworks */,
+				4ED8665B30162DBB00A5752A /* LogKit.framework in Embed Frameworks */,
 				4ED9B0552FF29FE700DA88AC /* NetworkKit.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
@@ -72,6 +106,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		4ED8665230162DBB00A5752A /* LogKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = LogKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		4ED9B0392FF29ED400DA88AC /* GameControllerSimulator.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GameControllerSimulator.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4ED9B04C2FF29FE700DA88AC /* NetworkKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = NetworkKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		4ED9B05F2FF2A08B00DA88AC /* BluetoothKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = BluetoothKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -89,6 +124,11 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		4ED8665330162DBB00A5752A /* LogKit */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = LogKit;
+			sourceTree = "<group>";
+		};
 		4ED9B03B2FF29ED400DA88AC /* GameControllerSimulator */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
@@ -115,12 +155,20 @@
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		4ED8664F30162DBB00A5752A /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		4ED9B0362FF29ED400DA88AC /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 				4ED9B0792FF2A0AE00DA88AC /* CommonKit.framework in Frameworks */,
 				4ED9B0672FF2A08B00DA88AC /* BluetoothKit.framework in Frameworks */,
+				4ED8665A30162DBB00A5752A /* LogKit.framework in Frameworks */,
 				4ED9B0542FF29FE700DA88AC /* NetworkKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -129,6 +177,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4ED8665F30162DCA00A5752A /* LogKit.framework in Frameworks */,
 				4ED9B07F2FF2A0C400DA88AC /* CommonKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -137,6 +186,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4ED8666430162DD500A5752A /* LogKit.framework in Frameworks */,
 				4ED9B0842FF2A0CB00DA88AC /* CommonKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -145,6 +195,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4ED8666930162DDE00A5752A /* LogKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -158,6 +209,7 @@
 				4ED9B04D2FF29FE700DA88AC /* NetworkKit */,
 				4ED9B0602FF2A08B00DA88AC /* BluetoothKit */,
 				4ED9B0722FF2A0AE00DA88AC /* CommonKit */,
+				4ED8665330162DBB00A5752A /* LogKit */,
 				4ED9B07E2FF2A0C400DA88AC /* Frameworks */,
 				4ED9B03A2FF29ED400DA88AC /* Products */,
 			);
@@ -170,6 +222,7 @@
 				4ED9B04C2FF29FE700DA88AC /* NetworkKit.framework */,
 				4ED9B05F2FF2A08B00DA88AC /* BluetoothKit.framework */,
 				4ED9B0712FF2A0AE00DA88AC /* CommonKit.framework */,
+				4ED8665230162DBB00A5752A /* LogKit.framework */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -184,6 +237,13 @@
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
+		4ED8664D30162DBB00A5752A /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		4ED9B0472FF29FE700DA88AC /* Headers */ = {
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
@@ -208,6 +268,29 @@
 /* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
+		4ED8665130162DBB00A5752A /* LogKit */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 4ED8665C30162DBB00A5752A /* Build configuration list for PBXNativeTarget "LogKit" */;
+			buildPhases = (
+				4ED8664D30162DBB00A5752A /* Headers */,
+				4ED8664E30162DBB00A5752A /* Sources */,
+				4ED8664F30162DBB00A5752A /* Frameworks */,
+				4ED8665030162DBB00A5752A /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				4ED8665330162DBB00A5752A /* LogKit */,
+			);
+			name = LogKit;
+			packageProductDependencies = (
+			);
+			productName = LogKit;
+			productReference = 4ED8665230162DBB00A5752A /* LogKit.framework */;
+			productType = "com.apple.product-type.framework";
+		};
 		4ED9B0382FF29ED400DA88AC /* GameControllerSimulator */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 4ED9B0442FF29ED500DA88AC /* Build configuration list for PBXNativeTarget "GameControllerSimulator" */;
@@ -223,6 +306,7 @@
 				4ED9B0532FF29FE700DA88AC /* PBXTargetDependency */,
 				4ED9B0662FF2A08B00DA88AC /* PBXTargetDependency */,
 				4ED9B0782FF2A0AE00DA88AC /* PBXTargetDependency */,
+				4ED8665930162DBB00A5752A /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				4ED9B03B2FF29ED400DA88AC /* GameControllerSimulator */,
@@ -247,6 +331,7 @@
 			);
 			dependencies = (
 				4ED9B0822FF2A0C400DA88AC /* PBXTargetDependency */,
+				4ED8666230162DCA00A5752A /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				4ED9B04D2FF29FE700DA88AC /* NetworkKit */,
@@ -271,6 +356,7 @@
 			);
 			dependencies = (
 				4ED9B0872FF2A0CB00DA88AC /* PBXTargetDependency */,
+				4ED8666730162DD500A5752A /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				4ED9B0602FF2A08B00DA88AC /* BluetoothKit */,
@@ -294,6 +380,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				4ED8666C30162DDE00A5752A /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				4ED9B0722FF2A0AE00DA88AC /* CommonKit */,
@@ -315,6 +402,9 @@
 				LastSwiftUpdateCheck = 2660;
 				LastUpgradeCheck = 2660;
 				TargetAttributes = {
+					4ED8665130162DBB00A5752A = {
+						CreatedOnToolsVersion = 26.6;
+					};
 					4ED9B0382FF29ED400DA88AC = {
 						CreatedOnToolsVersion = 26.6;
 					};
@@ -347,11 +437,19 @@
 				4ED9B04B2FF29FE700DA88AC /* NetworkKit */,
 				4ED9B05E2FF2A08B00DA88AC /* BluetoothKit */,
 				4ED9B0702FF2A0AE00DA88AC /* CommonKit */,
+				4ED8665130162DBB00A5752A /* LogKit */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		4ED8665030162DBB00A5752A /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		4ED9B0372FF29ED400DA88AC /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -383,6 +481,13 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		4ED8664E30162DBB00A5752A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		4ED9B0352FF29ED400DA88AC /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -414,6 +519,26 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		4ED8665930162DBB00A5752A /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 4ED8665130162DBB00A5752A /* LogKit */;
+			targetProxy = 4ED8665830162DBB00A5752A /* PBXContainerItemProxy */;
+		};
+		4ED8666230162DCA00A5752A /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 4ED8665130162DBB00A5752A /* LogKit */;
+			targetProxy = 4ED8666130162DCA00A5752A /* PBXContainerItemProxy */;
+		};
+		4ED8666730162DD500A5752A /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 4ED8665130162DBB00A5752A /* LogKit */;
+			targetProxy = 4ED8666630162DD500A5752A /* PBXContainerItemProxy */;
+		};
+		4ED8666C30162DDE00A5752A /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 4ED8665130162DBB00A5752A /* LogKit */;
+			targetProxy = 4ED8666B30162DDE00A5752A /* PBXContainerItemProxy */;
+		};
 		4ED9B0532FF29FE700DA88AC /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 4ED9B04B2FF29FE700DA88AC /* NetworkKit */;
@@ -442,6 +567,82 @@
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
+		4ED8665D30162DBB00A5752A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUILD_LIBRARY_FOR_DISTRIBUTION = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = H4W6CW3M6D;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				ENABLE_MODULE_VERIFIER = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				MODULE_VERIFIER_SUPPORTED_LANGUAGES = "objective-c objective-c++";
+				MODULE_VERIFIER_SUPPORTED_LANGUAGE_STANDARDS = "gnu17 gnu++20";
+				PRODUCT_BUNDLE_IDENTIFIER = cn.maoyanluo.LogKit;
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_INSTALL_MODULE = YES;
+				SWIFT_INSTALL_OBJC_HEADER = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Debug;
+		};
+		4ED8665E30162DBB00A5752A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUILD_LIBRARY_FOR_DISTRIBUTION = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = H4W6CW3M6D;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				ENABLE_MODULE_VERIFIER = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				MODULE_VERIFIER_SUPPORTED_LANGUAGES = "objective-c objective-c++";
+				MODULE_VERIFIER_SUPPORTED_LANGUAGE_STANDARDS = "gnu17 gnu++20";
+				PRODUCT_BUNDLE_IDENTIFIER = cn.maoyanluo.LogKit;
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_INSTALL_MODULE = YES;
+				SWIFT_INSTALL_OBJC_HEADER = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Release;
+		};
 		4ED9B0422FF29ED500DA88AC /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -860,6 +1061,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		4ED8665C30162DBB00A5752A /* Build configuration list for PBXNativeTarget "LogKit" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4ED8665D30162DBB00A5752A /* Debug */,
+				4ED8665E30162DBB00A5752A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		4ED9B0342FF29ED400DA88AC /* Build configuration list for PBXProject "GameControllerSimulator" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
