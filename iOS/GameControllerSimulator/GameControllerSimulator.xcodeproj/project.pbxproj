@@ -12,8 +12,8 @@
 		4ED8665F30162DCA00A5752A /* LogKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4ED8665230162DBB00A5752A /* LogKit.framework */; };
 		4ED8666430162DD500A5752A /* LogKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4ED8665230162DBB00A5752A /* LogKit.framework */; };
 		4ED8666930162DDE00A5752A /* LogKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4ED8665230162DBB00A5752A /* LogKit.framework */; };
-		4ED8668C301790BB00A5752A /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4ED86684301790BB00A5752A /* WidgetKit.framework */; };
-		4ED8668D301790BB00A5752A /* WidgetKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 4ED86684301790BB00A5752A /* WidgetKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		4ED8668C301790BB00A5752A /* GamepadWidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4ED86684301790BB00A5752A /* GamepadWidgetKit.framework */; };
+		4ED8668D301790BB00A5752A /* GamepadWidgetKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 4ED86684301790BB00A5752A /* GamepadWidgetKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		4ED86691301790C500A5752A /* LogKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4ED8665230162DBB00A5752A /* LogKit.framework */; };
 		4ED9B0542FF29FE700DA88AC /* NetworkKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4ED9B04C2FF29FE700DA88AC /* NetworkKit.framework */; };
 		4ED9B0552FF29FE700DA88AC /* NetworkKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 4ED9B04C2FF29FE700DA88AC /* NetworkKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
@@ -59,7 +59,7 @@
 			containerPortal = 4ED9B0312FF29ED400DA88AC /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = 4ED86683301790BB00A5752A;
-			remoteInfo = WidgetKit;
+			remoteInfo = GamepadWidgetKit;
 		};
 		4ED86693301790C500A5752A /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -114,7 +114,7 @@
 			files = (
 				4ED9B07A2FF2A0AE00DA88AC /* CommonKit.framework in Embed Frameworks */,
 				4ED9B0682FF2A08B00DA88AC /* BluetoothKit.framework in Embed Frameworks */,
-				4ED8668D301790BB00A5752A /* WidgetKit.framework in Embed Frameworks */,
+				4ED8668D301790BB00A5752A /* GamepadWidgetKit.framework in Embed Frameworks */,
 				4ED8665B30162DBB00A5752A /* LogKit.framework in Embed Frameworks */,
 				4ED9B0552FF29FE700DA88AC /* NetworkKit.framework in Embed Frameworks */,
 			);
@@ -125,7 +125,7 @@
 
 /* Begin PBXFileReference section */
 		4ED8665230162DBB00A5752A /* LogKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = LogKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		4ED86684301790BB00A5752A /* WidgetKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = WidgetKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		4ED86684301790BB00A5752A /* GamepadWidgetKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = GamepadWidgetKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		4ED9B0392FF29ED400DA88AC /* GameControllerSimulator.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GameControllerSimulator.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4ED9B04C2FF29FE700DA88AC /* NetworkKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = NetworkKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		4ED9B05F2FF2A08B00DA88AC /* BluetoothKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = BluetoothKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -148,9 +148,9 @@
 			path = LogKit;
 			sourceTree = "<group>";
 		};
-		4ED86685301790BB00A5752A /* WidgetKit */ = {
+		4ED86685301790BB00A5752A /* GamepadWidgetKit */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = WidgetKit;
+			path = GamepadWidgetKit;
 			sourceTree = "<group>";
 		};
 		4ED9B03B2FF29ED400DA88AC /* GameControllerSimulator */ = {
@@ -200,7 +200,7 @@
 			files = (
 				4ED9B0792FF2A0AE00DA88AC /* CommonKit.framework in Frameworks */,
 				4ED9B0672FF2A08B00DA88AC /* BluetoothKit.framework in Frameworks */,
-				4ED8668C301790BB00A5752A /* WidgetKit.framework in Frameworks */,
+				4ED8668C301790BB00A5752A /* GamepadWidgetKit.framework in Frameworks */,
 				4ED8665A30162DBB00A5752A /* LogKit.framework in Frameworks */,
 				4ED9B0542FF29FE700DA88AC /* NetworkKit.framework in Frameworks */,
 			);
@@ -243,7 +243,7 @@
 				4ED9B0602FF2A08B00DA88AC /* BluetoothKit */,
 				4ED9B0722FF2A0AE00DA88AC /* CommonKit */,
 				4ED8665330162DBB00A5752A /* LogKit */,
-				4ED86685301790BB00A5752A /* WidgetKit */,
+				4ED86685301790BB00A5752A /* GamepadWidgetKit */,
 				4ED9B07E2FF2A0C400DA88AC /* Frameworks */,
 				4ED9B03A2FF29ED400DA88AC /* Products */,
 			);
@@ -257,7 +257,7 @@
 				4ED9B05F2FF2A08B00DA88AC /* BluetoothKit.framework */,
 				4ED9B0712FF2A0AE00DA88AC /* CommonKit.framework */,
 				4ED8665230162DBB00A5752A /* LogKit.framework */,
-				4ED86684301790BB00A5752A /* WidgetKit.framework */,
+				4ED86684301790BB00A5752A /* GamepadWidgetKit.framework */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -333,9 +333,9 @@
 			productReference = 4ED8665230162DBB00A5752A /* LogKit.framework */;
 			productType = "com.apple.product-type.framework";
 		};
-		4ED86683301790BB00A5752A /* WidgetKit */ = {
+		4ED86683301790BB00A5752A /* GamepadWidgetKit */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 4ED8668E301790BB00A5752A /* Build configuration list for PBXNativeTarget "WidgetKit" */;
+			buildConfigurationList = 4ED8668E301790BB00A5752A /* Build configuration list for PBXNativeTarget "GamepadWidgetKit" */;
 			buildPhases = (
 				4ED8667F301790BB00A5752A /* Headers */,
 				4ED86680301790BB00A5752A /* Sources */,
@@ -348,13 +348,13 @@
 				4ED86694301790C500A5752A /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				4ED86685301790BB00A5752A /* WidgetKit */,
+				4ED86685301790BB00A5752A /* GamepadWidgetKit */,
 			);
-			name = WidgetKit;
+			name = GamepadWidgetKit;
 			packageProductDependencies = (
 			);
-			productName = WidgetKit;
-			productReference = 4ED86684301790BB00A5752A /* WidgetKit.framework */;
+			productName = GamepadWidgetKit;
+			productReference = 4ED86684301790BB00A5752A /* GamepadWidgetKit.framework */;
 			productType = "com.apple.product-type.framework";
 		};
 		4ED9B0382FF29ED400DA88AC /* GameControllerSimulator */ = {
@@ -508,7 +508,7 @@
 				4ED9B05E2FF2A08B00DA88AC /* BluetoothKit */,
 				4ED9B0702FF2A0AE00DA88AC /* CommonKit */,
 				4ED8665130162DBB00A5752A /* LogKit */,
-				4ED86683301790BB00A5752A /* WidgetKit */,
+				4ED86683301790BB00A5752A /* GamepadWidgetKit */,
 			);
 		};
 /* End PBXProject section */
@@ -626,7 +626,7 @@
 		};
 		4ED8668B301790BB00A5752A /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 4ED86683301790BB00A5752A /* WidgetKit */;
+			target = 4ED86683301790BB00A5752A /* GamepadWidgetKit */;
 			targetProxy = 4ED8668A301790BB00A5752A /* PBXContainerItemProxy */;
 		};
 		4ED86694301790C500A5752A /* PBXTargetDependency */ = {
@@ -760,7 +760,7 @@
 				MARKETING_VERSION = 1.0;
 				MODULE_VERIFIER_SUPPORTED_LANGUAGES = "objective-c objective-c++";
 				MODULE_VERIFIER_SUPPORTED_LANGUAGE_STANDARDS = "gnu17 gnu++20";
-				PRODUCT_BUNDLE_IDENTIFIER = cn.maoyanluo.WidgetKit;
+				PRODUCT_BUNDLE_IDENTIFIER = cn.maoyanluo.GamepadWidgetKit;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -798,7 +798,7 @@
 				MARKETING_VERSION = 1.0;
 				MODULE_VERIFIER_SUPPORTED_LANGUAGES = "objective-c objective-c++";
 				MODULE_VERIFIER_SUPPORTED_LANGUAGE_STANDARDS = "gnu17 gnu++20";
-				PRODUCT_BUNDLE_IDENTIFIER = cn.maoyanluo.WidgetKit;
+				PRODUCT_BUNDLE_IDENTIFIER = cn.maoyanluo.GamepadWidgetKit;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -1241,7 +1241,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		4ED8668E301790BB00A5752A /* Build configuration list for PBXNativeTarget "WidgetKit" */ = {
+		4ED8668E301790BB00A5752A /* Build configuration list for PBXNativeTarget "GamepadWidgetKit" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				4ED8668F301790BB00A5752A /* Debug */,

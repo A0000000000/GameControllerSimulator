@@ -7,14 +7,17 @@
 
 import SwiftUI
 import CoreBluetooth
-import WidgetKit
+import GamepadWidgetKit
 import LogKit
 
 struct SelectPage: View {
     
     public static let tag = "SelectPage"
     
-    let viewModel: MainViewModel
+    let peripherals: [CBPeripheral]
+    let onPeripheralSelected: (CBPeripheral) -> Void
+    let onPageLoad: () -> Void
+    
     @State private var hasLoaded = false
     
     var body: some View {
@@ -25,9 +28,10 @@ struct SelectPage: View {
                 .padding(.bottom, 4)
             ScrollView {
                 LazyVStack(spacing: 10) {
-                    ForEach(viewModel.availablePeripherals, id: \.identifier) { item in
+                    ForEach(peripherals, id: \.identifier) { item in
                         PeripheralInfoWidget(deviceName: item.name ?? "未知设备", deviceAddress: item.identifier.uuidString) {
                             Log.d(Self.tag, "select device: \(item.name ?? "nil")")
+                            onPeripheralSelected(item)
                         }
                         .padding(.horizontal, 16)
                         .padding(.vertical, 4)
@@ -41,7 +45,7 @@ struct SelectPage: View {
         .onAppear {
             if !hasLoaded {
                 hasLoaded = true
-                viewModel.initAvailableBluetoothList()
+                onPageLoad()
             }
         }
     }
