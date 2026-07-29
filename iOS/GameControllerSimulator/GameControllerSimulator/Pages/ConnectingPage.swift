@@ -7,15 +7,18 @@
 
 
 import SwiftUI
+import NetworkKit
 import GamepadWidgetKit
 
 struct ConnectingPage: View {
     
-    let tcpInfo: String
-    let udpInfo: String
+    let gattInfo: GATTStatus
+    let networkInfo: NetworkInfo
+    let currentConnectionType: ConnectionType
     
-    let onTransportTypeSelect: (Int) -> Void
-    let onItemClick: (Int) -> Void
+    let onTransportTypeSelect: (ConnectionType) -> Void
+    let onItemClick: (ConnectionType) -> Void
+    let onBack: () -> Void
     let onNextPage: () -> Void
     
     var body: some View {
@@ -26,14 +29,25 @@ struct ConnectingPage: View {
                 .padding(.bottom, 4)
             ScrollView {
                 LazyVStack(spacing: 10) {
+                    
                     ConnectionStatusCard(
-                        title: "TCP", primaryLabel: "对端地址", primaryValue: tcpInfo, statusText: "未就绪", statusColor: Color.yellow
+                        title: "Bluetooth GATT", primaryLabel: "对端名称", primaryValue: gattInfo.name, statusText: gattInfo.isAvailble ? "就绪" : "未就绪", statusColor: gattInfo.isAvailble ? Color.green : Color.yellow
                     )
                     .padding(.horizontal, 16)
                     .padding(.vertical, 4)
+                    
                     ConnectionStatusCard(
-                        title: "UDP", primaryLabel: "对端地址", primaryValue: udpInfo, statusText: "未就绪", statusColor: Color.yellow
-                    )
+                        title: "TCP", primaryLabel: "对端地址", primaryValue: "\(networkInfo.tcpAddress):\(networkInfo.tcpPort)", statusText: networkInfo.tcpReady ? "就绪" : "未就绪", statusColor: networkInfo.tcpReady ? Color.green : Color.yellow
+                    ) {
+                        onItemClick(.TCP)
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 4)
+                    ConnectionStatusCard(
+                        title: "UDP", primaryLabel: "对端地址", primaryValue: "\(networkInfo.udpAddress):\(networkInfo.udpPort)", statusText: networkInfo.udpReady ? "就绪" : "未就绪", statusColor: networkInfo.udpReady ? Color.green : Color.yellow
+                    ) {
+                        onItemClick(.UDP)
+                    }
                     .padding(.horizontal, 16)
                     .padding(.vertical, 4)
                 }
@@ -41,29 +55,56 @@ struct ConnectingPage: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .background(Color(.systemBackground))
-            .safeAreaInset(edge: .bottom, spacing: 0) {
-                VStack(spacing: 12) {
-                    HStack(spacing: 16) {
-                        Button("SPEED FIRST") {
-                            
-                        }
-
-                        Button("STABLE FIRST") {
-                            
-                        }
+            
+            VStack(spacing: 14) {
+                
+                // 传输策略选择
+                HStack(spacing: 12) {
+                    StrategyButton(
+                        title: "SPEED FIRST",
+                        selected: false,
+                        enabled: networkInfo.tcpReady
+                    ) {
+                        onTransportTypeSelect(.UDP)
                     }
-                    HStack(spacing: 16) {
-                        Button("Back") {
-                            
-                        }
-
-                        Button("Next") {
-                            
-                        }
+                    
+                    StrategyButton(
+                        title: "STABLE FIRST",
+                        selected: false,
+                        enabled: networkInfo.udpReady
+                    ) {
+                        onTransportTypeSelect(.TCP)
                     }
                 }
+                
+                
+                // 页面导航
+                HStack(spacing: 12) {
+                    
+                    Button {
+                        onBack()
+                    } label: {
+                        Text("Back")
+                            .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(SecondaryButtonStyle())
+                    
+                    
+                    Button {
+                        onNextPage()
+                    } label: {
+                        Text("Next")
+                            .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(PrimaryButtonStyle())
+                }
             }
+            .padding(.horizontal, 20)
+            .padding(.bottom, 20)
+            
         }
+        
     }
     
 }
+

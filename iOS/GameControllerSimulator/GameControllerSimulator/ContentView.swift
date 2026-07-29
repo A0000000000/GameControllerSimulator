@@ -48,13 +48,23 @@ struct ContentView: View {
                 Log.d(Self.tag, "detailedModel = \(UIDevice.current.detailedModel)")
             }
         case UIState.ConnectingPage:
-            ConnectingPage(tcpInfo: viewModel.tcpInfo, udpInfo: viewModel.udpInfo, onTransportTypeSelect: { transport in
-                
-            }, onItemClick: { transport in
-                
-            }) {
-                
-            }
+            ConnectingPage(
+                gattInfo: viewModel.gattInfo,
+                networkInfo: viewModel.networkInfo,
+                currentConnectionType: viewModel.currentConnectionType,
+                onTransportTypeSelect: { transport in
+                    viewModel.onUIIntent(intent: .ConnectionTypeChange(transport))
+                },
+                onItemClick: { transport in
+                    viewModel.onUIIntent(intent: .OnRequestRtt(transport))
+                },
+                onBack: {
+                    viewModel.onUIIntent(intent: .BackSelectPage)
+                },
+                onNextPage: {
+                    viewModel.onUIIntent(intent: .OpenGamepadPage)
+                }
+            )
         case UIState.GamepadPage:
             GamepadPage()
         }

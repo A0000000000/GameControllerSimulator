@@ -15,14 +15,14 @@
 		4ED8668C301790BB00A5752A /* GamepadWidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4ED86684301790BB00A5752A /* GamepadWidgetKit.framework */; };
 		4ED8668D301790BB00A5752A /* GamepadWidgetKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 4ED86684301790BB00A5752A /* GamepadWidgetKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		4ED86691301790C500A5752A /* LogKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4ED8665230162DBB00A5752A /* LogKit.framework */; };
-		4ED9B0542FF29FE700DA88AC /* NetworkKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4ED9B04C2FF29FE700DA88AC /* NetworkKit.framework */; };
-		4ED9B0552FF29FE700DA88AC /* NetworkKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 4ED9B04C2FF29FE700DA88AC /* NetworkKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		4ED9B0672FF2A08B00DA88AC /* BluetoothKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4ED9B05F2FF2A08B00DA88AC /* BluetoothKit.framework */; };
 		4ED9B0682FF2A08B00DA88AC /* BluetoothKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 4ED9B05F2FF2A08B00DA88AC /* BluetoothKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		4ED9B0792FF2A0AE00DA88AC /* CommonKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4ED9B0712FF2A0AE00DA88AC /* CommonKit.framework */; };
 		4ED9B07A2FF2A0AE00DA88AC /* CommonKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 4ED9B0712FF2A0AE00DA88AC /* CommonKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		4ED9B07F2FF2A0C400DA88AC /* CommonKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4ED9B0712FF2A0AE00DA88AC /* CommonKit.framework */; };
 		4ED9B0842FF2A0CB00DA88AC /* CommonKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4ED9B0712FF2A0AE00DA88AC /* CommonKit.framework */; };
+		4EEA04483019E78F000F52AD /* NetworkKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4ED9B04C2FF29FE700DA88AC /* NetworkKit.framework */; };
+		4EEA04493019E78F000F52AD /* NetworkKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 4ED9B04C2FF29FE700DA88AC /* NetworkKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -68,13 +68,6 @@
 			remoteGlobalIDString = 4ED8665130162DBB00A5752A;
 			remoteInfo = LogKit;
 		};
-		4ED9B0522FF29FE700DA88AC /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 4ED9B0312FF29ED400DA88AC /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 4ED9B04B2FF29FE700DA88AC;
-			remoteInfo = NetworkKit;
-		};
 		4ED9B0652FF2A08B00DA88AC /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 4ED9B0312FF29ED400DA88AC /* Project object */;
@@ -103,6 +96,13 @@
 			remoteGlobalIDString = 4ED9B0702FF2A0AE00DA88AC;
 			remoteInfo = CommonKit;
 		};
+		4EEA044A3019E78F000F52AD /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 4ED9B0312FF29ED400DA88AC /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 4ED9B04B2FF29FE700DA88AC;
+			remoteInfo = NetworkKit;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -112,11 +112,11 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
+				4EEA04493019E78F000F52AD /* NetworkKit.framework in Embed Frameworks */,
 				4ED9B07A2FF2A0AE00DA88AC /* CommonKit.framework in Embed Frameworks */,
 				4ED9B0682FF2A08B00DA88AC /* BluetoothKit.framework in Embed Frameworks */,
 				4ED8668D301790BB00A5752A /* GamepadWidgetKit.framework in Embed Frameworks */,
 				4ED8665B30162DBB00A5752A /* LogKit.framework in Embed Frameworks */,
-				4ED9B0552FF29FE700DA88AC /* NetworkKit.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -140,6 +140,14 @@
 			);
 			target = 4ED9B0382FF29ED400DA88AC /* GameControllerSimulator */;
 		};
+		4EEA044D3019E8D2000F52AD /* Exceptions for "NetworkKit" folder in "NetworkKit" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				ConnectionType.swift,
+				NetworkKit.docc,
+			);
+			target = 4ED9B04B2FF29FE700DA88AC /* NetworkKit */;
+		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -161,11 +169,6 @@
 			path = GameControllerSimulator;
 			sourceTree = "<group>";
 		};
-		4ED9B04D2FF29FE700DA88AC /* NetworkKit */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = NetworkKit;
-			sourceTree = "<group>";
-		};
 		4ED9B0602FF2A08B00DA88AC /* BluetoothKit */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = BluetoothKit;
@@ -174,6 +177,14 @@
 		4ED9B0722FF2A0AE00DA88AC /* CommonKit */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = CommonKit;
+			sourceTree = "<group>";
+		};
+		4EEA04473019E73D000F52AD /* NetworkKit */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				4EEA044D3019E8D2000F52AD /* Exceptions for "NetworkKit" folder in "NetworkKit" target */,
+			);
+			path = NetworkKit;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -198,11 +209,11 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4EEA04483019E78F000F52AD /* NetworkKit.framework in Frameworks */,
 				4ED9B0792FF2A0AE00DA88AC /* CommonKit.framework in Frameworks */,
 				4ED9B0672FF2A08B00DA88AC /* BluetoothKit.framework in Frameworks */,
 				4ED8668C301790BB00A5752A /* GamepadWidgetKit.framework in Frameworks */,
 				4ED8665A30162DBB00A5752A /* LogKit.framework in Frameworks */,
-				4ED9B0542FF29FE700DA88AC /* NetworkKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -239,7 +250,7 @@
 			isa = PBXGroup;
 			children = (
 				4ED9B03B2FF29ED400DA88AC /* GameControllerSimulator */,
-				4ED9B04D2FF29FE700DA88AC /* NetworkKit */,
+				4EEA04473019E73D000F52AD /* NetworkKit */,
 				4ED9B0602FF2A08B00DA88AC /* BluetoothKit */,
 				4ED9B0722FF2A0AE00DA88AC /* CommonKit */,
 				4ED8665330162DBB00A5752A /* LogKit */,
@@ -369,11 +380,11 @@
 			buildRules = (
 			);
 			dependencies = (
-				4ED9B0532FF29FE700DA88AC /* PBXTargetDependency */,
 				4ED9B0662FF2A08B00DA88AC /* PBXTargetDependency */,
 				4ED9B0782FF2A0AE00DA88AC /* PBXTargetDependency */,
 				4ED8665930162DBB00A5752A /* PBXTargetDependency */,
 				4ED8668B301790BB00A5752A /* PBXTargetDependency */,
+				4EEA044B3019E78F000F52AD /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				4ED9B03B2FF29ED400DA88AC /* GameControllerSimulator */,
@@ -399,9 +410,6 @@
 			dependencies = (
 				4ED9B0822FF2A0C400DA88AC /* PBXTargetDependency */,
 				4ED8666230162DCA00A5752A /* PBXTargetDependency */,
-			);
-			fileSystemSynchronizedGroups = (
-				4ED9B04D2FF29FE700DA88AC /* NetworkKit */,
 			);
 			name = NetworkKit;
 			packageProductDependencies = (
@@ -634,11 +642,6 @@
 			target = 4ED8665130162DBB00A5752A /* LogKit */;
 			targetProxy = 4ED86693301790C500A5752A /* PBXContainerItemProxy */;
 		};
-		4ED9B0532FF29FE700DA88AC /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 4ED9B04B2FF29FE700DA88AC /* NetworkKit */;
-			targetProxy = 4ED9B0522FF29FE700DA88AC /* PBXContainerItemProxy */;
-		};
 		4ED9B0662FF2A08B00DA88AC /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 4ED9B05E2FF2A08B00DA88AC /* BluetoothKit */;
@@ -658,6 +661,11 @@
 			isa = PBXTargetDependency;
 			target = 4ED9B0702FF2A0AE00DA88AC /* CommonKit */;
 			targetProxy = 4ED9B0862FF2A0CB00DA88AC /* PBXContainerItemProxy */;
+		};
+		4EEA044B3019E78F000F52AD /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 4ED9B04B2FF29FE700DA88AC /* NetworkKit */;
+			targetProxy = 4EEA044A3019E78F000F52AD /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 

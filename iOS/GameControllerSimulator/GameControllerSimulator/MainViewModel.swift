@@ -8,6 +8,7 @@ import SwiftUI
 import CoreBluetooth
 import BluetoothKit
 import LogKit
+import NetworkKit
 
 @MainActor
 @Observable
@@ -22,8 +23,9 @@ class MainViewModel {
     
     var availablePeripherals: [CBPeripheral] = []
     
-    var tcpInfo = ""
-    var udpInfo = ""
+    var currentConnectionType: ConnectionType = ConnectionType.TCP
+    var gattInfo = GATTStatus(isAvailble: false, name: "")
+    var networkInfo = NetworkInfo(tcpAddress: "", udpAddress: "", tcpPort: 0, udpPort: 0, tcpReady: false, udpReady: false)
     
     init() {
         bluetoothManager = BluetoothManager()
@@ -38,8 +40,23 @@ class MainViewModel {
         case UIIntent.InitAvailableBluetooth:
             bluetoothManager.initCBCentralManager()
         case UIIntent.PeripheralSelected(let peripheral):
+            gattInfo.isAvailble = false
+            gattInfo.name = peripheral.name ?? ""
             currentPage = UIState.ConnectingPage
+            bluetoothManager.stopScan()
             bluetoothManager.connect(peripheral)
+        case .BackSelectPage:
+            currentPage = .SelectPage
+            availablePeripherals.removeAll()
+            gattInfo = GATTStatus(isAvailble: false, name: "")
+            networkInfo = NetworkInfo(tcpAddress: "", udpAddress: "", tcpPort: 0, udpPort: 0, tcpReady: false, udpReady: false)
+            bluetoothManager.scan(serviceUUID: UUIDConstant.shared.GATT_FUN_UUID)
+        case .ConnectionTypeChange(let type):
+            currentConnectionType = type
+        case .OnRequestRtt(let type):
+            Log.d(Self.tag, "OnRequestRtt \(type)")
+        case .OpenGamepadPage:
+            Log.d(Self.tag, "OpenGamepadPage")
         }
     }
     
@@ -51,12 +68,29 @@ class MainViewModel {
         availablePeripherals.append(peripheral)
     }
     
+    fileprivate func setGattStatus(name: String, isAvailable: Bool) {
+        gattInfo.isAvailble = isAvailable
+        gattInfo.name = name
+    }
+    
     fileprivate func setTcpInfo(tcpInfo: String) {
-        self.tcpInfo = tcpInfo
+        let tcp = tcpInfo.split(separator: ":")
+        if (tcp.count != 2) {
+            Log.e(Self.tag, "TCP数据错误，原始数据：\(tcpInfo)")
+            return
+        }
+        self.networkInfo.tcpAddress = String(tcp[0])
+        self.networkInfo.tcpPort = UInt(tcp[1]) ?? 0
     }
     
     fileprivate func setUdpInfo(udpInfo: String) {
-        self.udpInfo = udpInfo
+        let udp = udpInfo.split(separator: ":")
+        if (udp.count != 2) {
+            Log.e(Self.tag, "UDP数据错误，原始数据：\(udpInfo)")
+            return
+        }
+        self.networkInfo.udpAddress = String(udp[0])
+        self.networkInfo.udpPort = UInt(udp[1]) ?? 0
     }
     
 }
@@ -123,6 +157,7 @@ private class MainViewModelDelegateProxy: BluetoothManagerDelegate {
             viewModel?.showErrorMsg(msg: "DiscoverCharacyeristics error: \(error?.localizedDescription ?? "nil")")
             return
         }
+        viewModel?.setGattStatus(name: didDiscoverCharacteristics.name ?? "", isAvailable: true)
         manager.read(servicesUUID: UUIDConstant.shared.GATT_FUN_UUID, characteristicUUID: UUIDConstant.shared.TCP_INFO_UUID)
         manager.read(servicesUUID: UUIDConstant.shared.GATT_FUN_UUID, characteristicUUID: UUIDConstant.shared.UDP_INFO_UUID)
     }
