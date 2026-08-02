@@ -52,7 +52,7 @@ public protocol BluetoothManagerDelegate: AnyObject {
 public class BluetoothManager: NSObject {
 
     public static let tag = "BluetoothManager"
-    private let queue = DispatchQueue(label: "bluetoothKit")
+    private let queue = DispatchQueue(label: "ble")
     private var centralManager: CBCentralManager!
     private var peripheral: CBPeripheral?
     public weak var delegate: BluetoothManagerDelegate?

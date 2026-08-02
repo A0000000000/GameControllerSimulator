@@ -145,6 +145,8 @@
 			membershipExceptions = (
 				ConnectionType.swift,
 				NetworkKit.docc,
+				TcpSocketClient.swift,
+				TransportProtocol.swift,
 			);
 			target = 4ED9B04B2FF29FE700DA88AC /* NetworkKit */;
 		};
